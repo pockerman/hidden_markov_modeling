@@ -7,7 +7,7 @@
 #PBS -M ag568@leicester.ac.uk
 
 # Make python  available
-module load python3
+module load python/gcc/36
 
 # Execute the MPI job code
-python3 hidden_markov_modeling/analysis.py
+python3 hidden_markov_modeling/analysis.py --config hidden_markov_modeling/config.json
