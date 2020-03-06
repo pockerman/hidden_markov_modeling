@@ -1,0 +1,14 @@
+{
+  "reference_file":"reference_bam",
+  "test_file":{
+    "filename": "test_bam",
+    "start": 100001,
+    "end": 1400001
+  },
+  "window_size":"100",
+  "train_set_size": 0.7,
+  "validation_set_size": 0.2,
+  "test_set_size": 0.1,
+  "use_mpi":true
+
+}
