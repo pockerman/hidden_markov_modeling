@@ -3,7 +3,38 @@ Utilities for working with bam files
 """
 
 
+def extract_windows(chromosome, ref_file, seq_file, **args):
+    """
+    Extract the windows that couple the seq_file and ref_files
+    for the given chromosome
+    :param chromosome: chromosome name (str)
+    :param ref_file: The reference file
+    :param seq_file: The sequence file
+    :return:
+    """
+
+    if "start_test" not in args.keys():
+        raise ValueError("Start position for test file has not been specified")
+    else:
+        start_test = int(args['start_test'])
+
+    if "end_test" not in args.keys():
+        raise ValueError("End position for test file has not been specified")
+    else:
+        stop_test = int(args['stop_test'])
+
+    bam_out, errors, adjusted = bam_strip(chromosome=chromosome,
+                                          file=seq_file, start=start_test,
+                                          stop=stop_test)
+
+    # extract common bases
+    common_bases(bam_out, ref_file)
+
+    pass
+
+
 def bam_strip(chromosome, file, start, stop):
+
     """
     get the contents of the file starting at start position and ending
     at stop position for the given chromosome
@@ -121,9 +152,4 @@ def partition_data(bamfile, fastafile):
     pass
 
 
-def remove_outlying_windows():
-    pass
-
-def normalize_data():
-    pass
 

@@ -11,4 +11,3 @@ def read_configuration_file(config_file):
         configuration = json.load(json_file)
         return configuration
 
-
