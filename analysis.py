@@ -16,16 +16,18 @@ def main():
 
     config_file = args.config
     configuration = read_configuration_file(config_file)
-    print("Configuration: ", configuration)
+
+    print("\tConfiguration: ", configuration)
 
     try:
 
         # read the refernce  file
-        ref_file = pysam.FastaFile(configuration["reference_file"],"rb")
+        ref_file = pysam.AlignmentFile(configuration["reference_file"],"rb")
 
         # read the test file
         test_file = pysam.AlignmentFile(configuration["reference_file"],"rb")
 
+        """
         # extract the windows
         windows = extract_windows(chromosome=configuration["chromosome"], ref_file=ref_file,
                                   start_test=test_file, **{"start_test": configuration["start_test"],
@@ -36,6 +38,7 @@ def main():
         # specify the HMM model
         hmm = HMM(start_transitions=configuration["HMM"]["initial_transitions_p"])
         hmm.fit(dataset=windows, solver=configuration["HMM"]["train_solver"])
+        """
 
     except Exception as e:
         print( str(e))
