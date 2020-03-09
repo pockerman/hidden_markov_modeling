@@ -24,11 +24,12 @@ def main():
         # read the refernce  file
         ref_file = pysam.AlignmentFile(configuration["reference_file"],"rb")
 
-        print("\t", ref_file.description)
+        print("\t", ref_file.filename)
         print("\t", ref_file.description)
 
         # read the test file
-        test_file = pysam.AlignmentFile(configuration["reference_file"],"rb")
+        test_file = pysam.AlignmentFile(configuration["test_file"]["name"],"rb")
+
         print("\t", test_file.filename)
         print("\t", test_file.description)
         """
