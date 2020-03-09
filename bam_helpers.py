@@ -25,16 +25,20 @@ def extract_windows(chromosome, ref_file, test_file, **args):
         stop_test = int(args['stop_test'])
     """
 
-    window_size = args["window_size"]
-    window_start = 0
-    window_end = window_size
+    #window_size = args["window_size"]
+    #window_start = 0
+    #window_end = window_size
 
-    bam_out, errors, adjusted = bam_strip(chromosome=chromosome, file=test_file,
-                                          start=10000, stop=20000)
+    try:
+        bam_out, errors, adjusted = bam_strip(chromosome=chromosome, file=test_file,
+                                                start=10000, stop=20000)
 
-    print("\t Number of erros: ", errors)
-    print("\t Number of adjusted: ", adjusted)
-    print("\t bam output: ", len(bam_out))
+        print("\t Number of erros: ", errors)
+        print("\t Number of adjusted: ", adjusted)
+        print("\t bam output: ", len(bam_out))
+    except Exception as e:
+        print(str(e))
+        raise
     # extract common bases
     #common_bases(bam_out, ref_file)
 

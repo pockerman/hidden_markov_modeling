@@ -31,9 +31,12 @@ def main():
             print("\t", test_file.description)
 
             print("=============================\n")
-            print("\t Extracting windows")
+
 
             try:
+
+                print("\t Extracting windows")
+
                 # extract the windows
                 windows = extract_windows(chromosome=configuration["chromosome"], ref_file=ref_file,
                                       test_file=test_file, **{"start_test": configuration["start_test"],
