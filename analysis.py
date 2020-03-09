@@ -1,4 +1,5 @@
 import argparse
+import pysam
 from _helpers import read_configuration_file
 
 
@@ -15,7 +16,12 @@ def main():
     configuration = read_configuration_file(config_file)
     print("Configuration: ", configuration)
 
-    print("Finisshed analysis")
+    try:
+        samfile = pysam.AlignmentFile('m605_verysensitive_trim_sorted.bam',"rb")
+    except Exception as e:
+        print( str(e))
+
+    print("Finished analysis")
 
 if __name__ == '__main__':
     main()

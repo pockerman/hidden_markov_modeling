@@ -1,4 +1,6 @@
-
+"""
+Utilities for working with bam files
+"""
 
 def bam_strip(chromosome, file, start, stop):
     """
