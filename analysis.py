@@ -17,19 +17,21 @@ def main():
     config_file = args.config
     configuration = read_configuration_file(config_file)
 
-    print("\tConfiguration: ", configuration)
+    #print("\tConfiguration: ", configuration)
 
     try:
 
         # read the refernce  file
         ref_file = pysam.AlignmentFile(configuration["reference_file"],"rb")
 
+        print("\t Reference file")
         print("\t", ref_file.filename)
         print("\t", ref_file.description)
-
+        print("\n")
         # read the test file
-        test_file = pysam.AlignmentFile(configuration["test_file"]["name"],"rb")
+        test_file = pysam.AlignmentFile(configuration["test_file"]["filename"],"rb")
 
+        print("\t Test file")
         print("\t", test_file.filename)
         print("\t", test_file.description)
         """
