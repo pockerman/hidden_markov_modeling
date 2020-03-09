@@ -2,6 +2,7 @@
 Utilities for working with bam files
 """
 
+
 def bam_strip(chromosome, file, start, stop):
     """
     get the contents of the file starting at start position and ending
@@ -114,4 +115,15 @@ def common_bases(data, fasta):
                 a = 3
         except Exception as e:
             print(e, x)
+
+
+def partition_data(bamfile, fastafile):
+    pass
+
+
+def remove_outlying_windows():
+    pass
+
+def normalize_data():
+    pass
 
