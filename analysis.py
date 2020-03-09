@@ -39,8 +39,8 @@ def main():
 
                 # extract the windows
                 windows = extract_windows(chromosome=configuration["chromosome"], ref_file=ref_file,
-                                      test_file=test_file, **{"start_test": configuration["start_test"],
-                                                              "end_test": configuration["end_test"]})
+                                      test_file=test_file) #**{"start_test": configuration["start_test"],
+                                                           #   "end_test": configuration["end_test"]})
 
                 """
                 # apply preprocessing for the windows
