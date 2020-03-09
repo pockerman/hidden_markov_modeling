@@ -24,9 +24,13 @@ def main():
         # read the refernce  file
         ref_file = pysam.AlignmentFile(configuration["reference_file"],"rb")
 
+        print("\t", ref_file.description)
+        print("\t", ref_file.description)
+
         # read the test file
         test_file = pysam.AlignmentFile(configuration["reference_file"],"rb")
-
+        print("\t", test_file.filename)
+        print("\t", test_file.description)
         """
         # extract the windows
         windows = extract_windows(chromosome=configuration["chromosome"], ref_file=ref_file,
