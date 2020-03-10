@@ -31,7 +31,7 @@ def extract_windows(chromosome, ref_file, test_file, **args):
 
     try:
         bam_out, errors, adjusted = bam_strip(chromosome=chromosome, file=test_file,
-                                                start=0, stop=-1)
+                                                start=0, stop=10)
 
         print("\t Number of erros: ", errors)
         print("\t Number of adjusted: ", adjusted)
