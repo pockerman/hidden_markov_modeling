@@ -53,12 +53,16 @@ def bam_strip(chromosome, file, start, stop):
     adjusted = 0
     bam_out = []
 
+    counter = 0
     # move column-wise
     for pileupcolumn in file.pileup(chromosome, start, stop,
                                         truncate=True, ignore_orphans=False):
 
             adjusted_tmp, errors_tmp = get_query_sequences(pileupcolumn=pileupcolumn, bam_out=bam_out)
-            print(bam_out)
+
+            if counter < 11:
+                print(bam_out)
+                counter += 1
 
             adjusted += adjusted_tmp
             errors += errors_tmp
