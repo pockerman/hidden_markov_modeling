@@ -30,12 +30,18 @@ def extract_windows(chromosome, ref_file, test_file, **args):
     #window_end = window_size
 
     try:
-        bam_out, errors, adjusted = bam_strip(chromosome=chromosome, file=test_file,
-                                                start=0, stop=20000)
+
+        fetch_data(chromosome=chromosome, bamfile=test_file, start=0, stop=12000)
+
+        """
+        bam_out, errors, adjusted = bam_strip(chromosome=chromosome,
+                                              file=test_file,
+                                              start=0, stop=20000)
 
         print("\t Number of erros: ", errors)
         print("\t Number of adjusted: ", adjusted)
         print("\t bam output: ", len(bam_out))
+        """
     except Exception as e:
         print(str(e))
         raise
@@ -181,6 +187,12 @@ def common_bases(data, fasta):
 
 def partition_data(bamfile, fastafile):
     pass
+
+def fetch_data(chromosome, bamfile, start, stop):
+
+    for read in bamfile.fetch(chromosome, start, stop):
+        print(read)
+
 
 
 
