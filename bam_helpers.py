@@ -53,21 +53,12 @@ def bam_strip(chromosome, file, start, stop):
     adjusted = 0
     bam_out = []
 
-    if stop == -1:
-        # we want to extract the whole chromosome
-
-        # move column-wise
-        for pileupcolumn in file.pileup(chromosome, start, truncate=True, ignore_orphans=False):
-
-            adjusted_tmp, errors_tmp = get_query_sequences(pileupcolumn=pileupcolumn, bam_out=bam_out)
-            adjusted += adjusted_tmp
-            errors += errors_tmp
-    else:
-
-        # move column-wise
-        for pileupcolumn in file.pileup(chromosome, start, stop,
+    # move column-wise
+    for pileupcolumn in file.pileup(chromosome, start, stop,
                                         truncate=True, ignore_orphans=False):
+
             adjusted_tmp, errors_tmp = get_query_sequences(pileupcolumn=pileupcolumn, bam_out=bam_out)
+
             adjusted += adjusted_tmp
             errors += errors_tmp
 
