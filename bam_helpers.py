@@ -58,7 +58,7 @@ def bam_strip(chromosome, file, start, stop):
                                         truncate=True, ignore_orphans=False):
 
             adjusted_tmp, errors_tmp = get_query_sequences(pileupcolumn=pileupcolumn, bam_out=bam_out)
-            print(adjusted_tmp)
+            print(bam_out)
 
             adjusted += adjusted_tmp
             errors += errors_tmp
