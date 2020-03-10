@@ -31,7 +31,7 @@ def extract_windows(chromosome, ref_file, test_file, **args):
 
     try:
         bam_out, errors, adjusted = bam_strip(chromosome=chromosome, file=test_file,
-                                                start=10000, stop=20000)
+                                                start=0, stop=-1)
 
         print("\t Number of erros: ", errors)
         print("\t Number of adjusted: ", adjusted)
@@ -53,35 +53,57 @@ def bam_strip(chromosome, file, start, stop):
     adjusted = 0
     bam_out = []
 
-    # move column-wise
-    for pileupcolumn in file.pileup(chromosome, start, stop,
-                                    truncate=True, ignore_orphans=False):
-        temp = []
-        temp.append(pileupcolumn.reference_pos)
+    if stop == -1:
+        # we want to extract the whole chromosome
 
-        # number of reads mapping to this column
-        temp.append(pileupcolumn.n)
+        # move column-wise
+        for pileupcolumn in file.pileup(chromosome, start, truncate=True, ignore_orphans=False):
 
+            adjusted_tmp, errors_tmp = get_query_sequences(pileupcolumn=pileupcolumn, bam_out=bam_out)
+            adjusted += adjusted_tmp
+            errors += errors_tmp
+    else:
+
+        # move column-wise
+        for pileupcolumn in file.pileup(chromosome, start, stop,
+                                        truncate=True, ignore_orphans=False):
+            adjusted_tmp, errors_tmp = get_query_sequences(pileupcolumn=pileupcolumn, bam_out=bam_out)
+            adjusted += adjusted_tmp
+            errors += errors_tmp
+
+    return bam_out, errors, adjusted
+
+def get_query_sequences(pileupcolumn, bam_out):
+
+    temp = []
+    temp.append(pileupcolumn.reference_pos)
+    adjusted = 0
+    errors = 0
+
+    # number of reads mapping to this column
+    temp.append(pileupcolumn.n)
+
+    try:
+        # append bases
+        temp.append(pileupcolumn.get_query_sequences(add_indels=True))
+        bam_out.append(temp)
+
+    except:
         try:
-            # append bases
-            temp.append(pileupcolumn.get_query_sequences(add_indels=True))
+
+            # appending bases
+            temp.append(pileupcolumn.get_query_sequences(add_indels=False))
+
+            # flag to show indels not assessed.
+            temp.extend("*")
             bam_out.append(temp)
 
+            if len(temp) == 4:
+                adjusted += 1
         except:
-            try:
+            errors += 1
 
-                # appending bases
-                temp.append(pileupcolumn.get_query_sequences(add_indels=False))
-
-                # flag to show indels not assessed.
-                temp.extend("*")
-                bam_out.append(temp)
-
-                if len(temp) == 4:
-                    adjusted += 1
-            except:
-                errors += 1
-    return bam_out, errors, adjusted
+    return adjusted, errors
 
 
 def create_indels_dictionary(chromosome, samfile, start, stop):
