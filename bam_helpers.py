@@ -190,8 +190,12 @@ def partition_data(bamfile, fastafile):
 
 def fetch_data(chromosome, bamfile, start, stop):
 
+    counter =0
     for read in bamfile.fetch(chromosome, start, stop):
-        print(read)
+
+        if counter < 11:
+            print(read)
+            counter += 1
 
 
 
