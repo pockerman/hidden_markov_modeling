@@ -36,11 +36,12 @@ def forward(obs_indices, observations, A, B, initial_dist):
 
     return alpha
 
+
 def backward(obs_indices, dataset, A, B):
     """
     Backward step
 
-    beta_j(t) = P(o_{t+1}, ..., o_T | qt = j, HMM)
+    beta_j(t) = P(O_{t+1}, ..., O_T | q_t = j, HMM)
 
     :param obs_indices: A dictionary that maps observations to indices
     :param dataset: Observations
