@@ -7,11 +7,14 @@
   },
   "window_size":"100",
   "chromosome": "chr1",
+  "min_rd": 1,
+  "max_rd": 2,
   "save_results_file": "hmm.txt",
   "HMM": {
     "initial_transitions_p": "uniform",
     "train_solver": "BaumWelch"
   },
+
   "train_set_size": 0.7,
   "validation_set_size": 0.2,
   "test_set_size": 0.1,
