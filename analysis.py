@@ -32,15 +32,19 @@ def main():
 
             print("=============================\n")
 
-
             try:
 
                 print("\t Extracting windows")
+                start_idx= configuration["reference_file"]["start_idx"]
+                end_idx = configuration["reference_file"]["end_idx"]
+                windowsize = configuration["window_size"]
+
+                args = {"start_idx":start_idx, "end_idx":end_idx,
+                        "windowsize":windowsize}
 
                 # extract the windows
                 windows = extract_windows(chromosome=configuration["chromosome"], ref_file=ref_file,
-                                      test_file=test_file) #**{"start_test": configuration["start_test"],
-                                                           #   "end_test": configuration["end_test"]})
+                                      test_file=test_file, **args)
 
                 """
                 # apply preprocessing for the windows

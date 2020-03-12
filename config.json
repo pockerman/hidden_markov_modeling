@@ -1,9 +1,13 @@
 {
-  "reference_file":"/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam",
+  "reference_file":{
+    "name": "/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam",
+    "start_idx" :0,
+    "end_idx": 20000
+  },
   "test_file":{
     "filename": "/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam",
-    "start_test": 100001,
-    "end_test": 1400001
+    "start_idx": 0,
+    "end_idx": 20000
   },
   "window_size":"100",
   "chromosome": "chr1",
