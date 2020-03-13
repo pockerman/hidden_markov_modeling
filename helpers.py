@@ -69,6 +69,9 @@ class Window(object):
         """
         return self._capacity
 
+    def get_range(self, start, end):
+        return self._observations[start:end]
+
     def __len__(self):
         return len(self._observations)
 

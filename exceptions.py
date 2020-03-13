@@ -1,5 +1,14 @@
+WARNING="WARNING: "
+
+class Error(Exception):
+    """
+    General error class to handle generic errors
+    """
+    def __init__(self, message):
+        self.message = message
 
 class FullWindowException(Exception):
+
     """
     Exception to throw when attempting to
     add a new observation to an already full window
@@ -9,3 +18,5 @@ class FullWindowException(Exception):
 
     def __str__(self):
         return self.message
+
+

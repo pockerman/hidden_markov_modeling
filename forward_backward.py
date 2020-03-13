@@ -1,5 +1,6 @@
 """
-Forward-Backward algos
+Forward-Backward algorithm. These are also
+used in the Baum-Welch EM algorithm
 """
 
 import numpy as np
