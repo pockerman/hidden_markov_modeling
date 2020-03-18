@@ -19,7 +19,7 @@ def extract_windows(chromosome, ref_file, test_file, **args):
     :return:
     """
 
-    windowsize = args["windowsize"]
+    windowcapacity = args["windowsize"]
     start_idx = args["start_idx"]
     end_idx = args["end_idx"]
 
@@ -50,7 +50,7 @@ def extract_windows(chromosome, ref_file, test_file, **args):
         windows = create_windows(bamlist=bam_out,
                                   indel_dict=indel_dict,
                                   fastdata=ref_list,
-                                  windowsize=windowsize,
+                                  windowcapacity=windowcapacity,
                                   start=start_idx,
                                   end=end_idx)
 
@@ -119,28 +119,42 @@ def get_indels(chromosome, samfile, start, stop):
 
     return indels
 
-def accumulate_windows(bamlist, windowsize):
-    pass
 
-
-def add_window_observation(window, windows, observation, windowsize):
+def add_window_observation(window, windows,
+                           observation, windowcapacity):
+    """
+    Add a new observation to the given window. If the
+    window has reached its capacity a new window
+    is created and then the observation is appened
+    :param window: The window instance to add the observation
+    :param windows: The list of windows where the window is cached
+    :param observation: The observation to add in the window
+    :param windowcapacity: The maximum window capacity
+    :return: instance of Window class
+    """
 
     if window.has_capacity():
         window.add(observation=observation)
     else:
         windows.append(window)
-        window = Window(capacity=windowsize)
+        window = Window(capacity=windowcapacity)
         window.add(observation=observation)
+
     return window
 
-def create_windows(bamlist, indel_dict, fastdata, windowsize, start, end):
+
+def create_windows(bamlist, indel_dict, fastdata, windowcapacity, start, end):
 
     """
-    Arrange the given bamlist into windows of size windowsize
+    Arrange the given bamlist into windows of size windowcapacity.
+    Note that a window is not necessary that will have the
+    windowcapacity items. windowcapacity simply indicates the
+    maximum number of observations that should be
+    added in a window
     :param bamlist:
-    :param indel_dict:
-    :param fastdata:
-    :return:
+    :param indel_dict: insertions/deletions directory
+    :param fastdata: The reference sequence
+    :return: a list of Window instances
     """
 
     if not bamlist:
@@ -150,10 +164,9 @@ def create_windows(bamlist, indel_dict, fastdata, windowsize, start, end):
         raise Error("No reference sequence is provided")
 
     # the returned list of windows
-    tmp_windows = []
     windows = []
 
-    window = Window(capacity=windowsize)
+    window = Window(capacity=windowcapacity)
     previous_observation = None
 
     for idx, item in enumerate(bamlist):
@@ -171,7 +184,7 @@ def create_windows(bamlist, indel_dict, fastdata, windowsize, start, end):
                 # yes it is...nice add it to the window
                 # and update the observation
                 window = add_window_observation(window=window, windows=windows,
-                                                observation=observation, windowsize=windowsize)
+                                                observation=observation, windowcapacity=windowcapacity)
 
                 previous_observation = observation
             else:
@@ -182,11 +195,11 @@ def create_windows(bamlist, indel_dict, fastdata, windowsize, start, end):
 
                 # fill in the missing info from the
                 # reference file
-                window_gaps = _get_missing_gap_info(start=int(previous_observation.position)-1,
+                window_gaps = _get_missing_gap_info(start=int(previous_observation.position)+1,
                                                     end=int(observation.position)-1, fastdata=fastdata)
 
                 # after getting the missing info we try to add it
-                # to the window we have accumulated so much info that
+                # to the window. we may have accumulated so much info that
                 # we may exceed the window capacity. For example
                 # a window already has windowcapacity - 2 items
                 # and len(window_gaps) is 10. In this case we need
@@ -198,22 +211,25 @@ def create_windows(bamlist, indel_dict, fastdata, windowsize, start, end):
                                                     base= win_gap_item[2])
 
                     window = add_window_observation(window=window, windows=windows,
-                                                    observation=dummy_observation, windowsize=windowsize)
+                                                    observation=dummy_observation,
+                                                    windowcapacity=windowcapacity)
 
-                # add also the current observation that led us
-                # heer
+                # add also the current observation
+                # that led us here
                 window = add_window_observation(window=window, windows=windows,
-                                                observation=observation, windowsize=windowsize)
+                                                observation=observation,
+                                                windowcapacity=windowcapacity)
 
                 previous_observation = observation
         else:
 
             # that's the first observation
             window = add_window_observation(window=window, windows=windows,
-                                            observation=observation, windowsize=windowsize)
+                                            observation=observation,
+                                            windowcapacity=windowcapacity)
             previous_observation = observation
 
-    # catch also the last window 
+    # catch also the last window
     if len(window) != window.capacity():
         windows.append(window)
 
@@ -222,12 +238,15 @@ def create_windows(bamlist, indel_dict, fastdata, windowsize, start, end):
 
 def get_query_sequences(pileupcolumn, bam_out, use_indels=True, do_not_use_indels_on_error=True):
     """
-    Given a pysam.PileupColumn update the bam_out list with the relevant entries
-    corresponding to the given column. That is append to bam_out the following
-    sublist [pileupcolumn.reference_pos, pileupcolumn.n, [list of bases mapping to the reference_pos]]
+    Given a pysam.PileupColumn instance, it updates the bam_out
+    list with the relevant entries corresponding to the given column.
+    That is it appends to bam_out the following
+    sublist
+    [pileupcolumn.reference_pos, pileupcolumn.n, [list of bases mapping to the reference_pos]]
+
     If an error occurs, the sublist of bases mapping to the reference position is substituted
-    with the string "ERROR". Client code then should decide how to fill this entry or disregard it
-    altogether
+    with the string "ERROR".
+    Client code then should decide how to fill this entry or disregard it altogether
 
     :param pileupcolumn: the pysam.PileupColumn
     :param bam_out: list of lists. Each sublist has the
@@ -367,29 +386,6 @@ def common_bases(bamdata, fastadata):
             raise Error("An error occurred whilst extracting common_bases")
 
 
-def get_winsize(data):
-
-    adj_winsize = 0
-    for x in data:
-
-        # if the base for the position = "N"
-        if x[2] != "N" or x[2] != "n":
-            adj_winsize += 1
-        else:
-            return
-    return adj_winsize
-
-
-# use the fasta sequence to alter the GC counts:
-# if gap or no reads/bases then use the bases in the fasta
-# file for the skipped positions to calculate the gc content of window.
-
-
-
-
-
-
-
 def sum_rd(data, expected_size, net_indel):
 
     """
@@ -504,51 +500,6 @@ def _get_missing_gap_info(start, end, fastdata):
 
     return window_gaps
 
-
-def _get_skip_insert_positions(cur_pos, prev_pos, prev_end,
-                               fastadata, win_gaps, windowsize):
-
-    # the position of the skipped element.
-    skipped_pos = (int(prev_pos) + 1)
-
-    # last two digits of prev_position
-    # before the gap, + 1 (first missing position)
-    insert_pos = (prev_end + 1)
-
-    # used to insert skipped_temp into the right position in cur_win later on.
-    # iterating the data_list to pull bases corresponding to the skipped positions
-
-    for base in fastadata[(int(prev_pos) + 1):(int(cur_pos) + 1)]:
-
-        # in the bam file and filling the skipped
-        # positions in cur_win with [pos, rd, base].
-        if int(cur_pos) > ((int(prev_pos) + windowsize) - prev_end):
-
-            if len(win_gaps) != 0:
-                win_gaps = []
-
-        # single wins retain win_gaps until the
-        # end of their cur_win iteration
-        # whilst win_gaps is emptied everytime a
-        # new cross_win gap has been dealt with.
-
-        skipped_temp = []
-        skipped_temp.append(skipped_pos)
-
-        # 0 to represent the read depth for this position.
-        skipped_temp.append(0)
-        skipped_temp.append(base)
-        skipped_temp.append(insert_pos)
-        win_gaps.append(skipped_temp)
-
-        # -1 so that cur_pos does not end up in cur_win twice.
-        if skipped_pos == (int(cur_pos) - 1):
-            break
-
-        skipped_pos += 1
-        insert_pos += 1
-
-    return win_gaps, skipped_pos, insert_pos
 
 
 
