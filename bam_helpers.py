@@ -123,6 +123,16 @@ def accumulate_windows(bamlist, windowsize):
     pass
 
 
+def add_window_observation(window, windows, observation, windowsize):
+
+    if window.has_capacity():
+        window.add(observation=observation)
+    else:
+        windows.append(window)
+        window = Window(capacity=windowsize)
+        window.add(observation=observation)
+    return window
+
 def create_windows(bamlist, indel_dict, fastdata, windowsize, start, end):
 
     """
@@ -160,12 +170,8 @@ def create_windows(bamlist, indel_dict, fastdata, windowsize, start, end):
 
                 # yes it is...nice add it to the window
                 # and update the observation
-                if window.has_capacity():
-                    window.add(observation=observation)
-                else:
-                    windows.append(window)
-                    window = Window(capacity=windowsize)
-                    window.add(observation=observation)
+                window = add_window_observation(window=window, windows=windows,
+                                                observation=observation, windowsize=windowsize)
 
                 previous_observation = observation
             else:
@@ -191,20 +197,21 @@ def create_windows(bamlist, indel_dict, fastdata, windowsize, start, end):
                                                     read_depth=win_gap_item[1],
                                                     base= win_gap_item[2])
 
-                    if window.has_capacity():
-                        window.add(observation=dummy_observation)
-                    else:
-                        windows.append(window)
-                        window = Window(capacity=windowsize)
-                        window.add(observation=dummy_observation)
+                    window = add_window_observation(window=window, windows=windows,
+                                                    observation=dummy_observation, windowsize=windowsize)
+
+                # add also the current observation that led us
+                # heer
+                window = add_window_observation(window=window, windows=windows,
+                                                observation=observation, windowsize=windowsize)
 
                 previous_observation = observation
         else:
 
             # that's the first observation
-            window.add(observation=observation)
+            window = add_window_observation(window=window, windows=windows,
+                                            observation=observation, windowsize=windowsize)
             previous_observation = observation
-
 
     return windows
 
