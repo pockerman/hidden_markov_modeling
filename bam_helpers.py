@@ -213,6 +213,10 @@ def create_windows(bamlist, indel_dict, fastdata, windowsize, start, end):
                                             observation=observation, windowsize=windowsize)
             previous_observation = observation
 
+    # catch also the last window 
+    if len(window) != window.capacity():
+        windows.append(window)
+
     return windows
 
 
