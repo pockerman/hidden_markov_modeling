@@ -53,6 +53,9 @@ class Window(object):
         # the characteristic observation of the window
         self._mean_observation = None
 
+        # the total number of insertions/deletions
+        self._net_indels = 0
+
     def add(self, observation):
 
         if len(self._observations) >= self._capacity:
@@ -69,8 +72,77 @@ class Window(object):
         """
         return self._capacity
 
+
+    def has_capacity(self):
+        return self.capacity() - len(self._observations) != 0
+
     def get_range(self, start, end):
         return self._observations[start:end]
+
+    def get_gc_count(self):
+        """
+        Returns the GC count for the window
+        :return:
+        """
+        gc_count = 0
+        at_count = 0
+
+        for observation in self._observations:
+
+            if observation.base.upper() == "C" \
+                    or observation.base.upper() == "G":
+                gc_count += 1
+            elif observation.base.upper() != "N":
+                at_count += 1
+
+        if gc_count == 0:
+            return 0
+        #elif at_count == 0:
+        #    return 1
+
+        return gc_count / (gc_count + at_count)
+
+    def set_net_indels(self, net_indels):
+        self._net_indels = net_indels
+
+    def has_gaps(self):
+        """
+        Returns true if the window contains gaps. This is done
+        by looping over the the window observations and check if the
+        observed positions are contiguous without gaps
+        :return:
+        """
+        previous = int(self._observations[0].position)
+        for item in range(1, len(self)):
+
+            pos = int (self._observations[item].position)
+
+            if pos != previous + 1:
+                # we have a gap
+                return True
+            else:
+                previous = pos
+        return False
+
+    def insert_at(self, pos, data):
+        """
+        Insert the data at the specified position
+        for the current window
+        :param pos:
+        :param data:
+        :return:
+        """
+        self._observations.insert(pos, data)
+
+    def insert_at_positions(self, data):
+        """
+        Insert the data
+        :param data:
+        :return:
+        """
+        for item in data:
+            self.insert_at(pos=item[3] -1, data=item[:3])
+
 
     def __len__(self):
         return len(self._observations)
