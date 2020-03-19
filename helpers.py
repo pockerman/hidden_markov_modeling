@@ -1,6 +1,10 @@
 import json
+import numpy as np
+import logging
 from collections import namedtuple
 from exceptions import FullWindowException
+from exceptions import Error
+
 
 def read_configuration_file(config_file):
     """
@@ -11,6 +15,26 @@ def read_configuration_file(config_file):
     with open(config_file) as json_file:
         configuration = json.load(json_file)
         return configuration
+
+
+def set_up_logger(configuration):
+    # set up the logger
+    logger_file = configuration.get("logger_file", None)
+
+    # always force logging
+    if logger_file is None:
+        logger_file = "tuf.log"
+
+    logging_level = configuration.get("logger_level", None)
+
+    if logging_level is None or logging_level == "INFO":
+        logging_level = logging.INFO
+    elif logging_level == "DEBUG":
+        logging_level = logging.DEBUG
+    elif logging_level == "ERROR":
+        logging_level = logging.ERROR
+
+    logging.basicConfig(filename=logger_file, level=logging_level)
 
 
 Observation = namedtuple("Observation", ["position", "read_depth", "base"])
@@ -44,14 +68,12 @@ class Window(object):
     """
     def __init__(self, capacity):
 
+        # maximum capacity of the window
         self._capacity = capacity
 
         # holds the observations i.e. the base
         # strings observed into the window
         self._observations = []
-
-        # the characteristic observation of the window
-        self._mean_observation = None
 
         # the total number of insertions/deletions
         self._net_indels = 0
@@ -72,12 +94,50 @@ class Window(object):
         """
         return self._capacity
 
-
     def has_capacity(self):
+        """
+        Returns True if the caapacity of the
+        window has not been exhausted
+        :return: boolean
+        """
         return self.capacity() - len(self._observations) != 0
 
     def get_range(self, start, end):
+        """
+        Returns a range of the observations stored in
+        the window
+        :param start:
+        :param end:
+        :return:
+        """
         return self._observations[start:end]
+
+    def get_rd_stats(self, statistics="all"):
+        """
+        Returns a statistical summary as a dictionary
+        of the read depth variable in the window
+        :param statistics:
+        :return:
+        """
+        valid_statistics = ["all",  "mean", "var", "median"]
+        if statistics not in valid_statistics:
+            raise Error("Invalid statistsics: '{0}' not in {1}".format(statistics, valid_statistics))
+
+        # accumulate RD as an array and use numpy
+        rd_data = [item[1] for item in self._observations]
+        mean = np.mean(rd_data)
+        var = np.var(rd_data)
+        median = np.median(rd_data)
+        return {"mean": mean, "var": var, "median": median}
+
+    def get_rd_observations(self):
+        """
+        Returns a list with read depth observations
+        contained in the window
+        :return:
+        """
+        rd_data = [item[1] for item in self._observations]
+        return rd_data
 
     def get_gc_count(self):
         """
@@ -97,12 +157,15 @@ class Window(object):
 
         if gc_count == 0:
             return 0
-        #elif at_count == 0:
-        #    return 1
 
         return gc_count / (gc_count + at_count)
 
     def set_net_indels(self, net_indels):
+        """
+        Set the net insertion/deletions for the window
+        :param net_indels:
+        :return:
+        """
         self._net_indels = net_indels
 
     def has_gaps(self):
@@ -133,16 +196,6 @@ class Window(object):
         :return:
         """
         self._observations.insert(pos, data)
-
-    def insert_at_positions(self, data):
-        """
-        Insert the data
-        :param data:
-        :return:
-        """
-        for item in data:
-            self.insert_at(pos=item[3] -1, data=item[:3])
-
 
     def __len__(self):
         return len(self._observations)
