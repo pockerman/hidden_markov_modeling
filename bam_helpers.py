@@ -3,7 +3,8 @@ Utilities for working with bam files
 """
 import math
 import statistics
-from collections import Counter, OrderedDict
+import logging
+from collections import Counter
 from helpers import Window, Observation
 from exceptions import FullWindowException
 from exceptions import Error
@@ -26,9 +27,6 @@ def extract_windows(chromosome, ref_file, test_file, **args):
     try:
 
         ref_list = ref_file.fetch(chromosome, 0, )
-
-        for item in ref_list:
-            print(item)
 
         bam_out, errors, adjusted = bam_strip(chromosome=chromosome,
                                               file=test_file,
@@ -188,6 +186,7 @@ def create_windows(bamlist, indel_dict, fastdata, windowcapacity, start, end):
 
                 previous_observation = observation
             else:
+
                 # there is a gap we cannot simply
                 # add the observation as this may have
                 # to be added to the next window depending
@@ -200,7 +199,7 @@ def create_windows(bamlist, indel_dict, fastdata, windowcapacity, start, end):
 
                 # after getting the missing info we try to add it
                 # to the window. we may have accumulated so much info that
-                # we may exceed the window capacity. For example
+                # we exceed the window capacity. For example
                 # a window already has windowcapacity - 2 items
                 # and len(window_gaps) is 10. In this case we need
                 # to create a new window
@@ -236,7 +235,10 @@ def create_windows(bamlist, indel_dict, fastdata, windowcapacity, start, end):
     return windows
 
 
-def get_query_sequences(pileupcolumn, bam_out, use_indels=True, do_not_use_indels_on_error=True):
+def get_query_sequences(pileupcolumn, bam_out,
+                        use_indels=True,
+                        do_not_use_indels_on_error=True):
+
     """
     Given a pysam.PileupColumn instance, it updates the bam_out
     list with the relevant entries corresponding to the given column.
@@ -265,15 +267,16 @@ def get_query_sequences(pileupcolumn, bam_out, use_indels=True, do_not_use_indel
     adjusted = 0
     errors = 0
 
+    # add the reference position and the number
+    # of reads that correspond to this position
     temp.append(pileupcolumn.reference_pos)
-    # number of reads mapping to this column
     temp.append(pileupcolumn.n)
 
     try:
         # append bases
         temp.append(pileupcolumn.get_query_sequences(add_indels=use_indels))
         bam_out.append(temp)
-    except:
+    except Exception as e:
 
         # try a fall out extra step only if it makes sense
         if do_not_use_indels_on_error and use_indels:
@@ -291,12 +294,25 @@ def get_query_sequences(pileupcolumn, bam_out, use_indels=True, do_not_use_indel
                 adjusted += 1
             except:
                 errors += 1
-                temp.append(["ERROR"])
-                bam_out.append(temp)
+                if len(bam_out) != 0:
+                    logging.error("Previous position was: {0}".format(bam_out[len(bam_out) - 1][0]))
+                else:
+                    logging.error("At the startig position")
+                #temp.append(["ERROR"])
+                #bam_out.append(temp)
         else:
             errors += 1
-            temp.append(["ERROR"])
-            bam_out.append(temp)
+
+            # we have an error we should note
+            logging.error("At ")
+
+            if len(bam_out) != 0:
+                logging.error("Previous position was: {0}".format(bam_out[len(bam_out)-1][0]))
+            else:
+                logging.error("At the startig position")
+
+            #temp.append(["ERROR"])
+            #bam_out.append(temp)
 
     return bam_out, adjusted, errors
 
@@ -384,53 +400,6 @@ def common_bases(bamdata, fastadata):
 
         except Exception as e:
             raise Error("An error occurred whilst extracting common_bases")
-
-
-def sum_rd(data, expected_size, net_indel):
-
-    """
-    Adjust the given data with respect to net_indel.
-    Only adjust for indels not for reference mapped gaps
-    :param data:
-    :param expected_size: The expected size of the window
-    :param net_indel: total sum of indels
-    :return:
-    """
-    sums = []
-    winsize = 0
-
-    for x in data:
-
-        # if the base for the position = "N"
-        if x[2] != "N" or x[2] != "n":
-
-            # new method which excludes any
-            # positions marked N from the calculation,
-            # allowing the GC average (here)
-            # and sum RD for a window (sum_rd function)
-            # to be adjusted.
-            sums.append(x[1])
-
-            # we do not adjust winsize for any skipped positions
-            # that mapped to a base in the reference fasta as
-            # these may be bases that are supressed
-            # by TUF so scaling up the rd of the window would make them seem regular.
-            # similarly its important to scale up windows
-            # with Ns as these are unmapped positions, that
-            # will lower the rd of windows and make finding TUF too difficult.
-            winsize += 1
-
-    if net_indel is None or net_indel == 0.0:
-        return sum(sums)
-    else:
-        # we use winsize to adjust for the indels
-        # but not compensating for the gap_size
-        # always divide by winsize as we do not want
-        # to compensate for reference mapped gaps,
-        # these could represent tuf regions/cores.
-
-        adjusted_rd = (round(sum(sums) / (winsize + net_indel)) * expected_size)
-        return adjusted_rd
 
 
 def _get_insertions_and_deletions_from_indel(indel, insertions, deletions):
