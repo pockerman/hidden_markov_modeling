@@ -1,6 +1,6 @@
 {
   "reference_file":{
-    "name": "data/m605_chopped_1_1000101.bam",
+    "name": "data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
     "start_idx" :0,
     "end_idx": 1000100
   },
@@ -9,7 +9,7 @@
     "start_idx": 0,
     "end_idx": 1000100
   },
-  "window_size":10,
+  "window_size":100,
   "chromosome": "chr1",
   "min_rd": 1,
   "max_rd": 2,
@@ -18,7 +18,8 @@
     "initial_transitions_p": "uniform",
     "train_solver": "BaumWelch"
   },
-
+  "logger_file":"tuf.log",
+  "logger_level": "INFO",
   "train_set_size": 0.7,
   "validation_set_size": 0.2,
   "test_set_size": 0.1,
