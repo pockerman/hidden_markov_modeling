@@ -39,7 +39,9 @@ def set_up_logger(configuration):
 
 Observation = namedtuple("Observation", ["position", "read_depth", "base"])
 
+
 class WindowIterator(object):
+
     """
     Helper class to allow iteration over the window
     elements
@@ -119,16 +121,22 @@ class Window(object):
         :param statistics:
         :return:
         """
-        valid_statistics = ["all",  "mean", "var", "median"]
+        valid_statistics = ["all",  "mean", "var",
+                            "median", "min", "max"]
         if statistics not in valid_statistics:
-            raise Error("Invalid statistsics: '{0}' not in {1}".format(statistics, valid_statistics))
+            raise Error("Invalid statistsics: '{0}'"
+                        " not in {1}".format(statistics, valid_statistics))
 
         # accumulate RD as an array and use numpy
         rd_data = [item[1] for item in self._observations]
         mean = np.mean(rd_data)
         var = np.var(rd_data)
         median = np.median(rd_data)
-        return {"mean": mean, "var": var, "median": median}
+        min = np.amin(rd_data)
+        max = np.amax(rd_data)
+        return {"mean": mean, "var": var,
+                "median": median, "min": min,
+                "max": max}
 
     def get_rd_observations(self):
         """
@@ -215,5 +223,14 @@ class Window(object):
         :return: Observation instance
         """
         return self._observations[item]
+
+    def __setitem__(self, o, value):
+        """
+        Set the o-th observation to value
+        :param o:
+        :param value:
+        :return:
+        """
+        self._observations[o] = value
 
 

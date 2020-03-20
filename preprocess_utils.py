@@ -2,6 +2,37 @@
 Preprocessing utilities
 """
 
+from pomegranate import*
+
+from exceptions import Error
+
+VALID_DISTS = ['gaussian', 'uniform', 'poisson']
+
+
+def fit_distribution(data, dist_name="gaussian", **kwargs):
+
+    """
+    Fits a distribution within the given dataset
+    :param data:
+    :param dist_name:
+    :param kwargs:
+    :return: appropriate distribution object
+    """
+
+    if dist_name not in VALID_DISTS:
+        raise Error("Invalid distribution name. Name {0} not in {1}".format(dist_name, VALID_DISTS))
+
+    if dist_name == 'gaussian':
+        dist = NormalDistribution.from_samples(data)
+        return dist
+    elif dist_name == 'uniform':
+        dist = UniformDistribution.from_samples(data)
+        return dist
+    elif dist_name == 'poisson':
+        dist = PoissonDistribution.from_samples(data)
+        return dist
+
+
 def preprocess(windows, **config):
     """
     Apply preprocessing to the given windows

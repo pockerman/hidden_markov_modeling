@@ -2,7 +2,7 @@
 Utilities for working with bam files
 """
 import math
-import statistics
+import pysam
 import logging
 from collections import Counter
 from helpers import Window, Observation
@@ -10,7 +10,8 @@ from exceptions import FullWindowException
 from exceptions import Error
 
 
-def extract_windows(chromosome, ref_file, test_file, **args):
+def extract_windows(chromosome, ref_filename, test_filename, **args):
+
     """
     Extract the windows that couple the seq_file and ref_files
     for the given chromosome
@@ -24,38 +25,49 @@ def extract_windows(chromosome, ref_file, test_file, **args):
     start_idx = args["start_idx"]
     end_idx = args["end_idx"]
 
-    try:
+    with pysam.FastaFile(ref_filename) as ref_file:
 
-        ref_list = ref_file.fetch(chromosome, 0, )
+        print("\t Reference file: ", ref_file.filename)
 
-        bam_out, errors, adjusted = bam_strip(chromosome=chromosome,
-                                              file=test_file,
-                                              start=start_idx, stop=end_idx)
+        with pysam.AlignmentFile(test_filename, "rb") as test_file:
+            print("\t Test file")
+            print("\t", test_file.filename)
+            print("\t", test_file.description)
 
-        print("\t Number of erros: ", errors)
-        print("\t Number of adjusted: ", adjusted)
-        print("\t bam output: ", len(bam_out))
+            print("=============================\n")
 
-        # find insertions and deletions
-        indel_dict = get_indels(chromosome=chromosome, samfile=test_file,
-                                start=start_idx, stop=end_idx)
+            try:
 
-        # get the common bases
-        # TODO: explain what are we trying to do here
-        common_bases(bamdata=bam_out, fastadata=ref_list)
+                ref_list = ref_file.fetch(chromosome, 0, )
 
-        # extract the windows
-        windows = create_windows(bamlist=bam_out,
-                                  indel_dict=indel_dict,
-                                  fastdata=ref_list,
-                                  windowcapacity=windowcapacity,
-                                  start=start_idx,
-                                  end=end_idx)
+                bam_out, errors, adjusted = bam_strip(chromosome=chromosome,
+                                                      file=test_file,
+                                                      start=start_idx, stop=end_idx)
 
-        return windows
-    except Exception as e:
-        print(str(e))
-        raise
+                print("\t Number of erros: ", errors)
+                print("\t Number of adjusted: ", adjusted)
+                print("\t bam output: ", len(bam_out))
+
+                # find insertions and deletions
+                indel_dict = get_indels(chromosome=chromosome, samfile=test_file,
+                                        start=start_idx, stop=end_idx)
+
+                # get the common bases
+                # TODO: explain what are we trying to do here
+                common_bases(bamdata=bam_out, fastadata=ref_list)
+
+                # extract the windows
+                windows = create_windows(bamlist=bam_out,
+                                          indel_dict=indel_dict,
+                                          fastdata=ref_list,
+                                          windowcapacity=windowcapacity,
+                                          start=start_idx,
+                                          end=end_idx)
+
+                return windows
+            except Exception as e:
+                print(str(e))
+                raise
 
 
 def bam_strip(chromosome, file, start, stop):
@@ -350,30 +362,23 @@ def common_bases(bamdata, fastadata):
 
     """
     Fill in the information in bamdata by using the
-    reference sequence given in fastadata
+    reference sequence given in fastadata. The bamdata
+    is a list containing lists of the form
+    # [reference_pos, count_number, [list of bases.  usually a single base]]
     :param bamdata: The bamdata to fill in
     :param fasta: The reference data
     :return:
     """
 
-    for i, x in enumerate(bamdata):
+    for x in bamdata:
 
-        # x is expected to be of the form
-        # [reference_pos, count_number, [list of bases.  usually a single base]]
         try:
+            # the bamdata should be [ref_pos, count, [bases]]
             if x[1] == 1 and len(x) < 3:
                 # appending the corresponding base for
                 # this position from hg38 ref fasta
-                x.append((fastadata[x[0] + 1]))
-
-            # change to searching fasta and appending
-            # corresponding base in fasta file instead.
-            elif x[2] == '':
-                del (x[2])
-
-                # plus one because of the 0 indexing of fasta
-                # list compared to the 1 indexing of the bam positions.
-                x.insert(2, (fastadata[x[0] + 1]))
+                #x.append((fastadata[x[0] + 1]))
+                logging.error(" Bam item does not have the correct format")
 
             else:
                 # provides the element which reaches the
@@ -382,14 +387,12 @@ def common_bases(bamdata, fastadata):
 
                 # delete from the original bam entry what is present
                 # from the entry position 2 and backwards
-
                 del (x[2:])
 
                 # when the most common mapped base to the position is an
                 # indel then all elements of the string are appended
                 # to the list (see screenshot on windows staff account).
                 if len(common_count[0][0]) > 1:
-
                     indel = common_count[0][0]
                     x.extend(indel[0])
                 else:
@@ -397,7 +400,6 @@ def common_bases(bamdata, fastadata):
                     # extend adds the new elements into the list,
                     # not into the list as a separate list.
                     x.extend(common_count[0][0])
-
         except Exception as e:
             raise Error("An error occurred whilst extracting common_bases")
 
@@ -468,11 +470,3 @@ def _get_missing_gap_info(start, end, fastdata):
         window_gaps.append(skipped_temp)
 
     return window_gaps
-
-
-
-
-
-
-
-

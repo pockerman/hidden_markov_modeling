@@ -24,14 +24,9 @@ indel_dict = indels("chr1", samfile, start, end) # itterating the bam file and p
 print("indels found") # positions containg at least 1 read with an indel into a dictionary
 					  # where the position is the key and the mapped bases to the position are the vals.
 common_bases(bam_list, fasta_list) # finding the most common base that is mapped to each given position and
-					   # appending that base to bam_list; e.g. [pos, rd, most common base]	
-# print("after common bases", bam_list[:50])
-# for z in bam_list:
-# 	if z[0] >= 103790 and z[0] <= 103910:
-# 		print(z)
-# for c in bam_list:
-# 	if c[0] >= 101001 and c[0] <= 101101:
-# 		print(c)
+					   # appending that base to bam_list; e.g. [pos, rd, most common base]
+
+
 
 chr1_dictionary = OrderedDict()
 cur_win = [] # bam_list is itterated and each element is appended to cur_win until the position 
@@ -198,10 +193,7 @@ for ind, x in enumerate(bam_list):
 																			     		   # for the window the gap occurs in. if the gap does not skip an entire window (checked for below), e.g. if the distance from the end of the window the gap occurs in
 																			     		   # and the end of the gap is >= 100, then the itteration resumes at the position that is the end of the gap + 1 and unless anoter cross_win gap occurs
 																			     		   # it will continue onto the if cur_pos == cur_win[-1][0] code block.
-						print("window where a cross-gap occurs", position)
-						# print(bam_data[0])
-						# print(cur_win)
-						# exit()
+
 						chr1_dictionary.update(position)
 						cw_start += 100 # each time a window is produced, cw_start/end needs to +=100, until the itteration
 										# of cur_win is over, at which point cw_start/end need to be reset to index the new cur_win.
@@ -256,6 +248,7 @@ for ind, x in enumerate(bam_list):
 					for gap_data in win_gaps:
 						cur_win.insert(int(gap_data[3]-1), gap_data[:3]) # insert_pos = gap_data[3] # not 0 indexing on the range function.
 						win_gaps = []
+
 					#print(cur_win[cw_start:cw_end])
 					win_sum = sum_rd(cur_win[cw_start:cw_end], 100, net_indel)
 					win_gc = gc_count(cur_win[cw_start:cw_end]) # the first win the gap occurs in is represented by cur_win[:-1], which would end at prev_pos.
