@@ -1,0 +1,54 @@
+This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: notes.aux
+The style file: plain.bst
+Database file #1: references.bib
+Warning--I didn't find a database entry for "rabiner"
+Warning--empty journal in coella2007
+Warning--empty journal in rabiner2009
+Warning--empty journal in rocha2012
+Warning--empty journal in cai2012
+Warning--empty journal in Wang2007
+Warning--empty journal in yoon2009
+You've used 6 entries,
+            2118 wiz_defined-function locations,
+            525 strings with 5253 characters,
+and the built_in function-call counts, 1978 in all, are:
+= -- 165
+> -- 162
+< -- 0
++ -- 65
+- -- 58
+* -- 146
+:= -- 375
+add.period$ -- 18
+call.type$ -- 6
+change.case$ -- 47
+chr.to.int$ -- 0
+cite$ -- 12
+duplicate$ -- 60
+empty$ -- 103
+format.name$ -- 58
+if$ -- 366
+int.to.chr$ -- 0
+int.to.str$ -- 6
+missing$ -- 6
+newline$ -- 33
+num.names$ -- 12
+pop$ -- 59
+preamble$ -- 1
+purify$ -- 41
+quote$ -- 0
+skip$ -- 43
+stack$ -- 0
+substring$ -- 31
+swap$ -- 0
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 24
+warning$ -- 6
+while$ -- 12
+width$ -- 7
+write$ -- 56
+(There were 7 warnings)

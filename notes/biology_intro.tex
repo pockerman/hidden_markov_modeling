@@ -1,0 +1,60 @@
+\section{Copy Number Variation CNV}
+
+Copy number variants (CNVs) are alternations of DNA of a genome that results
+in the cell having a less or more than two copies of segments of the DNA \citep{cai2012}.
+CNVs correspond to relatively large regions of the genome, ranging from about one kilobase
+to several megabses that are deleted or duplicated \cite{cai2012}.
+
+CNVs can be discovered by cytogenetic techniques, array comparative genomic
+hybridization and by single nucleotide polymorphism (SNP) arrays see \citep{cai2012} and
+references therein. Furtheremore, CNVs can be identified by next-generation sequencing (NGS) 
+in high resolution \cite{cai2012}. NGS
+can generate millions of short sequence reads along the whole human genome. When these
+short reads are mapped to the reference genome, both distances of paired-end data 
+and read-depth (RD) data can reveal the possible structure variations of the target genome \cite{cai2012}
+Another important source of information useful for inferring CNVs from reads alignment is
+the read depth (RD). The RD data are generated to count the number of reads that cover a
+genomic location or a small bin along the genome which provide important information
+about the CNVs that a given individual carries \cite{cai2012}. 
+When the genomic location or bin is within a deletion, one expects to observe a
+smaller number of read counts or lower mapping density than the background read depth. In
+contrast, when the genomic location or bin is within an insertion or duplication, one expects
+to observe a larger number of read counts or higher mapping density. Therefore, these RDs
+can be used to detect and identify the CNVs. The read-depth data provide more reliable
+information for large CNVs and CNVs flanked by repeats, where accurate mapping reads is
+difficult. The read depth data also provide information on CNVs based on the targeted
+sequences where only targeted regions of the genome are sequenced \cite{cai2012}.
+
+
+\section{TUF}
+\label{tuf}
+
+TUF cores in WGA sequencing samples can be identified as gaps in RD coverage. Thus, they
+mimic deletions. This means that TUF cores can be represented as deletions in RD data. Thus, we can adapt
+existing CNV detection models for TUF detection.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

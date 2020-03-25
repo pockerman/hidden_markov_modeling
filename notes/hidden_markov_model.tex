@@ -1,0 +1,113 @@
+\chapter{Hidden Markov Model}
+
+Hidden Markov Models or HMM for shor, are a class of probabilistic grapjical models.
+They have been used in fields such as speech recognition, optical character recognotion and ion channel recordings,
+computational biology.
+
+\section{HMM Definition}
+We will first introduce the first-order HMM model. Let's assume that a system $\Sigma$ can be described using
+a finite set of state $S$. Let's also assume that the transition from state $s_i$ to state $s_j$, where both are in $S$,  can be described by the probability $a_{i,j}$. In other words, $a_{i,j}$
+is simply
+
+\begin{equation}
+a_{i,j} = P(S=s_j | S=s_i)
+\end{equation}
+
+
+We can clearly define a matrix to arrange the transition probabilities $a_{i,j}$. Let's call this matrix $A$.
+Let's also assume that when the system is at state $S_i$ it emits a symbol from a specified set with probability $b_{i,X}$.
+$b_{iX}$ is the probability that the system will emmit the symbol $X$ when at state $s_i$ or
+
+\begin{equation}
+b_{i,X} = P( X| S=s_i)
+\end{equation}
+  
+Just like we did with the matrix $A$ we can also define the emission matrix $B$.
+
+\begin{framed}
+\begin{remark}
+The first-order Markov assumption is that both emissions and transitions depend on the current state only and
+not on the past.
+\end{remark}
+\end{framed}
+
+We can assume that the system has a start and end state. At $t=0$ the system is alsways at the start state.
+Alternativelu, we could use a probabilistic approach over all states to initialize the model.
+
+
+There are three types of questions we want to be able to answer when we consider HMM.
+
+\begin{itemize}
+\item How likely is the sequence of observation the model gave us? 
+\item What is the most probable sequence of transitions and emissions  throught the HMM that underlies the 
+generation of a particular sequence?
+\item How do we learn the transition and the emission probabilities?
+\end{itemize}
+
+\section{The Forward-Backward Algorithm}
+\label{forward_backward_algo}
+
+Let's assume that we have an HMM described by the tuple $\lambda$. We are intersted in computing the 
+probability of the observation sequence $O$ given $\lambda$.
+
+If $\pi$ is a path in the HMM of consecutive states that starts at START and ends in END then
+
+\begin{equation}
+P(O, \pi | \lambda) = \Pi_{START}^{END}a_{i,j}\Pi_{t=1}^{T}b_{i,t}
+\end{equation}
+Then,
+
+\begin{equation}
+P(O | \lambda) = \sum_{\pi}P(O, \pi | \lambda)
+\end{equation}
+
+The forward-backward procedures are also used in the Baum-Welch algorithm; see section \ref{baum_welch_learning}. 
+
+We are now also interested in computing the most likely path. This can be done by using the socalled Viterbi alogorithm.
+The Viterbi algorithm is another application of DP.
+
+
+\section{The Viterbi Algorithm}
+\label{viterbi_algorithm}
+
+The Viterbi algorithm gives a YES or NO answer to the following question
+
+\begin{equation}
+\text{Was the HMM in state k at time i given that it emitted string x?}
+\end{equation}
+
+We need to further define the following variables
+
+\begin{equation}
+\delta_i(t) = max_{\pi_i(t)}P(\pi_i(t)|\lambda)
+\end{equation}
+
+
+We can update these variables using a propagation mechanism similar to the forward algorithm.
+The sum are replaced with maximization operations
+
+
+The resulting Viterbi path will be used both for learning and when dealing with multiple alignements.
+
+This question however does not tell us how much certain we are in the YES/NO answer. 
+Let's consider the probability $P(\pi_i=k,x)$ 
+
+
+\section{Learning Algorithms}
+Various algorithms are available for HMM training; Baum-Welch or Expectation Maximization algorithm, different forms
+of gradient-descent algorithms and othe Generalized EM or GEM algorithms.
+
+\subsection{Baum-Welch Learning}
+\label{baum_welch_learning}
+
+As mentioned previously $\mathbf{h}$ represents a vector valued function and $h_{sonar}$ is the modeled measurement from the
+sonar sensor. Odisseus is using the following model
+
+\begin{equation}
+h_{sonar}(\mathbf{x}, \mathbf{v}_{sonar}) = \sqrt{(x - x_o)^2 + (y - y_o)^2} +  \mathbf{v}_{sonar}
+\label{sonar_h}
+\end{equation} 
+
+where $\mathbf{v}_{sonar}$ is the error vector associated with the sonar. $x_o, y_o$ are the coordinates of the
+obstacle detected by the sensor.
+

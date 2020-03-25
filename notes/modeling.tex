@@ -1,0 +1,63 @@
+\section{Modeling}
+
+In \cite{yoon2009} a window based algorithm is developed for RD data in order to detect CNVs.
+The basic idea of their approach is to identify regions of consecutive 100-bp windows with significantly increased or reduced RD counts. In order to detect such a scenario, 
+the read count of a window is converted into a $Z-$score according to equation \ref{z_score}
+
+\begin{equation}
+Z_{window} = \frac{RC_{window} - \mu}{\sigma}
+\label{z_score}
+\end{equation}
+where $\mu$ is the mean RD of all windows:
+
+\begin{equation}
+\mu = \frac{1}{W}\sum_{W} RC_w
+\end{equation}
+and $\sigma$ is the standard deviation.
+
+The $Z-$score is then converted to its upper-tail probability:
+
+\begin{equation}
+p_{i}^{Upper} = P(Z>z_i)
+\end{equation}
+
+\begin{equation}
+p_{i}^{Lower} = P(Z<z_i)
+\end{equation}
+
+For an interval of consecutive windows $A$ with $l$ windows, they classify  an unusual event as duplication if 
+
+\begin{equation}
+max\{p_{i}^{Upper} | i \in A\} < \left(\frac{FPR}{L/l}\right)^{1/l}
+\end{equation}
+or as a deletion if 
+\begin{equation}
+max\{p_{i}^{Lower} | i \in A\} < \left(\frac{FPR}{L/l}\right)^{1/l}
+\end{equation}
+
+FPR is the nominal false-positive rate (FPR) desired for the entire
+chromosome (deletion and duplications are treated separately), $L$ is the number of windows of a chromosome, and $l$ is the size of the interval $A$.
+
+In \cite{coella2007} a Hidden Markov Model in order to detect 
+CNV from SNP genotyping data is discussed. The model assumes six hidden states; full deletion, single copy deletion, normal heterozygote, normal homozygote, single copy duplication and double copy duplication. The exponential function in equation \ref{rho} is used in order to define the a priori transition probabilities. 
+
+\begin{equation}
+\rho = \frac{1}{2}(1 - exp(-d/2L))
+\label{rho}
+\end{equation}
+
+In \ref{rho} $d$ is the distance between adjacent SNP loci. 
+The distance between neighbouring SNPs determines the probability of having a copy number state change between them.
+$L$ is a characteristic length which, as the authors state, could either be inferred directly from the data or adjusted calibrate the
+model to a given false positive rate in an objective fashion.
+
+The emission probabilities are defined by a simple mixture model of the form
+
+\begin{equation}
+p = U + (1 - U)N(\mu, \sigma)
+\end{equation}
+
+where $U$ denotes the uniform distribution ad $N(\mu, \sigma)$ the normal distribution. The uniform distribution is used to model 
+random fluctuations.
+
+In \cite{Wang2007} another HMM based model is presented for CNV detection in whole-genome SNP genotyping data. The HMM is based on the HMM model in \cite{coella2007}.

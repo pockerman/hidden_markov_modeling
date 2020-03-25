@@ -1,0 +1,42 @@
+\begin{thebibliography}{1}
+
+\bibitem{coella2007}
+Stefano Colella, Christopher Yau, Jennifer~M. Taylor, Ghazala Mirza, Helen
+  Butler, Penny Clouston, Anne~S. Bassett, Anneke Seller, Christopher~C.
+  Holmes, and Jiannis Ragoussis.
+\newblock Quantisnp: an objective bayes hidden-markov model to detect and
+  accurately map copy number variation using snp genotyping data.
+\newblock 2007.
+
+\bibitem{rabiner2009}
+Rabiner~L. R.
+\newblock A tutorial on hidden markov models and selected applications in
+  speech recognition.
+\newblock 2009.
+
+\bibitem{rocha2012}
+Miguel Rocha and Pedro~G. Ferreira.
+\newblock Bioinformatics algorithsm. design and implementation in python.
+\newblock 2012.
+
+\bibitem{cai2012}
+Cai~T. T., Jeng~J. X., and Li~H.
+\newblock Robust detection and identification of sparse segments in ultra-high
+  dimensional data analysis.
+\newblock 2012.
+
+\bibitem{Wang2007}
+Kai Wang, Mingyao Li, Dexter Hadley, Rui Liu, Joseph Glessner, Struan~F.A.
+  Grant, Hakon Hakonarson, and Maja Bucan.
+\newblock Penncnv: An integrated hidden markov model designed for
+  high-resolution copy number variation detection in whole-genome snp
+  genotyping data.
+\newblock 2007.
+
+\bibitem{yoon2009}
+Seungtai Yoon, Zhenyu Xuan, Vladimir Makarov, Kenny Ye, and Jonathan Sebat.
+\newblock Sensitive and accurate detection of copy number variants using read
+  depth of coverage.
+\newblock 2009.
+
+\end{thebibliography}
