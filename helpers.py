@@ -36,6 +36,15 @@ def set_up_logger(configuration):
 
     logging.basicConfig(filename=logger_file, level=logging_level)
 
+def flat_windows(windows):
+
+  win = []
+
+  for window in windows:
+    win.append(window.get_rd_observations())
+
+  return win
+
 
 Observation = namedtuple("Observation", ["position", "read_depth", "base"])
 
