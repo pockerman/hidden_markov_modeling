@@ -51,13 +51,14 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
                 print("\t Number of adjusted: ", adjusted)
                 print("\t bam output: ", len(bam_out))
 
-                # find insertions and deletions
-                indel_dict = create_indels_dictionary(chromosome=chromosome, samfile=test_file,
-                                                      start=start_idx, stop=end_idx)
-
                 # get the common bases
                 # TODO: explain what are we trying to do here
                 common_bases(bamdata=bam_out, fastadata=ref_list)
+
+                # find insertions and deletions
+                indel_dict = create_indels_dictionary(chromosome=chromosome,
+                                                      samfile=test_file,
+                                                      start=start_idx, stop=end_idx)
 
                 # extract the windows
                 windows = create_windows(bamlist=bam_out,
@@ -269,6 +270,7 @@ def get_query_sequences(pileupcolumn, bam_out,
       return bam_out, 0, 1
     else:
       # we have reads  pileupcolumn.n != 0
+      temp.append(pileupcolumn.n)
 
       # get the read qualities for the column
       quality = pileupcolumn.get_query_qualities()
