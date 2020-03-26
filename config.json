@@ -14,7 +14,8 @@
     "start_idx": 0,
     "end_idx": 1000100
   },
-  "window_size":100,
+  "window_size":10,
+  "quality_theshold":20,
   "chromosome": "chr1",
   "min_rd": 1,
   "max_rd": 2,

@@ -24,6 +24,7 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
     windowcapacity = args["windowsize"]
     start_idx = args["start_idx"]
     end_idx = args["end_idx"]
+    quality_theshold = args.get("quality_theshold", None)
 
     with pysam.FastaFile(ref_filename) as ref_file:
 
@@ -42,15 +43,17 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
 
                 bam_out, errors, adjusted = bam_strip(chromosome=chromosome,
                                                       file=test_file,
-                                                      start=start_idx, stop=end_idx)
+                                                      start=start_idx, stop=end_idx,
+                                                      quality_theshold=quality_theshold,
+                                                      fastadata=ref_list)
 
                 print("\t Number of erros: ", errors)
                 print("\t Number of adjusted: ", adjusted)
                 print("\t bam output: ", len(bam_out))
 
                 # find insertions and deletions
-                indel_dict = get_indels(chromosome=chromosome, samfile=test_file,
-                                        start=start_idx, stop=end_idx)
+                indel_dict = create_indels_dictionary(chromosome=chromosome, samfile=test_file,
+                                                      start=start_idx, stop=end_idx)
 
                 # get the common bases
                 # TODO: explain what are we trying to do here
@@ -70,7 +73,7 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
                 raise
 
 
-def bam_strip(chromosome, file, start, stop):
+def bam_strip(chromosome, file, start, stop, **kwargs):
 
     """
     get the contents of the file starting at start position and ending
@@ -80,54 +83,21 @@ def bam_strip(chromosome, file, start, stop):
     adjusted = 0
     bam_out = []
 
-    counter = 0
     # move column-wise
     for pileupcolumn in file.pileup(chromosome, start, stop,
                                         truncate=True, ignore_orphans=False):
 
             bam_out, adjusted_tmp, errors_tmp = \
-                get_query_sequences(pileupcolumn=pileupcolumn, bam_out=bam_out)
+                get_query_sequences(pileupcolumn=pileupcolumn, bam_out=bam_out,
+                                    use_indels=True,
+                                    do_not_use_indels_on_error=True,
+                                    quality_theshold=kwargs.get("quality_theshold", None),
+                                    fastadata=kwargs.get("fastadata", None))
+
             adjusted += adjusted_tmp
             errors += errors_tmp
 
     return bam_out, errors, adjusted
-
-
-def get_indels(chromosome, samfile, start, stop):
-
-    """
-    find  insertions/deletions  and put in dictionary
-    """
-    indels = {}
-
-    for i, pileupcolumn in enumerate(samfile.pileup(chromosome, start, stop,
-                                                    truncate=True, ignore_orphans=False)):
-        indel_count = 0
-        for pileupread in pileupcolumn.pileups:
-
-            # start counting indels when
-            # first indel is encountered
-
-            if (pileupread.indel != 0):
-                indel_count += 1
-
-            # TODO: Do we really need all the if-else stuff here?
-            if (indel_count == pileupcolumn.n) and pileupcolumn.n > 1:  # homozygous indels.
-                indel_1 = {str(pileupcolumn.pos):
-                               (pileupcolumn.get_query_sequences(add_indels=True))}
-                indels.update(indel_1)
-
-            elif indel_count >= 0.5 * pileupcolumn.n and pileupcolumn.n > 1:  # heterozygous indels.
-                indel_2 = {str(pileupcolumn.pos):
-                               (pileupcolumn.get_query_sequences(add_indels=True))}
-                indels.update(indel_2)
-
-            elif (indel_count > 0):  # spontaneous indels.
-                indel_3 = {str(pileupcolumn.pos):
-                               (pileupcolumn.get_query_sequences(add_indels=True))}
-                indels.update(indel_3)
-
-    return indels
 
 
 def add_window_observation(window, windows,
@@ -249,7 +219,8 @@ def create_windows(bamlist, indel_dict, fastdata, windowcapacity, start, end):
 
 def get_query_sequences(pileupcolumn, bam_out,
                         use_indels=True,
-                        do_not_use_indels_on_error=True):
+                        do_not_use_indels_on_error=True,
+                        **kwargs):
 
     """
     Given a pysam.PileupColumn instance, it updates the bam_out
@@ -280,51 +251,73 @@ def get_query_sequences(pileupcolumn, bam_out,
     errors = 0
 
     # add the reference position and the number
-    # of reads that correspond to this position
     temp.append(pileupcolumn.reference_pos)
-    temp.append(pileupcolumn.n)
 
-    try:
-        # append bases
-        temp.append(pileupcolumn.get_query_sequences(add_indels=use_indels))
-        bam_out.append(temp)
-    except Exception as e:
+    # if the count is zero then we consult the reference
+    # at this position if we have a reference file
+    if pileupcolumn.n == 0 and "fastadata" in kwargs:
 
-        # try a fall out extra step only if it makes sense
-        if do_not_use_indels_on_error and use_indels:
-            try:
+      # is this correct? 1 read only
+      temp.append(1)
 
-                # appending bases
-                temp.append(pileupcolumn.get_query_sequences(add_indels=False))
+      # plus 1 since bam is zero-bsed and FASTA is 1 based
+      tmp.append([kwargs["fastadata"][pileupcolumn.reference_pos + 1]])
+    elif pileupcolumn.n == 0:
+      # we cannot do anything log the error and return
+      logging.error("At position: {0} read \
+                    count is zero and cannot use ref file.".format(pileupcolumn.reference_pos))
+      return bam_out, 0, 1
+    else:
+      # we have reads  pileupcolumn.n != 0
 
-                # flag to show indels not assessed.
-                # TODO: Do we really need that?
-                temp.extend("*")
-                bam_out.append(temp)
+      # get the read qualities for the column
+      quality = pileupcolumn.get_query_qualities()
+      quality_threshold = kwargs.get("quality_theshold", None)
+      try:
+          # append bases only if the quality of the read
+          # satisfies our threshold
 
-                # once in here we always adjust
-                adjusted += 1
-            except:
-                errors += 1
-                if len(bam_out) != 0:
-                    logging.error("Previous position was: {0}".format(bam_out[len(bam_out) - 1][0]))
-                else:
-                    logging.error("At the startig position")
-                #temp.append(["ERROR"])
-                #bam_out.append(temp)
-        else:
-            errors += 1
+          query_sequences = pileupcolumn.get_query_sequences(add_indels=use_indels)
 
-            # we have an error we should note
-            logging.error("At ")
+          if quality_threshold:
+            filtered_bases = [ query_sequences[i] for i, q in enumerate(quality)
+                              if q >= quality_threshold]
 
-            if len(bam_out) != 0:
-                logging.error("Previous position was: {0}".format(bam_out[len(bam_out)-1][0]))
-            else:
-                logging.error("At the startig position")
+            temp.append(filtered_bases)
+          else:
+            temp.append(query_sequences)
+          bam_out.append(temp)
+      except Exception as e:
 
-            #temp.append(["ERROR"])
-            #bam_out.append(temp)
+          # try a fall out extra step only if it makes sense
+          if do_not_use_indels_on_error and use_indels:
+              try:
+
+                  query_sequences = pileupcolumn.get_query_sequences(add_indels=False)
+
+                  if quality_threshold:
+                     filtered_bases = [ query_sequences[i] for i, q in enumerate(quality)
+                                       if q >= quality_threshold]
+                     temp.append(filtered_bases)
+                  else:
+                    temp.append(query_sequences)
+
+                  # flag to show indels not assessed.
+                  # TODO: Do we really need that?
+                  temp.extend("*")
+                  bam_out.append(temp)
+
+                  # once in here we always adjust
+                  adjusted += 1
+              except:
+                  errors += 1
+                  logging.error("An error occured at position {0} whilst \
+                                reading query sequences.".format(pileupcolumn.reference_pos))
+          else:
+              errors += 1
+              logging.error("An error occured at position {0} whilst \
+                            reading query sequences.".format(pileupcolumn.reference_pos))
+
 
     return bam_out, adjusted, errors
 
@@ -401,7 +394,8 @@ def common_bases(bamdata, fastadata):
                     # not into the list as a separate list.
                     x.extend(common_count[0][0])
         except Exception as e:
-            raise Error("An error occurred whilst extracting common_bases")
+            raise Error("An error occurred whilst extracting \
+                        common_bases {0}".format(str(e)))
 
 
 def _get_insertions_and_deletions_from_indel(indel, insertions, deletions):
