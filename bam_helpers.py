@@ -281,14 +281,19 @@ def get_query_sequences(pileupcolumn, bam_out,
 
           query_sequences = pileupcolumn.get_query_sequences(add_indels=use_indels)
 
-          if quality_threshold:
-            filtered_bases = [ query_sequences[i] for i, q in enumerate(quality)
-                              if q >= quality_threshold]
-
-            temp.append(filtered_bases)
+          if len(query_sequences) != len(quality):
+            logging.error("len(query_sequences) not equal to len(quality). pysam error?")
           else:
-            temp.append(query_sequences)
-          bam_out.append(temp)
+
+            if quality_threshold:
+              filtered_bases = [ query_sequences[i] for i, q in enumerate(quality)
+                                if q >= quality_threshold]
+
+
+              temp.append(filtered_bases)
+            else:
+              temp.append(query_sequences)
+            bam_out.append(temp)
       except Exception as e:
 
           # try a fall out extra step only if it makes sense
@@ -297,20 +302,24 @@ def get_query_sequences(pileupcolumn, bam_out,
 
                   query_sequences = pileupcolumn.get_query_sequences(add_indels=False)
 
-                  if quality_threshold:
-                     filtered_bases = [ query_sequences[i] for i, q in enumerate(quality)
-                                       if q >= quality_threshold]
-                     temp.append(filtered_bases)
+                  if len(query_sequences) != len(quality):
+                    logging.error("len(query_sequences) not equal to len(quality). pysam error?")
                   else:
-                    temp.append(query_sequences)
 
-                  # flag to show indels not assessed.
-                  # TODO: Do we really need that?
-                  temp.extend("*")
-                  bam_out.append(temp)
+                    if quality_threshold:
+                       filtered_bases = [ query_sequences[i] for i, q in enumerate(quality)
+                                         if q >= quality_threshold]
+                       temp.append(filtered_bases)
+                    else:
+                      temp.append(query_sequences)
 
-                  # once in here we always adjust
-                  adjusted += 1
+                    # flag to show indels not assessed.
+                    # TODO: Do we really need that?
+                    temp.extend("*")
+                    bam_out.append(temp)
+
+                    # once in here we always adjust
+                    adjusted += 1
               except:
                   errors += 1
                   logging.error("An error occured at position {0} whilst \
