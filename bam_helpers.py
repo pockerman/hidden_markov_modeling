@@ -5,10 +5,11 @@ import math
 import pysam
 import logging
 from collections import Counter
-from helpers import Window, Observation
+from helpers import Window, Observation, DUMMY_ID
 from exceptions import FullWindowException
 from exceptions import Error
 
+DUMMY_BASE = "*"
 
 def extract_windows(chromosome, ref_filename, test_filename, **args):
 
@@ -66,7 +67,9 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
                                           fastdata=ref_list,
                                           windowcapacity=windowcapacity,
                                           start=start_idx,
-                                          end=end_idx)
+                                          end=end_idx,
+                                          fill_missing_window_data=args.get("fill_missing_window_data", False),
+                                          fill_missing_window_data_factor=args.get("fill_missing_window_data_factor",0))
 
                 return windows
             except Exception as e:
@@ -124,7 +127,8 @@ def add_window_observation(window, windows,
     return window
 
 
-def create_windows(bamlist, indel_dict, fastdata, windowcapacity, start, end):
+def create_windows(bamlist, indel_dict, fastdata,
+                   windowcapacity, start, end, **kwargs):
 
     """
     Arrange the given bamlist into windows of size windowcapacity.
@@ -165,7 +169,8 @@ def create_windows(bamlist, indel_dict, fastdata, windowcapacity, start, end):
                 # yes it is...nice add it to the window
                 # and update the observation
                 window = add_window_observation(window=window, windows=windows,
-                                                observation=observation, windowcapacity=windowcapacity)
+                                                observation=observation,
+                                                windowcapacity=windowcapacity)
 
                 previous_observation = observation
             else:
@@ -178,7 +183,8 @@ def create_windows(bamlist, indel_dict, fastdata, windowcapacity, start, end):
                 # fill in the missing info from the
                 # reference file
                 window_gaps = _get_missing_gap_info(start=int(previous_observation.position)+1,
-                                                    end=int(observation.position)-1, fastdata=fastdata)
+                                                    end=int(observation.position)-1,
+                                                    fastdata=fastdata)
 
                 # after getting the missing info we try to add it
                 # to the window. we may have accumulated so much info that
@@ -211,8 +217,17 @@ def create_windows(bamlist, indel_dict, fastdata, windowcapacity, start, end):
                                             windowcapacity=windowcapacity)
             previous_observation = observation
 
-    # catch also the last window
+    # catch also the last window. The last
+    # window may not be using all its capacity
+    # as this depends on the partitioning. Optionally
+    # we fill in the missing data if that was requested
     if len(window) != window.capacity():
+      if kwargs.get("fill_missing_window_data", False):
+        while window.has_capacity():
+          window.add(observation=[DUMMY_ID,
+                                  kwargs["fill_missing_window_data_factor"],
+                                  [DUMMY_BASE]])
+
         windows.append(window)
 
     return windows
@@ -258,8 +273,8 @@ def get_query_sequences(pileupcolumn, bam_out,
     # at this position if we have a reference file
     if pileupcolumn.n == 0 and "fastadata" in kwargs:
 
-      # is this correct? 1 read only
-      temp.append(1)
+      # when we consult the reference no RD
+      temp.append(0)
 
       # plus 1 since bam is zero-bsed and FASTA is 1 based
       tmp.append([kwargs["fastadata"][pileupcolumn.reference_pos + 1]])
