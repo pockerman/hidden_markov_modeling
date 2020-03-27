@@ -53,6 +53,28 @@ def preprocess(windows, **config):
             normality_check(windows=windows, test_name=name)
     return windows
 
+
+def cluster(data, nclusters, method, **kwargs):
+
+  """
+  A simple wrapper to various clustering approaches.
+  Cluster the given data into nclusters by using the
+  specified method. Depending on the specified method
+  different packages may be required and different
+  argumens are expected in the kwargs dict.
+  """
+
+  if method == "kmeans":
+
+    from sklearn.cluster import KMeans
+    clusterer = KMeans(n_clusters=nclusters)
+    clusterer.fit(data)
+    return clusterer
+
+  raise Error("Invalid clustering method: " + method )
+
+
+
 def remove_outliers(windows, criteria):
     """
     Remove the outlier windows from the list of the
