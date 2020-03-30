@@ -262,14 +262,28 @@ class Window(object):
 
         # accumulate RD as an array and use numpy
         rd_data = [item.read_depth for item in self._observations]
-        mean = np.mean(rd_data)
-        var = np.var(rd_data)
-        median = np.median(rd_data)
-        min = np.amin(rd_data)
-        max = np.amax(rd_data)
-        return {"mean": mean, "var": var,
-                "median": median, "min": min,
-                "max": max}
+
+        if statistics == "mean":
+          return np.mean(rd_data)
+        elif statistics == "var":
+          return np.var(rd_data)
+        elif statistics == "median":
+          return np.median(rd_data)
+        elif statistics == "min":
+          return np.amin(rd_data)
+        elif statistics == "max":
+          return np.amax(rd_data)
+        elif statistics == "all":
+
+          mean = np.mean(rd_data)
+          var = np.var(rd_data)
+          median = np.median(rd_data)
+          min = np.amin(rd_data)
+          max = np.amax(rd_data)
+          return {"mean": mean, "var": var,
+                  "median": median, "min": min,
+                  "max": max}
+
 
     def get_rd_observations(self):
         """
