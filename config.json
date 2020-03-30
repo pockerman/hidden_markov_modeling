@@ -21,10 +21,12 @@
   "chromosome": "chr1",
   "min_rd": 1,
   "max_rd": 2,
-  "save_results_file": "hmm.txt",
+  "save_": "hmm.txt",
   "HMM": {
-    "initial_transitions_p": "uniform",
-    "train_solver": "BaumWelch"
+    "name":"HMM_Model",
+    "train_solver": "baum-welch",
+    "save_model":true,
+    "save_hmm_filename":"HMM_Model.json"
   },
   "logger_file":"tuf.log",
   "logger_level": "INFO",

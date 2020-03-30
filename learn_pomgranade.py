@@ -100,7 +100,8 @@ def main():
     dist_clust_2 = fit_distribution(data=cluster2)
 
     # create the HMM
-    model = HiddenMarkovModel(name="HMM_Model", start=None, end=None)
+    model = HiddenMarkovModel(name=configuration["HMM"]["name"],
+                              start=None, end=None)
 
     # the states of the model.
     # We also need to specify the the probability
@@ -132,15 +133,18 @@ def main():
     # finally we need to bake
     model.bake()
 
-
-    #sns.distplot(sns_windows)
-    #plt.show()
-
     # fit the model
     model, history = model.fit(sequences=windows,
                                min_iterations=10,
-                               algorithm='baum-welch',
+                               algorithm=configuration["HMM"]["train_solver"],
                                return_history=True)
+
+    # save the model
+    if configuration["HMM"]["save_model"]:
+      json_str = model.to_json()
+      import json
+      with open(configuration["HMM"]["save_hmm_filename"], 'w') as jsonfile:
+        json.dump(json_str, jsonfile)
 
     #model.bake()
 
@@ -150,8 +154,8 @@ def main():
     #print("History epoch: ", history.learning_rate)
 
     # plot the model
-    plt.figure( figsize=(10,6) )
-    model.plot()
+    #plt.figure( figsize=(10,6) )
+    #model.plot()
 
 
 if __name__ == '__main__':
