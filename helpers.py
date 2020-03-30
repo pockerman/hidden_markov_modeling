@@ -1,6 +1,8 @@
 import json
 import numpy as np
 import logging
+import json
+
 from collections import namedtuple
 from exceptions import FullWindowException
 from exceptions import Error
@@ -55,8 +57,116 @@ def flat_windows(windows, prop="RD"):
 
   return win
 
+def windows_rd_statistics(windows, statistic="all"):
+
+  rd_observations = []
+
+  for window in windows:
+    rd_observations.extend(windo.get_rd_observations())
+
+  if statistic == "mean":
+    return np.mean(rd_observations)
+  elif statistic == "var":
+    return np.var(rd_observations)
+  elif statistic == "median":
+    return np.median(rd_observations)
+  elif statistic == "all":
+    mu = np.mean(rd_observations)
+    var = np.var(rd_observations)
+    median = np.median(rd_observations)
+    return mu, var, median
+  else:
+    raise Error("Unknown statistic:{0}".format(statistic))
+
+
+def windows_to_json(windows):
+  """
+  Generate a json formatted string
+  representing the windows
+  Parameters
+  ----------
+  windows : list
+    DESCRIPTION. A list of Window instances
+
+  Returns
+  -------
+  string
+
+  """
+
+  str_map = {}
+
+  for window in windows:
+    str_map[window.get_id()] = window.to_json()
+
+  return json.dumps(str_map)
+
+
+def windows_from_json(jsonmap):
+  """
+
+
+  Parameters
+  ----------
+  jsonmap : TYPE
+    DESCRIPTION.
+
+  Returns
+  -------
+  list of Window instances
+
+  """
+
+  windows = []
+
+  for idx in jsonmap.keys():
+
+    window_str = jsonmap[idx]
+    window_data = json.loads(window_str)
+    window = Window(idx=window_data["id"],
+                    capacity=window_data["capacity"])
+
+    for obs in window_data["observations"]:
+      obsdata = json.loads(obs)
+      observaion =observation_from_json(jsonmap=obsdata)
+      window.add(observation=observaion)
+
+    windows.append(window)
+  return windows
+
 
 Observation = namedtuple("Observation", ["position", "read_depth", "base"])
+
+def observation_to_json(observation):
+  """
+  Returns a json formatted string for the
+  given observation
+
+  Parameters
+  ----------
+  observation : Observation
+    DESCRIPTION.
+
+  Returns
+  -------
+  json_str : string
+
+  """
+
+  json_str = {"position":observation.position,
+              "read_depth": observation.read_depth,
+              "base": observation.base}
+
+  json_str = json.dumps(json_str)
+  return json_str
+
+
+def observation_from_json(jsonmap):
+
+  observation = Observation(position=jsonmap["position"],
+                            read_depth=jsonmap["read_depth"],
+                            base=jsonmap["base"])
+  return observation
 
 
 class WindowIterator(object):
@@ -87,7 +197,10 @@ class Window(object):
     """
     Class representing a window for arranging of the data
     """
-    def __init__(self, capacity):
+    def __init__(self, idx, capacity):
+
+        # the id of the window
+        self._id = idx
 
         # maximum capacity of the window
         self._capacity = capacity
@@ -142,12 +255,13 @@ class Window(object):
         """
         valid_statistics = ["all",  "mean", "var",
                             "median", "min", "max"]
+
         if statistics not in valid_statistics:
             raise Error("Invalid statistsics: '{0}'"
                         " not in {1}".format(statistics, valid_statistics))
 
         # accumulate RD as an array and use numpy
-        rd_data = [item[1] for item in self._observations]
+        rd_data = [item.read_depth for item in self._observations]
         mean = np.mean(rd_data)
         var = np.var(rd_data)
         median = np.median(rd_data)
@@ -163,7 +277,7 @@ class Window(object):
         contained in the window
         :return:
         """
-        rd_data = [item[1] for item in self._observations]
+        rd_data = [item.read_depth for item in self._observations]
         return rd_data
 
     def get_gc_count(self):
@@ -214,6 +328,19 @@ class Window(object):
                 previous = pos
         return False
 
+
+    def get_id(self):
+      """
+      Returns the zero based id of the window
+
+
+      Returns
+      -------
+      self._id
+
+      """
+      return self._id
+
     def insert_at(self, pos, data):
         """
         Insert the data at the specified position
@@ -223,6 +350,22 @@ class Window(object):
         :return:
         """
         self._observations.insert(pos, data)
+
+    def to_json(self):
+      """
+      Returns a json formatted string represneting
+      the window
+      """
+      json_str = {"id":self._id,
+                  "capacity":self._capacity,}
+
+      observations = []
+      for obs in self._observations:
+        obs_json = observation_to_json(observation=obs)
+        observations.append(obs_json)
+
+      json_str["observations"] = observations
+      return json.dumps(json_str)
 
     def __len__(self):
         return len(self._observations)

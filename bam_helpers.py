@@ -121,7 +121,8 @@ def add_window_observation(window, windows,
         window.add(observation=observation)
     else:
         windows.append(window)
-        window = Window(capacity=windowcapacity)
+        window = Window(idx=window.get_id()+1,
+                        capacity=windowcapacity)
         window.add(observation=observation)
 
     return window
@@ -151,7 +152,8 @@ def create_windows(bamlist, indel_dict, fastdata,
     # the returned list of windows
     windows = []
 
-    window = Window(capacity=windowcapacity)
+    idstart = 0
+    window = Window(idx=idstart, capacity=windowcapacity)
     previous_observation = None
 
     for idx, item in enumerate(bamlist):
@@ -222,13 +224,15 @@ def create_windows(bamlist, indel_dict, fastdata,
     # as this depends on the partitioning. Optionally
     # we fill in the missing data if that was requested
     if len(window) != window.capacity():
+
+      # fill in missing data if this is requested
       if kwargs.get("fill_missing_window_data", False):
         while window.has_capacity():
-          window.add(observation=[DUMMY_ID,
-                                  kwargs["fill_missing_window_data_factor"],
-                                  [DUMMY_BASE]])
+          window.add(observation=Observation(position=DUMMY_ID,
+                                  read_depth=kwargs["fill_missing_window_data_factor"],
+                                  base= [DUMMY_BASE]))
 
-        windows.append(window)
+      windows.append(window)
 
     return windows
 

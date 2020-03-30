@@ -6,6 +6,7 @@ import numpy as np
 
 from helpers import read_configuration_file
 from helpers import flat_windows
+from helpers import windows_to_json
 from preprocess_utils import cluster
 from preprocess_utils import fit_distribution
 from bam_helpers import extract_windows
@@ -36,6 +37,7 @@ def load_data(configuration):
 
     ref_filename = configuration["reference_file"]["name"]
     test_filename = configuration["test_file"]["filename"]
+
     # extract the windows for the WGA treated file
     wga_windows = extract_windows(chromosome=chromosome,
                                   ref_filename=ref_filename,
@@ -68,6 +70,14 @@ def main():
 
     # load the windowed data
     wga_windows = load_data(configuration=configuration)
+
+    # if we want to save the windows then do so
+    if configuration["save_windows"]:
+      import json
+      with open(configuration["windows_filename"], 'w') as jsonfile:
+        json_str = windows_to_json(wga_windows)
+        json.dump(json_str, jsonfile)
+
 
     windows = flat_windows(wga_windows)
 
