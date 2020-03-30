@@ -7,6 +7,7 @@ import scipy.stats as st
 
 from exceptions import Error
 from helpers import windows_rd_statistics
+from helpers import list_dict_to_list
 
 VALID_DISTS = ['gaussian', 'uniform', 'poisson']
 
@@ -115,6 +116,7 @@ def windows_tails_p(zscores, l):
   for i, zscore in enumerate(zscores):
 
     if len(local_probs_up) < l:
+
       prob = st.norm.cdf(zscore)
       local_probs_up.append({"idx":i,
                              "prob":prob})
@@ -162,9 +164,30 @@ class ZScoreWindowCluster(object):
 
 
   def __init__(self):
-    pass
+    self._score = 0
 
   def __call__(self, window, upper_ps, lower_ps):
+
+    window_upper_p, upper_vals = find_prob(idx=window.get_idx(),
+                                 probabilities=upper_ps)
+
+    window_lower_p, lower_vals = find_prob(idx=window.get_idx(),
+                               probabilities=lower_ps)
+
+
+  def find_prob(idx, probabilities):
+
+    for item in probabilities:
+      for subitem in item:
+        if subitem["idx"] == idx:
+          return subitem["prob"], list_dict_to_list(list_dict_vals=item,
+                                                    property_name="prob")
+
+    raise Error("For window {0} probability not found".format(idx))
+
+
+
+
 
 
 

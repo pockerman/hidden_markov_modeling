@@ -20,6 +20,16 @@ def read_configuration_file(config_file):
         return configuration
 
 
+def list_dict_to_list(list_dict_vals, property_name):
+
+  result = []
+
+  for item in list_dict_vals:
+    result.append(item[property_name])
+
+  return result
+
+
 def set_up_logger(configuration):
     # set up the logger
     logger_file = configuration.get("logger_file", None)
@@ -62,7 +72,7 @@ def windows_rd_statistics(windows, statistic="all"):
   rd_observations = []
 
   for window in windows:
-    rd_observations.extend(windo.get_rd_observations())
+    rd_observations.extend(window.get_rd_observations())
 
   if statistic == "mean":
     return np.mean(rd_observations)
