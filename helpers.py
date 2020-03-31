@@ -2,6 +2,7 @@ import json
 import numpy as np
 import logging
 import json
+from enum import Enum
 
 from collections import namedtuple
 from exceptions import FullWindowException
@@ -20,12 +21,30 @@ def read_configuration_file(config_file):
         return configuration
 
 
-def list_dict_to_list(list_dict_vals, property_name):
+def listify_dicts_property(list_dict_vals, property_name):
+  """
+  given a list of dictionaries return a list with the
+  values of the property with name property_name
+
+  Parameters
+  ----------
+  list_dict_vals : list of dictioanries
+
+  property_name : str
+    The property name to look for
+
+  Returns
+  -------
+  result : list
+
+
+  """
 
   result = []
 
   for item in list_dict_vals:
-    result.append(item[property_name])
+    if item.get(property_name):
+      result.append(item[property_name])
 
   return result
 
@@ -86,7 +105,7 @@ def windows_rd_statistics(windows, statistic="all"):
     median = np.median(rd_observations)
     return mu, var, median
   else:
-    raise Error("Unknown statistic:{0}".format(statistic))
+    raise Error("Unknown statistic: %s" % statistic)
 
 
 def windows_to_json(windows):
@@ -179,6 +198,13 @@ def observation_from_json(jsonmap):
   return observation
 
 
+class WindowState(Enum):
+  DELETE = 0
+  NORMAL = 1
+  INSERT = 2
+  TUF = 3
+
+
 class WindowIterator(object):
 
     """
@@ -221,6 +247,9 @@ class Window(object):
 
         # the total number of insertions/deletions
         self._net_indels = 0
+
+        # the state of the window
+        self._state = None
 
     def add(self, observation):
 
@@ -294,7 +323,6 @@ class Window(object):
                   "median": median, "min": min,
                   "max": max}
 
-
     def get_rd_observations(self):
         """
         Returns a list with read depth observations
@@ -357,13 +385,15 @@ class Window(object):
       """
       Returns the zero based id of the window
 
-
       Returns
       -------
       self._id
 
       """
       return self._id
+
+    def set_state(self, state):
+      self._state = state
 
     def insert_at(self, pos, data):
         """
