@@ -107,6 +107,10 @@ def windows_tails_p(zscores, interval_length):
 
   """
 
+  if interval_length > len(zscores):
+    raise Error(("You request an interval length {0} not supported by"+
+                " the total number of windows {1}").format(interval_length, len(zscores)))
+
   local_probs_up = []
   local_probs_low = []
   upper_ps = []
