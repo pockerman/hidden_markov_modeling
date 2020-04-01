@@ -10,6 +10,7 @@ from exceptions import Error
 from helpers import windows_rd_statistics
 from helpers import listify_dicts_property
 from helpers import WindowState
+from helpers import flat_windows
 
 VALID_DISTS = ['gaussian', 'uniform', 'poisson']
 
@@ -18,14 +19,10 @@ def fit_distribution(data, dist_name="gaussian", **kwargs):
 
     """
     Fits a distribution within the given dataset
-    :param data:
-    :param dist_name:
-    :param kwargs:
-    :return: appropriate distribution object
     """
-
     if dist_name not in VALID_DISTS:
-        raise Error("Invalid distribution name. Name {0} not in {1}".format(dist_name, VALID_DISTS))
+        raise Error("Invalid distribution name. \
+                    Name {0} not in {1}".format(dist_name, VALID_DISTS))
 
     if dist_name == 'gaussian':
         dist = NormalDistribution.from_samples(data)
@@ -51,12 +48,14 @@ def cluster(data, nclusters, method, **kwargs):
 
     from sklearn.cluster import KMeans
     clusterer = KMeans(n_clusters=nclusters)
-    clusterer.fit(data)
+    windows = flat_windows(data)
+    clusterer.fit(windows)
     return clusterer
   elif "zscore":
+    selector = ZScoreWindowCluster(cutoff = kwargs["cutoff"])
     return z_score_window_clusterer(windows=data,
                                     n_consecutive_windows=kwargs["n_consecutive_windows"],
-                                    selector=kwargs["selector"])
+                                    selector=selector)
 
 
   raise Error("Invalid clustering method: " + method )
@@ -84,7 +83,7 @@ def calculate_windows_zscore(windows):
   z_scores = []
 
   for window in windows:
-    zscore = (window.get_rd_stats(statistics="mean") - mu)/var
+    zscore = (window.get_rd_stats(statistics="mean") - mu)/np.sqrt(var)
     z_scores.append(zscore)
 
   return z_scores
@@ -92,7 +91,7 @@ def calculate_windows_zscore(windows):
 def windows_tails_p(zscores, interval_length):
   """
   Calculate windows upper and lower tail probabilities arranged
-  into window intervals of length l
+  into window intervals of length interval_length
 
   Parameters
   ----------
@@ -113,15 +112,33 @@ def windows_tails_p(zscores, interval_length):
   upper_ps = []
   lower_ps = []
 
+  def get_upper_lower_prob_from_score(score):
+
+      # calculate the probability density
+      # up to the zscore point
+      # i.e caluclate P(Z <= z_i)
+      prob = st.norm.cdf(score)
+
+      # p(Z > z_i) = 1.0 - p(Z <= z_i)
+      return 1.0 - prob, prob
+
+
   if interval_length == 1:
     for i, zscore in enumerate(zscores):
 
+      # calculate the probability density
+      # up to the zscore point
+      # i.e caluclate P(Z <= z_i)
       prob = st.norm.cdf(zscore)
+
+      up, low = get_upper_lower_prob_from_score(score=zscore)
+
+      # p(Z > z_i) = 1.0 - p(Z <= z_i)
       local_probs_up.append({"idx":i,
-                             "prob":prob})
+                             "prob": up})
 
       local_probs_low.append({"idx":i,
-                              "prob":1.0-prob})
+                              "prob": low})
 
       upper_ps.append(local_probs_up)
       lower_ps.append(local_probs_low)
@@ -138,12 +155,14 @@ def windows_tails_p(zscores, interval_length):
   while cont:
 
     while start != finish:
-      prob = st.norm.cdf(zscores[start])
+
+      up, low = get_upper_lower_prob_from_score(score=zscores[start])
+
       local_probs_up.append({"idx":start,
-                             "prob":prob})
+                             "prob":up})
 
       local_probs_low.append({"idx":start,
-                              "prob":1.0-prob})
+                              "prob":low})
       start += 1
     upper_ps.append(local_probs_up)
     lower_ps.append(local_probs_low)
@@ -159,12 +178,13 @@ def windows_tails_p(zscores, interval_length):
   # pick up what is left
   while start != end:
 
-    prob = st.norm.cdf(zscores[start])
+    up, low = get_upper_lower_prob_from_score(score=zscores[start])
+
     local_probs_up.append({"idx":start,
-                             "prob":prob})
+                           "prob":up})
 
     local_probs_low.append({"idx":start,
-                              "prob":1.0-prob})
+                            "prob":low})
     start += 1
 
   if local_probs_low and local_probs_up:
@@ -209,14 +229,26 @@ class ZScoreWindowCluster(object):
     window_lower_p, lower_vals = self.find_prob(widx=window.get_id(),
                                                 probabilities=lower_ps)
 
+    # maximum upper p-value
     max_upper = np.amax(upper_vals)
+
+    # maximum lower p-value
     max_lower = np.amax(lower_vals)
 
+    # check if the p-value is such that
+    # we reject the H0: NORMAL state and
+    # Set the window to INSERT
     if max_upper < self._cutoff:
       window.set_state(state=WindowState.INSERT)
     elif max_lower < self._cutoff:
+
+      # check if the p-value is such that
+      # we reject the H0: NORMAL state and
+      # Set the window to DELETE
       window.set_state(state=WindowState.DELETE)
     else:
+
+      # the H0: NORMAL state was not rejected
       window.set_state(state=WindowState.NORMAL)
 
   def find_prob(self, widx, probabilities):
