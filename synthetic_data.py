@@ -23,6 +23,7 @@ from helpers import add_window_observation
 from helpers import DUMMY_ID
 from helpers import windows_to_json
 from helpers import flat_windows
+from exceptions import Error
 from bam_helpers import DUMMY_BASE
 from preprocess_utils import cluster
 from preprocess_utils import fit_distribution
@@ -31,6 +32,7 @@ from preprocess_utils import fit_distribution
 def create_synthetic_data(configuration):
 
   bases = ['A', 'T', 'C', 'G']
+  flip = ["YES", "NO"]
   states = {"normal_rd": configuration["normal_rd"],
             "delete_rd": configuration["delete_rd"],
             "insert_rd": configuration["insert_rd"]}
@@ -40,15 +42,32 @@ def create_synthetic_data(configuration):
   synthetic_data = []
   state_name = np.random.choice(list(states.keys()))
 
+  counter = 0
   for i in range(seq_size):
 
-    if i % configuration["swap_state_freq"] == 0:
+    if np.random.choice(flip) == 'YES' and counter >= 10:
       state_name = np.random.choice(list(states.keys()))
       synthetic_data.append(states[state_name])
+      counter += 1
+    elif counter == configuration["swap_state_freq"]:
+
+      state_name = np.random.choice(list(states.keys()))
+      synthetic_data.append(states[state_name])
+      counter += 1
+
     else:
       synthetic_data.append(states[state_name])
+      counter += 1
 
-# let's create the windows
+
+  if len(synthetic_data) != seq_size:
+    raise Error("Invalid size of synthetic \
+                data {0} not equal to {1}".format(len(synthetic_data), seq_size))
+
+
+  print(synthetic_data)
+
+  # let's create the windows
   # the returned list of windows
   windows = []
 
@@ -76,7 +95,7 @@ def create_synthetic_data(configuration):
                                   read_depth=configuration["fill_missing_window_data_factor"],
                                   base= [DUMMY_BASE]))
 
-      windows.append(window)
+  windows.append(window)
 
   return windows
 
@@ -99,16 +118,31 @@ def main():
 
     windows = create_synthetic_data(configuration=configuration)
 
+    L = len(windows)
+
     for win_interval_length in configuration["repeated_sizes"]:
 
+      print("Window interval length: ", win_interval_length)
 
-      cutoff = configuration["clusterer"]["fpr"]
+      n = win_interval_length
+      cutoff = (n*configuration["clusterer"]["fpr"]/L)**(1/n)
+
+      print("cutoff used: ", cutoff)
 
       # cluster the windows and assing them state
       windows = cluster(data=windows, nclusters=3,
                         method="zscore",
                         **{'n_consecutive_windows': win_interval_length,
                            "cutoff":cutoff})
+
+
+      print("Number of windows: ", len(windows))
+
+      #for window in windows:
+        #print("Window id: ", window.get_id())
+        #print("Window state: ", window.get_state().name)
+        #print("Window length: ", len(window))
+
       # if we want to save the windows then do so
       if configuration["save_windows"]:
         import json
