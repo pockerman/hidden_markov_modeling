@@ -12,10 +12,10 @@ from helpers import listify_dicts_property
 from helpers import WindowState
 from helpers import flat_windows
 
-VALID_DISTS = ['gaussian', 'uniform', 'poisson']
+VALID_DISTS = ['normal', 'uniform', 'poisson']
 
 
-def fit_distribution(data, dist_name="gaussian", **kwargs):
+def fit_distribution(data, dist_name="normal", **kwargs):
 
     """
     Fits a distribution within the given dataset
@@ -24,7 +24,7 @@ def fit_distribution(data, dist_name="gaussian", **kwargs):
         raise Error("Invalid distribution name. \
                     Name {0} not in {1}".format(dist_name, VALID_DISTS))
 
-    if dist_name == 'gaussian':
+    if dist_name == 'normal':
         dist = NormalDistribution.from_samples(data)
         return dist
     elif dist_name == 'uniform':
