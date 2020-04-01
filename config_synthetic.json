@@ -3,13 +3,13 @@
   "delete_rd":0,
   "insert_rd":3,
   "window_size":100,
-  "sequence_size":1000000,
+  "sequence_size":1000,
   "swap_state_freq":15,
   "fill_missing_window_data":true,
   "fill_missing_window_data_factor":0,
   "quality_theshold":20,
-  "repeated_sizes":[1,2,3,4,5],
-  "save_windows":true,
+  "repeated_sizes":[1,5, 10],
+  "save_windows":false,
   "windows_filename":"hmm_windows",
   "clusterer":{
     "name":"zscore",
@@ -18,8 +18,13 @@
   "HMM": {
     "name":"HMM_Model",
     "train_solver": "baum-welch",
-    "save_model":true,
+    "save_model":false,
     "save_hmm_filename":"HMM_Model"
+  },
+  "fit_states_dist":{
+    "INSERT":"normal",
+    "DELETE":"normal",
+    "NORMAL":"normal"
   },
   "logger_file":"tuf.log",
   "logger_level": "INFO"

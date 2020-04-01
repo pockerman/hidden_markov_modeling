@@ -165,9 +165,12 @@ def main():
           insert_state.extend(window.get_rd_observations())
 
 
-      normal_dist = fit_distribution(data=normal_state)
-      delete_dist = fit_distribution(data=delete_state)
-      insert_dist = fit_distribution(data=insert_state)
+      normal_dist = fit_distribution(data=normal_state,
+                                     dist_name=configuration["fit_states_dist"]["NORMAL"])
+      delete_dist = fit_distribution(data=delete_state,
+                                     dist_name=configuration["fit_states_dist"]["DELETE"])
+      insert_dist = fit_distribution(data=insert_state,
+                                     dist_name=configuration["fit_states_dist"]["INSERT"])
 
       # create the HMM
       model = HiddenMarkovModel(name=configuration["HMM"]["name"],
