@@ -10,7 +10,7 @@
   "quality_theshold":20,
   "repeated_sizes":[1,2,3,4,5],
   "save_windows":true,
-  "windows_filename":"hmm_windows.json",
+  "windows_filename":"hmm_windows",
   "clusterer":{
     "name":"zscore",
     "fpr":0.05
@@ -19,7 +19,7 @@
     "name":"HMM_Model",
     "train_solver": "baum-welch",
     "save_model":true,
-    "save_hmm_filename":"HMM_Model.json"
+    "save_hmm_filename":"HMM_Model"
   },
   "logger_file":"tuf.log",
   "logger_level": "INFO"

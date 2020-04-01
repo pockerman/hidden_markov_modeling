@@ -112,7 +112,8 @@ def main():
       # if we want to save the windows then do so
       if configuration["save_windows"]:
         import json
-        with open(configuration["windows_filename"], 'w') as jsonfile:
+        with open(configuration["windows_filename"]+
+                  "_"+str(win_interval_length)+".json", 'w') as jsonfile:
           json_str = windows_to_json(windows)
           json.dump(json_str, jsonfile)
 
@@ -180,7 +181,8 @@ def main():
       if configuration["HMM"]["save_model"]:
         json_str = model.to_json()
         import json
-        with open(configuration["HMM"]["save_hmm_filename"], 'w') as jsonfile:
+        with open(configuration["HMM"]["save_hmm_filename"]+
+                  "_"+str(win_interval_length)+".json", 'w') as jsonfile:
           json.dump(json_str, jsonfile)
 
 
