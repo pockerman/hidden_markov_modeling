@@ -6,6 +6,7 @@ import pysam
 import logging
 from collections import Counter
 from helpers import Window, Observation, DUMMY_ID
+from helpers import add_window_observation
 from exceptions import FullWindowException
 from exceptions import Error
 
@@ -104,30 +105,6 @@ def bam_strip(chromosome, file, start, stop, **kwargs):
     return bam_out, errors, adjusted
 
 
-def add_window_observation(window, windows,
-                           observation, windowcapacity):
-    """
-    Add a new observation to the given window. If the
-    window has reached its capacity a new window
-    is created and then the observation is appened
-    :param window: The window instance to add the observation
-    :param windows: The list of windows where the window is cached
-    :param observation: The observation to add in the window
-    :param windowcapacity: The maximum window capacity
-    :return: instance of Window class
-    """
-
-    if window.has_capacity():
-        window.add(observation=observation)
-    else:
-        windows.append(window)
-        window = Window(idx=window.get_id()+1,
-                        capacity=windowcapacity)
-        window.add(observation=observation)
-
-    return window
-
-
 def create_windows(bamlist, indel_dict, fastdata,
                    windowcapacity, start, end, **kwargs):
 
@@ -170,7 +147,8 @@ def create_windows(bamlist, indel_dict, fastdata,
 
                 # yes it is...nice add it to the window
                 # and update the observation
-                window = add_window_observation(window=window, windows=windows,
+                window = add_window_observation(window=window,
+                                                windows=windows,
                                                 observation=observation,
                                                 windowcapacity=windowcapacity)
 

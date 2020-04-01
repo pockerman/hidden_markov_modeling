@@ -198,6 +198,30 @@ def observation_from_json(jsonmap):
   return observation
 
 
+def add_window_observation(window, windows,
+                           observation, windowcapacity):
+    """
+    Add a new observation to the given window. If the
+    window has reached its capacity a new window
+    is created and then the observation is appened
+    :param window: The window instance to add the observation
+    :param windows: The list of windows where the window is cached
+    :param observation: The observation to add in the window
+    :param windowcapacity: The maximum window capacity
+    :return: instance of Window class
+    """
+
+    if window.has_capacity():
+        window.add(observation=observation)
+    else:
+        windows.append(window)
+        window = Window(idx=window.get_id()+1,
+                        capacity=windowcapacity)
+        window.add(observation=observation)
+
+    return window
+
+
 class WindowState(Enum):
   DELETE = 0
   NORMAL = 1
@@ -393,7 +417,31 @@ class Window(object):
       return self._id
 
     def set_state(self, state):
+      """
+      Set the state of the window
+
+      Parameters
+      ----------
+      state : WindowState
+        Enumeration describing the window state
+
+      Returns
+      -------
+      None.
+
+      """
       self._state = state
+
+    def get_state(self):
+      """
+
+
+      Returns the state of the window
+      -------
+      WindowState
+
+      """
+      return self._state
 
     def insert_at(self, pos, data):
         """
@@ -411,6 +459,7 @@ class Window(object):
       the window
       """
       json_str = {"id":self._id,
+                  "state":self._state.name,
                   "capacity":self._capacity,}
 
       observations = []
