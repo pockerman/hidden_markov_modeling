@@ -123,6 +123,7 @@ def windows_tails_p(zscores, interval_length):
       # i.e caluclate P(Z <= z_i)
       prob = st.norm.cdf(score)
 
+
       # p(Z > z_i) = 1.0 - p(Z <= z_i)
       return 1.0 - prob, prob
 
@@ -149,7 +150,6 @@ def windows_tails_p(zscores, interval_length):
       local_probs_up = []
       local_probs_low = []
     return upper_ps, lower_ps
-
 
   start = 0
   finish = interval_length
@@ -195,13 +195,12 @@ def windows_tails_p(zscores, interval_length):
     upper_ps.append(local_probs_up)
     lower_ps.append(local_probs_low)
 
-  #we also need to last ones
   return upper_ps, lower_ps
 
 def z_score_window_clusterer(windows, n_consecutive_windows, selector):
   """
   classify each window according to the given states
-  by computing a Z-score and a cut off quantity
+  by computing a Z-score
   """
 
   zscores = calculate_windows_zscore(windows=windows)
@@ -261,7 +260,7 @@ class ZScoreWindowCluster(object):
       for subitem in item:
         if subitem["idx"] == widx:
           return subitem["prob"], listify_dicts_property(list_dict_vals=item,
-                                                    property_name="prob")
+                                                         property_name="prob")
 
     raise Error("For window %s probability not found" % widx)
 

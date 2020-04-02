@@ -138,10 +138,10 @@ def main():
 
       print("Number of windows: ", len(windows))
 
-      #for window in windows:
-        #print("Window id: ", window.get_id())
-        #print("Window state: ", window.get_state().name)
-        #print("Window length: ", len(window))
+      for window in windows:
+        print("Window id: ", window.get_id())
+        print("Window state: ", window.get_state().name)
+        print("Window length: ", len(window))
 
       # if we want to save the windows then do so
       if configuration["save_windows"]:
