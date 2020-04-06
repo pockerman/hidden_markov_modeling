@@ -12,7 +12,8 @@ from helpers import listify_dicts_property
 from helpers import WindowState
 from helpers import flat_windows
 
-VALID_DISTS = ['normal', 'uniform', 'poisson']
+VALID_DISTS = ['normal', 'uniform', 'poisson',
+               'discrete',]
 
 
 def fit_distribution(data, dist_name="normal", **kwargs):
@@ -22,7 +23,7 @@ def fit_distribution(data, dist_name="normal", **kwargs):
     """
     if dist_name not in VALID_DISTS:
         raise Error("Invalid distribution name. \
-                    Name {0} not in {1}".format(dist_name, VALID_DISTS))
+                    Name '{0}' not in {1}".format(dist_name, VALID_DISTS))
 
     if dist_name == 'normal':
         dist = NormalDistribution.from_samples(data)
@@ -32,6 +33,9 @@ def fit_distribution(data, dist_name="normal", **kwargs):
         return dist
     elif dist_name == 'poisson':
         dist = PoissonDistribution.from_samples(data)
+        return dist
+    elif dist_name == 'discrete':
+        dist = DiscreteDistribution.from_samples(data)
         return dist
 
 def cluster(data, nclusters, method, **kwargs):
@@ -51,14 +55,34 @@ def cluster(data, nclusters, method, **kwargs):
     windows = flat_windows(data)
     clusterer.fit(windows)
     return clusterer
-  elif "zscore":
+  elif method == "zscore":
     selector = ZScoreWindowCluster(cutoff = kwargs["cutoff"])
     return z_score_window_clusterer(windows=data,
                                     n_consecutive_windows=kwargs["n_consecutive_windows"],
                                     selector=selector)
+  elif method == "wmode":
+    return mode_window_clusterer(windows=data,
+                                 normal_rd=kwargs["normal_rd"],
+                                 delete_rd=kwargs["delete_rd"],
+                                 insert_rd=kwargs["insert_rd"])
 
 
   raise Error("Invalid clustering method: " + method )
+
+
+def mode_window_clusterer(windows, normal_rd,
+                          delete_rd, insert_rd):
+
+  for window in windows:
+    mode = window.get_rd_stats(statistics="mode")
+
+    if mode == normal_rd:
+      window.set_state(WindowState.NORMAL)
+    elif mode == delete_rd:
+      window.set_state(WindowState.DELETE)
+    elif mode == insert_rd:
+      window.set_state(WindowState.INSERT)
+  return windows
 
 
 def calculate_windows_zscore(windows):
@@ -123,10 +147,8 @@ def windows_tails_p(zscores, interval_length):
       # i.e caluclate P(Z <= z_i)
       prob = st.norm.cdf(score)
 
-
       # p(Z > z_i) = 1.0 - p(Z <= z_i)
       return 1.0 - prob, prob
-
 
   if interval_length == 1:
     for i, zscore in enumerate(zscores):
@@ -217,7 +239,6 @@ def z_score_window_clusterer(windows, n_consecutive_windows, selector):
 
 
 class ZScoreWindowCluster(object):
-
 
   def __init__(self, cutoff):
     self._cutoff = cutoff
