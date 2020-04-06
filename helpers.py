@@ -3,12 +3,32 @@ import numpy as np
 import logging
 import json
 from enum import Enum
+from scipy import stats
 
 from collections import namedtuple
 from exceptions import FullWindowException
 from exceptions import Error
 
 DUMMY_ID = -1
+
+class HMMCallback(object):
+
+  def __init__(self, callback):
+    self._callback = callback
+    self.model = None
+
+  def on_epoch_end(self, logs):
+    pass
+    #self._callback(logs)
+
+  def on_training_begin(self):
+    pass
+
+  def on_training_end(self, logs):
+    pass
+
+def print_logs_callback(logs):
+  print(logs)
 
 def read_configuration_file(config_file):
     """
@@ -36,7 +56,6 @@ def listify_dicts_property(list_dict_vals, property_name):
   Returns
   -------
   result : list
-
 
   """
 
@@ -86,6 +105,32 @@ def flat_windows(windows, prop="RD"):
 
   return win
 
+def flat_windows_from_state(windows, configuration, as_on_seq):
+
+  """
+  Returns a flattened list of windows by their
+  prop property observations
+  """
+
+  win = []
+
+  for window in windows:
+
+    if not isinstance(window, Window):
+      raise Error("The given window is not an insatnce of Window")
+
+    if window.get_state() == WindowState.NORMAL:
+      value = [configuration["normal_rd"]] if as_on_seq else configuration["normal_rd"]
+      win.append(value)
+    elif window.get_state() == WindowState.DELETE:
+      value = [configuration["delete_rd"]] if as_on_seq else configuration["delete_rd"]
+      win.append(value)
+    elif window.get_state() == WindowState.INSERT:
+      value = [configuration["insert_rd"]] if as_on_seq else configuration["insert_rd"]
+      win.append(value)
+
+  return win
+
 def windows_rd_statistics(windows, statistic="all"):
 
   rd_observations = []
@@ -99,11 +144,14 @@ def windows_rd_statistics(windows, statistic="all"):
     return np.var(rd_observations)
   elif statistic == "median":
     return np.median(rd_observations)
+  elif statistic == "mode":
+    return stats.mode(rd_observations, axis=None).mode[0]
   elif statistic == "all":
     mu = np.mean(rd_observations)
     var = np.var(rd_observations)
     median = np.median(rd_observations)
-    return mu, var, median
+    mode = stats.mode(rd_observations, axis=None).mode[0]
+    return mu, var, median, mode
   else:
     raise Error("Unknown statistic: %s" % statistic)
 
@@ -317,7 +365,8 @@ class Window(object):
         :return:
         """
         valid_statistics = ["all",  "mean", "var",
-                            "median", "min", "max"]
+                            "median", "min", "max",
+                            "mode"]
 
         if statistics not in valid_statistics:
             raise Error("Invalid statistsics: '{0}'"
@@ -336,16 +385,21 @@ class Window(object):
           return np.amin(rd_data)
         elif statistics == "max":
           return np.amax(rd_data)
+        elif statistics == "mode":
+          return stats.mode(rd_data, axis=None).mode[0]
         elif statistics == "all":
 
           mean = np.mean(rd_data)
           var = np.var(rd_data)
           median = np.median(rd_data)
-          min = np.amin(rd_data)
-          max = np.amax(rd_data)
+          min_ = np.amin(rd_data)
+          max_ = np.amax(rd_data)
+          mode = stats.mode(rd_data, axis=None).mode[0]
           return {"mean": mean, "var": var,
-                  "median": median, "min": min,
-                  "max": max}
+                  "median": median,
+                  "min": min_,
+                  "max": max_,
+                  "mode": mode}
 
     def get_rd_observations(self):
         """
