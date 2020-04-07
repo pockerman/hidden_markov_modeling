@@ -55,6 +55,24 @@ def cluster(data, nclusters, method, **kwargs):
     windows = flat_windows(data)
     clusterer.fit(windows)
     return clusterer
+  elif method == "kmedoids":
+    from pyclustering.cluster.kmedoids import kmedoids
+    from pyclustering.utils.metric import type_metric
+    from pyclustering.utils.metric import  distance_metric
+
+    if kwargs["clusterer"]["config"]["metric"] == "MANHATAN":
+      t_metric= type_metric.MANHATTAN
+    elif kwargs["clusterer"]["config"]["metric"] == "EUCLIDEAN":
+      t_metric = type_metric.MANHATTAN
+
+    metric = distance_metric(metric_type=t_metric)
+
+    windows = flat_windows(data)
+    clusterer = kmedoids(data=windows,
+                         initial_index_medoids=kwargs["clusterer"]["config"]["init_cluster_idx"],
+                         metric=metric)
+    clusterer.process()
+    return clusterer
   elif method == "zscore":
     selector = ZScoreWindowCluster(cutoff = kwargs["cutoff"])
     return z_score_window_clusterer(windows=data,

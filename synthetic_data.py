@@ -15,6 +15,7 @@ import argparse
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
+from collections import defaultdict
 
 from helpers import read_configuration_file
 from helpers import Window
@@ -27,6 +28,7 @@ from helpers import flat_windows
 from helpers import flat_windows_from_state
 from helpers import HMMCallback
 from helpers import print_logs_callback
+from helpers import windows_rd_statistics
 from exceptions import Error
 from bam_helpers import DUMMY_BASE
 from preprocess_utils import cluster
@@ -160,10 +162,13 @@ def init_hmm(hmm_model, windows, configuration):
                              states[i],
                              configuration["HMM"]["start_prob"][state])
 
-
   for i in states:
     for j in states:
-      hmm_model.add_transition(i, j, 0.05)
+
+      if i == j:
+        hmm_model.add_transition(i, j, 0.95)
+      else:
+        hmm_model.add_transition(i, j, 0.05)
 
   # finally we need to bake
   hmm_model.bake(verbose=True)
@@ -258,12 +263,56 @@ def main():
                           **{'normal_rd': configuration["normal_rd"],
                              "delete_rd": configuration["delete_rd"],
                             "insert_rd": configuration["insert_rd"]})
+    elif configuration["clusterer"]["name"] =="kmedoids":
+
+        kwargs = {"clusterer":{
+                              "name":"kmedoids",
+                              "config":{
+                              "init_cluster_idx":[0, 10, 15],
+                              "metric":"MANHATAN"
+                            }
+                          }}
+        clusterer =  cluster(data=windows,
+                          nclusters=3,
+                          method="kmedoids",
+                          **kwargs)
+
+        from pyclustering.cluster import cluster_visualizer
+        from pyclustering.cluster import cluster_visualizer_multidim
+        visualizer = cluster_visualizer()
+        clusters = clusterer.get_clusters()
+
+        print(clusters)
+        clusters_means = []
+        cluster_data = defaultdict(list)
 
 
-        save_windows(windows=windows,
-                   configuration=configuration,
-                   win_interval_length=0)
+        for i in range(len(clusters)):
 
+          window_indexes = clusters[i]
+
+          for w in window_indexes:
+            cluster_data[i].extend(windows[i].get_rd_observations())
+
+
+        for cidx in cluster_data:
+          clusters_means.append((cidx, np.mean(cluster_data[cidx])))
+
+        print("Clusters means are: ", clusters_means)
+
+
+
+        #visualizer.append_clusters(clusters,
+        #                           windows_rd_statistics(windows=windows,
+        #                                                 statistic="mean"))
+        #visualizer.show()
+
+        #save_windows(windows=windows,
+        #           configuration=configuration,
+        #           win_interval_length=0)
+
+
+        """
         # create the HMM
         hmm_model = HiddenMarkovModel(name=configuration["HMM"]["name"],
                                     start=None, end=None)
@@ -297,15 +346,6 @@ def main():
 
 
         hmm_model.bake()
-
-        #print("Total improvements: ", history.total_improvement)
-        #print("Improvements: ", history.improvements)
-        #print("Learning rate: ", history.learning_rates)
-        #print("HMM Model: ", hmm_model)
-
-
-
-
         synthetic_data = create_synthetic_data(configuration=configuration,
                                                create_windows=False)
 
@@ -325,12 +365,10 @@ def main():
         plt.show()
 
 
-        #print("viterbi path: ", viterbi_path)
-
-
         save_hmm(hmm_model=hmm_model,
                    configuration=configuration,
                    win_interval_length=0)
+        """
 
 
 
