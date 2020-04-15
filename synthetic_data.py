@@ -110,14 +110,14 @@ def create_synthetic_data(configuration, create_windows=True):
 
 def create_clusters(windows, configuration):
 
-  kwargs = {"clusterer":{ "name":"kmedoids",
-                              "config":{
-                              "init_cluster_idx":[0, 10, 15],
-                              "metric":"MANHATAN"
-                            }
-                          }}
-  clusterer =  build_clusterer(data=windows, nclusters=3,
-                         method="kmedoids", **kwargs)
+  kwargs = {"clusterer":{ "name":configuration["clusterer"],
+                          "config":configuration["clusterer"]["config"]}}
+
+
+  clusterer =  build_clusterer(data=windows,
+                               nclusters=len(configuration["states"]),
+                               method="kmedoids",
+                               **kwargs)
 
   clusters_indexes = clusterer.get_clusters()
   clusters = []
@@ -127,64 +127,102 @@ def create_clusters(windows, configuration):
 
   print(clusters)
 
-
   cluster_stats = clusters_statistics(clusters=clusters, windows=windows)
   #print("Cluster statistics: ", cluster_stats)
   cluster_data = defaultdict(list)
 
   labeled_clusters = {}
 
-  for cluster in clusters:
 
-    print("Testing cluster: ", cluster.cidx)
+  if "NOT_NORMAL" in configuration["states"]:
 
-    cluster_data[cluster.cidx] = cluster.get_data_from_windows(windows=windows)
+    for cluster in clusters:
+
+      print("Testing cluster: ", cluster.cidx)
+
+      cluster_data[cluster.cidx] = cluster.get_data_from_windows(windows=windows)
 
     # is the cluster a DELETE or sth else:
-    h0_delete = LessThan(parameter_name="mean", value=1.0)
-    ha_delete = GreaterOrEqualThan(parameter_name="mean", value=1.0)
+      h0_normal = Equal(parameter_name="mean", value=1.0)
+      ha_notnormal = NotEqual(parameter_name="mean", value=1.0)
 
-    hypothesis_delete = HypothesisTest(null=h0_delete,
+      hypothesis = HypothesisTest(null=h0_normal,
+                                       alternative = ha_notnormal,
+                                       alpha=0.05,
+                                       data=cluster_data[cluster.cidx],
+                                       statistic_calculator=zscore_statistic)
+
+      hypothesis.test()
+
+      if h0_normal.accepted:
+      # this cluster is a delete cluster
+        print("Cluster %s is NORMAL" %cluster.cidx)
+        cluster.state = WindowState.NORMAL
+
+        if WindowState.NORMAL in labeled_clusters:
+              labeled_clusters[WindowState.NORMAL].merge(cluster)
+        else:
+              labeled_clusters[WindowState.NORMAL] = cluster
+
+      else:
+
+        if WindowState.NOT_NORMAL in labeled_clusters:
+              labeled_clusters[WindowState.NOT_NORMAL].merge(cluster)
+        else:
+              labeled_clusters[WindowState.NOT_NORMAL] = cluster
+
+  else:
+
+    for cluster in clusters:
+
+      print("Testing cluster: ", cluster.cidx)
+
+      cluster_data[cluster.cidx] = cluster.get_data_from_windows(windows=windows)
+
+      # is the cluster a DELETE or sth else:
+      h0_delete = LessThan(parameter_name="mean", value=1.0)
+      ha_delete = GreaterOrEqualThan(parameter_name="mean", value=1.0)
+
+      hypothesis_delete = HypothesisTest(null=h0_delete,
                                        alternative = ha_delete,
                                        alpha=0.05,
                                        data=cluster_data[cluster.cidx],
                                        statistic_calculator=zscore_statistic)
 
-    hypothesis_delete.test()
+      hypothesis_delete.test()
 
-    if h0_delete.accepted:
+      if h0_delete.accepted:
       # this cluster is a delete cluster
-      print("Cluster %s is DELETE" %cluster.cidx)
-      cluster.state = WindowState.DELETE
+        print("Cluster %s is DELETE" %cluster.cidx)
+        cluster.state = WindowState.DELETE
 
-      if WindowState.DELETE in labeled_clusters:
+        if WindowState.DELETE in labeled_clusters:
               labeled_clusters[WindowState.DELETE].merge(cluster)
-      else:
+        else:
               labeled_clusters[WindowState.DELETE] = cluster
 
-    else:
+      else:
 
-      h0_normal = Equal(parameter_name="mean", value=1.0)
-      ha_normal = GreaterOrEqualThan(parameter_name="mean", value=1.0)
+        h0_normal = Equal(parameter_name="mean", value=1.0)
+        ha_normal = GreaterOrEqualThan(parameter_name="mean", value=1.0)
 
-      hypothesis_normal = HypothesisTest(null=h0_normal,
+        hypothesis_normal = HypothesisTest(null=h0_normal,
                                              alternative = ha_normal,
                                              alpha=0.05,
                                              data=cluster_data[cluster.cidx],
                                              statistic_calculator=zscore_statistic)
 
-      hypothesis_normal.test()
+        hypothesis_normal.test()
 
-      if h0_normal.accepted:
-        print("Cluster %s is NORMAL"%cluster.cidx)
-        cluster.state = WindowState.NORMAL
+        if h0_normal.accepted:
+          print("Cluster %s is NORMAL"%cluster.cidx)
+          cluster.state = WindowState.NORMAL
 
-        if WindowState.NORMAL in labeled_clusters:
-          labeled_clusters[WindowState.NORMAL].merge(cluster)
+          if WindowState.NORMAL in labeled_clusters:
+            labeled_clusters[WindowState.NORMAL].merge(cluster)
+          else:
+            labeled_clusters[WindowState.NORMAL] = cluster
         else:
-          labeled_clusters[WindowState.NORMAL] = cluster
-
-      else:
           print("Cluster %s is INSERT"%cluster.cidx)
           cluster.state = WindowState.INSERT
 

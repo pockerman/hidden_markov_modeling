@@ -286,7 +286,8 @@ class WindowState(Enum):
   NORMAL = 1
   INSERT = 2
   TUF = 3
-  INVALID = 4
+  NOT_NORMAL = 4
+  INVALID = 5
 
 
 class WindowIterator(object):

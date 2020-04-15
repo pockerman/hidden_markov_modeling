@@ -103,20 +103,41 @@ def build_clusterer(data, nclusters, method, **kwargs):
       t_metric= type_metric.MANHATTAN
     elif kwargs["clusterer"]["config"]["metric"] == "EUCLIDEAN":
       t_metric = type_metric.EUCLIDEAN
+    else:
+      raise Error("Invalid metric specified %s"%kwargs["clusterer"]["config"]["metric"])
 
     metric = distance_metric(metric_type=t_metric)
 
     windows = flat_windows(data)
+
+    initial_index_medoids=[]
+    if kwargs["clusterer"]["config"]["init_cluster_idx"] == "random_from_data":
+      import random
+
+      for c in range(nclusters):
+        idx = random.randint(0, len(windows)-1)
+
+        if idx in initial_index_medoids:
+
+          # try ten times before quiting
+          for time in range(10):
+            idx = random.randint(0, len(windows)-1)
+
+            if idx in initial_index_medoids:
+              continue
+            else:
+              initial_index_medoids.append(idx)
+              break
+
+        else:
+          initial_index_medoids.append(idx)
+
+
     clusterer = kmedoids(data=windows,
-                         initial_index_medoids=kwargs["clusterer"]["config"]["init_cluster_idx"],
+                         initial_index_medoids=initial_index_medoids,
                          metric=metric)
     clusterer.process()
     return clusterer
-  #elif method == "zscore":
-  #  selector = ZScoreWindowCluster(cutoff = kwargs["cutoff"])
-  #  return z_score_window_clusterer(windows=data,
-  #                                  n_consecutive_windows=kwargs["n_consecutive_windows"],
-  #                                  selector=selector)
   elif method == "wmode":
     return mode_window_clusterer(windows=data,
                                  normal_rd=kwargs["normal_rd"],

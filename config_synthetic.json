@@ -2,25 +2,38 @@
   "normal_rd":1,
   "delete_rd":0,
   "insert_rd":2,
+  "min_num_inserts":20,
+  "max_num_deletes":20,
   "window_size":100,
   "sequence_size":2000,
   "swap_state_freq":15,
-  "minimum_occurences":50,
+  "minimum_occurences":{
+
+    "NORMAL":75,
+    "DELETE":25,
+    "INSERT":25
+  },
   "fill_missing_window_data":true,
   "fill_missing_window_data_factor":0,
   "quality_theshold":20,
   "repeated_sizes":[1, 5],
   "save_windows":false,
   "windows_filename":"hmm_windows",
+  "labeler":{
+
+    "name":"hypothesis_testing",
+    "significance": 0.05,
+    "statistic_cal":"zscore",
+    "statistic_parameter":"mean"
+  },
   "clusterer":{
     "name":"kmedoids",
-    "fpr":0.05,
     "config":{
-    "init_cluster_idx":[0, 10, 15],
-    "metric":"MANHATAN"
+    "init_cluster_idx":"random_from_data",
+    "metric":"EUCLIDEAN"
     }
   },
-  "states":["NORMAL", "DELETE", "INSERT"],
+  "states":["NORMAL", "NOT_NORMAL"],
   "HMM": {
     "name":"HMM_Model",
     "train_solver": "baum-welch",
@@ -28,13 +41,11 @@
     "save_hmm_filename":"HMM_Model",
     "start_prob":{
       "NORMAL": 1.0,
-      "INSERT": 0.0,
-      "DELETE": 0.0
+      "NOT_NORMAL": 0.0
     }
   },
   "fit_states_dist":{
-    "INSERT":"normal",
-    "DELETE":"normal",
+    "NOT_NORMAL": "normal",
     "NORMAL":"normal"
   },
   "logger_file":"tuf.log",
