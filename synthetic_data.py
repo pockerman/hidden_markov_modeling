@@ -16,6 +16,7 @@ import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import defaultdict
+from scipy import stats
 
 from helpers import read_configuration_file
 from helpers import Window
@@ -28,10 +29,16 @@ from helpers import flat_windows
 from helpers import flat_windows_from_state
 from helpers import HMMCallback
 from helpers import print_logs_callback
-from helpers import windows_rd_statistics
+#from helpers import windows_rd_statistics
+from helpers import save_hmm
+
+from helpers import flat_windows_rd_from_indexes
+from cluster import Cluster
+from cluster import clusters_statistics
+from hypothesis_testing import*
 from exceptions import Error
 from bam_helpers import DUMMY_BASE
-from preprocess_utils import cluster
+from preprocess_utils import build_clusterer
 from preprocess_utils import fit_distribution
 
 
@@ -39,9 +46,9 @@ def create_synthetic_data(configuration, create_windows=True):
 
   bases = ['A', 'T', 'C', 'G']
   flip = ["YES", "NO"]
-  states = {"normal_rd": configuration["normal_rd"],
-            "delete_rd": configuration["delete_rd"],
-            "insert_rd": configuration["insert_rd"]}
+  states = {"NORMAL": configuration["normal_rd"],
+            "DELETE": configuration["delete_rd"],
+            "INSERT": configuration["insert_rd"]}
 
   seq_size = configuration["sequence_size"]
 
@@ -52,17 +59,11 @@ def create_synthetic_data(configuration, create_windows=True):
   for i in range(seq_size):
 
     if np.random.choice(flip) == 'YES' and \
-      counter > configuration["minimum_occurences"]:
+      counter > configuration["minimum_occurences"][state_name]:
       state_name = np.random.choice(list(states.keys()))
       synthetic_data.append(states[state_name])
       counter = 0
       counter += 1
-    #elif counter  configuration["swap_state_freq"]:
-
-     # state_name = np.random.choice(list(states.keys()))
-     # synthetic_data.append(states[state_name])
-     # counter += 1
-
     else:
       synthetic_data.append(states[state_name])
       counter += 1
@@ -105,45 +106,114 @@ def create_synthetic_data(configuration, create_windows=True):
   return windows
 
 
-def init_hmm(hmm_model, windows, configuration):
-
-  # collect the windows with the same state
-  normal_state = []
-  delete_state = []
-  insert_state = []
-  states_to_windows = {}
-
-  for window in windows:
-        if window.get_state() == WindowState.NORMAL:
-          normal_state.extend(window.get_rd_observations())
-        elif window.get_state() == WindowState.DELETE:
-          delete_state.extend(window.get_rd_observations())
-        elif window.get_state() == WindowState.INSERT:
-          insert_state.extend(window.get_rd_observations())
-
-  states_to_windows["NORMAL"] = normal_state
-  states_to_windows["INSERT"] = insert_state
-  states_to_windows["DELETE"] = delete_state
 
 
-  print("Number of NORMAL windows: ", len(normal_state))
-  print("Number of DELETE windows: ", len(delete_state))
-  print("Number of INSERT windows: ", len(insert_state))
+def create_clusters(windows, configuration):
+
+  kwargs = {"clusterer":{ "name":"kmedoids",
+                              "config":{
+                              "init_cluster_idx":[0, 10, 15],
+                              "metric":"MANHATAN"
+                            }
+                          }}
+  clusterer =  build_clusterer(data=windows, nclusters=3,
+                         method="kmedoids", **kwargs)
+
+  clusters_indexes = clusterer.get_clusters()
+  clusters = []
+
+  for i in range(len(clusters_indexes)):
+    clusters.append(Cluster(id_ = i, indexes=clusters_indexes[i]))
+
+  print(clusters)
+
+
+  cluster_stats = clusters_statistics(clusters=clusters, windows=windows)
+  #print("Cluster statistics: ", cluster_stats)
+  cluster_data = defaultdict(list)
+
+  labeled_clusters = {}
+
+  for cluster in clusters:
+
+    print("Testing cluster: ", cluster.cidx)
+
+    cluster_data[cluster.cidx] = cluster.get_data_from_windows(windows=windows)
+
+    # is the cluster a DELETE or sth else:
+    h0_delete = LessThan(parameter_name="mean", value=1.0)
+    ha_delete = GreaterOrEqualThan(parameter_name="mean", value=1.0)
+
+    hypothesis_delete = HypothesisTest(null=h0_delete,
+                                       alternative = ha_delete,
+                                       alpha=0.05,
+                                       data=cluster_data[cluster.cidx],
+                                       statistic_calculator=zscore_statistic)
+
+    hypothesis_delete.test()
+
+    if h0_delete.accepted:
+      # this cluster is a delete cluster
+      print("Cluster %s is DELETE" %cluster.cidx)
+      cluster.state = WindowState.DELETE
+
+      if WindowState.DELETE in labeled_clusters:
+              labeled_clusters[WindowState.DELETE].merge(cluster)
+      else:
+              labeled_clusters[WindowState.DELETE] = cluster
+
+    else:
+
+      h0_normal = Equal(parameter_name="mean", value=1.0)
+      ha_normal = GreaterOrEqualThan(parameter_name="mean", value=1.0)
+
+      hypothesis_normal = HypothesisTest(null=h0_normal,
+                                             alternative = ha_normal,
+                                             alpha=0.05,
+                                             data=cluster_data[cluster.cidx],
+                                             statistic_calculator=zscore_statistic)
+
+      hypothesis_normal.test()
+
+      if h0_normal.accepted:
+        print("Cluster %s is NORMAL"%cluster.cidx)
+        cluster.state = WindowState.NORMAL
+
+        if WindowState.NORMAL in labeled_clusters:
+          labeled_clusters[WindowState.NORMAL].merge(cluster)
+        else:
+          labeled_clusters[WindowState.NORMAL] = cluster
+
+      else:
+          print("Cluster %s is INSERT"%cluster.cidx)
+          cluster.state = WindowState.INSERT
+
+          if WindowState.INSERT in labeled_clusters:
+            labeled_clusters[WindowState.INSERT].merge(cluster)
+          else:
+            labeled_clusters[WindowState.INSERT] = cluster
+
+
+  return labeled_clusters
+
+
+def init_hmm(clusters, windows, configuration):
+
+  # create the HMM
+  hmm_model = HiddenMarkovModel(name=configuration["HMM"]["name"],
+                                start=None, end=None)
 
 
   state_to_dist = {}
-
-  for name in states_to_windows:
-    state_to_dist[name] = fit_distribution(data=states_to_windows[name],
-                                 dist_name=configuration["fit_states_dist"][name])
-
-  # the states of the model.
-  # We also need to specify the the probability
-  # distribution of the state. this is \pi from the literature
   states = []
+  for cluster in clusters:
+    state_to_dist[cluster.state.name] = \
+    fit_distribution(data=cluster.get_data_from_windows(windows=windows),
+                     dist_name=configuration["fit_states_dist"][cluster.state.name])
+    states.append(State(state_to_dist[cluster.state.name], name=cluster.state.name))
 
-  for state in configuration["states"]:
-    states.append(State(state_to_dist[state], name=state))
+
+  print(state_to_dist)
 
 
   # add the states to the model
@@ -156,11 +226,10 @@ def init_hmm(hmm_model, windows, configuration):
   # we fit the model. All states have an equal
   # probability to be the starting state or we could
 
-  for i, state in enumerate(configuration["states"]):
-
+  for i, cluster in enumerate(clusters):
     hmm_model.add_transition(hmm_model.start,
                              states[i],
-                             configuration["HMM"]["start_prob"][state])
+                              configuration["HMM"]["start_prob"][cluster.state.name])
 
   for i in states:
     for j in states:
@@ -175,61 +244,50 @@ def init_hmm(hmm_model, windows, configuration):
   return hmm_model
 
 
-def save_windows(windows, configuration, win_interval_length):
+def hmm_train(clusters, windows, configuration):
 
-  if configuration["save_windows"]:
-    import json
-    with open(configuration["windows_filename"]+
-                  "_"+str(win_interval_length)+".json", 'w') as jsonfile:
-      json_str = windows_to_json(windows)
-      json.dump(json_str, jsonfile)
-
-def save_hmm(hmm_model, configuration, win_interval_length):
-
-  if configuration["HMM"]["save_model"]:
-    json_str = hmm_model.to_json()
-    import json
-    with open(configuration["HMM"]["save_hmm_filename"]+
-              "_"+str(win_interval_length)+".json", 'w') as jsonfile:
-      json.dump(json_str, jsonfile)
+  # initialize the model
+  hmm_model = init_hmm(clusters=clusters,
+                       windows=windows,
+                       configuration=configuration)
 
 
-def zscore_hmm(windows, configuration):
+  flatwindows = flat_windows_from_state(windows=windows,
+                                        configuration=configuration,
+                                        as_on_seq=False)
 
-  for win_interval_length in configuration["repeated_sizes"]:
+  #flatwindows = flat_windows(windows)
+  print("Start training HMM")
 
-          print("Window interval length: ", win_interval_length)
-          n = win_interval_length
-          cutoff = (n*configuration["clusterer"]["fpr"]/L)**(1/n)
+  # fit the model
+  hmm_model, history = hmm_model.fit(sequences=[flatwindows],
+                                           #min_iterations=,
+                                           algorithm=configuration["HMM"]["train_solver"],
+                                           return_history=True,
+                                           verbose=True,
+                                           lr_decay=0.6,
+                                           callbacks=[HMMCallback(callback=print_logs_callback)],
+                                           inertia=0.01)
 
-          print("cutoff used: ", cutoff)
+  print("Done training HMM")
+  hmm_model.bake()
 
-          windows = cluster(data=windows, nclusters=3,
-                            method="zscore",
-                            **{'n_consecutive_windows': win_interval_length,
-                               "cutoff":cutoff})
+  p_d_given_m = hmm_model.log_probability(sequence=flatwindows)
+  print("P(D|M): ", p_d_given_m)
+  print(hmm_model.predict_proba(flatwindows))
+  viterbi_path=hmm_model.viterbi(flatwindows)
+  trans, ems = hmm_model.forward_backward( flatwindows )
+  print(trans)
 
-          # create the HMM
-          hmm_model = HiddenMarkovModel(name=configuration["HMM"]["name"],
-                                    start=None, end=None)
-
-          # initialize the model
-          hmm_model = init_hmm(hmm_model=hmm_model,
-                               windows=windows,
-                               configuration=configuration)
+  # plot the model
+  plt.figure( figsize=(10,6) )
+  hmm_model.plot()
+  plt.show()
 
 
-          flatwindows = flat_windows(windows)
-
-          # fit the model
-          hmm_model, history = hmm_model.fit(sequences=flatwindows,
-                                         min_iterations=10,
-                                         algorithm=configuration["HMM"]["train_solver"],
-                                         return_history=True)
-
-          save_hmm(hmm_model=hmm_model,
+  save_hmm(hmm_model=hmm_model,
                    configuration=configuration,
-                   win_interval_length=win_interval_length)
+                   win_interval_length=0)
 
 def main():
 
@@ -249,127 +307,16 @@ def main():
 
     windows = create_synthetic_data(configuration=configuration)
 
-    # how many windows in total
-    L = len(windows)
+    clusters = create_clusters(windows=windows, configuration=configuration)
 
-    # cluster the windows and assing them state
-    if configuration["clusterer"]["name"] =="zscore":
-      zscore_hmm(windows=windows, configuration=configuration)
+    print("Number of clusters used: {0}".format(len(clusters)))
 
-    elif configuration["clusterer"]["name"] =="wmode":
-        windows = cluster(data=windows,
-                          nclusters=3,
-                          method="wmode",
-                          **{'normal_rd': configuration["normal_rd"],
-                             "delete_rd": configuration["delete_rd"],
-                            "insert_rd": configuration["insert_rd"]})
-    elif configuration["clusterer"]["name"] =="kmedoids":
+    for cluster in clusters:
+      print(cluster)
+      print("State modelled by cluster {0} is {1}".format(clusters[cluster].cidx,
+                                                          clusters[cluster].state.name))
 
-        kwargs = {"clusterer":{
-                              "name":"kmedoids",
-                              "config":{
-                              "init_cluster_idx":[0, 10, 15],
-                              "metric":"MANHATAN"
-                            }
-                          }}
-        clusterer =  cluster(data=windows,
-                          nclusters=3,
-                          method="kmedoids",
-                          **kwargs)
-
-        from pyclustering.cluster import cluster_visualizer
-        from pyclustering.cluster import cluster_visualizer_multidim
-        visualizer = cluster_visualizer()
-        clusters = clusterer.get_clusters()
-
-        print(clusters)
-        clusters_means = []
-        cluster_data = defaultdict(list)
-
-
-        for i in range(len(clusters)):
-
-          window_indexes = clusters[i]
-
-          for w in window_indexes:
-            cluster_data[i].extend(windows[i].get_rd_observations())
-
-
-        for cidx in cluster_data:
-          clusters_means.append((cidx, np.mean(cluster_data[cidx])))
-
-        print("Clusters means are: ", clusters_means)
-
-
-
-        #visualizer.append_clusters(clusters,
-        #                           windows_rd_statistics(windows=windows,
-        #                                                 statistic="mean"))
-        #visualizer.show()
-
-        #save_windows(windows=windows,
-        #           configuration=configuration,
-        #           win_interval_length=0)
-
-
-        """
-        # create the HMM
-        hmm_model = HiddenMarkovModel(name=configuration["HMM"]["name"],
-                                    start=None, end=None)
-
-        # initialize the model
-        hmm_model = init_hmm(hmm_model=hmm_model,
-                             windows=windows,
-                             configuration=configuration)
-
-
-        flatwindows = flat_windows_from_state(windows=windows,
-                                              configuration=configuration,
-                                              as_on_seq=False)
-
-        print(flatwindows)
-
-        #flatwindows = flat_windows(windows)
-        print("Start training HMM")
-
-        # fit the model
-        hmm_model, history = hmm_model.fit(sequences=[flatwindows],
-                                           #min_iterations=,
-                                           algorithm=configuration["HMM"]["train_solver"],
-                                           return_history=True,
-                                           verbose=True,
-                                           lr_decay=0.6,
-                                           callbacks=[HMMCallback(callback=print_logs_callback)],
-                                           inertia=0.01)
-
-        print("Done training HMM")
-
-
-        hmm_model.bake()
-        synthetic_data = create_synthetic_data(configuration=configuration,
-                                               create_windows=False)
-
-        p_d_given_m = hmm_model.log_probability(sequence=flatwindows)
-
-        print("P(D|M): ", p_d_given_m)
-
-        print(hmm_model.predict_proba(flatwindows))
-        viterbi_path=hmm_model.viterbi(flatwindows)
-
-        trans, ems = hmm_model.forward_backward( flatwindows )
-        print(trans)
-
-        # plot the model
-        plt.figure( figsize=(10,6) )
-        hmm_model.plot()
-        plt.show()
-
-
-        save_hmm(hmm_model=hmm_model,
-                   configuration=configuration,
-                   win_interval_length=0)
-        """
-
+    hmm_train(clusters=clusters.values(), windows=windows, configuration=configuration)
 
 
 if __name__ == '__main__':

@@ -41,6 +41,24 @@ def read_configuration_file(config_file):
         return configuration
 
 
+def save_windows(windows, configuration, win_interval_length):
+
+  if configuration["save_windows"]:
+    import json
+    with open(configuration["windows_filename"]+
+                  "_"+str(win_interval_length)+".json", 'w') as jsonfile:
+      json_str = windows_to_json(windows)
+      json.dump(json_str, jsonfile)
+
+def save_hmm(hmm_model, configuration, win_interval_length):
+
+  if configuration["HMM"]["save_model"]:
+    json_str = hmm_model.to_json()
+    import json
+    with open(configuration["HMM"]["save_hmm_filename"]+
+              "_"+str(win_interval_length)+".json", 'w') as jsonfile:
+      json.dump(json_str, jsonfile)
+
 def listify_dicts_property(list_dict_vals, property_name):
   """
   given a list of dictionaries return a list with the
@@ -97,12 +115,10 @@ def flat_windows(windows, prop="RD"):
   win = []
 
   for window in windows:
-
     if not isinstance(window, Window):
       raise Error("The given window is not an insatnce of Window")
 
     win.append(window.get_rd_observations())
-
   return win
 
 def flat_windows_from_state(windows, configuration, as_on_seq):
@@ -131,6 +147,15 @@ def flat_windows_from_state(windows, configuration, as_on_seq):
 
   return win
 
+
+def flat_windows_rd_from_indexes(indexes, windows):
+  rd_observations = []
+
+  for widx in indexes:
+    rd_observations.extend(windows[widx].get_rd_observations())
+  return rd_observations
+
+"""
 def windows_rd_statistics(windows, statistic="all"):
 
   rd_observations = []
@@ -138,22 +163,8 @@ def windows_rd_statistics(windows, statistic="all"):
   for window in windows:
     rd_observations.extend(window.get_rd_observations())
 
-  if statistic == "mean":
-    return np.mean(rd_observations)
-  elif statistic == "var":
-    return np.var(rd_observations)
-  elif statistic == "median":
-    return np.median(rd_observations)
-  elif statistic == "mode":
-    return stats.mode(rd_observations, axis=None).mode[0]
-  elif statistic == "all":
-    mu = np.mean(rd_observations)
-    var = np.var(rd_observations)
-    median = np.median(rd_observations)
-    mode = stats.mode(rd_observations, axis=None).mode[0]
-    return mu, var, median, mode
-  else:
-    raise Error("Unknown statistic: %s" % statistic)
+  return compute_statistic(data=rd_observations, statistsics=statistic)
+"""
 
 
 def windows_to_json(windows):
@@ -275,6 +286,7 @@ class WindowState(Enum):
   NORMAL = 1
   INSERT = 2
   TUF = 3
+  INVALID = 4
 
 
 class WindowIterator(object):
@@ -374,32 +386,8 @@ class Window(object):
 
         # accumulate RD as an array and use numpy
         rd_data = [item.read_depth for item in self._observations]
-
-        if statistics == "mean":
-          return np.mean(rd_data)
-        elif statistics == "var":
-          return np.var(rd_data)
-        elif statistics == "median":
-          return np.median(rd_data)
-        elif statistics == "min":
-          return np.amin(rd_data)
-        elif statistics == "max":
-          return np.amax(rd_data)
-        elif statistics == "mode":
-          return stats.mode(rd_data, axis=None).mode[0]
-        elif statistics == "all":
-
-          mean = np.mean(rd_data)
-          var = np.var(rd_data)
-          median = np.median(rd_data)
-          min_ = np.amin(rd_data)
-          max_ = np.amax(rd_data)
-          mode = stats.mode(rd_data, axis=None).mode[0]
-          return {"mean": mean, "var": var,
-                  "median": median,
-                  "min": min_,
-                  "max": max_,
-                  "mode": mode}
+        from preprocess_utils import compute_statistic
+        return compute_statistic(data=rd_data,statistics=statistics)
 
     def get_rd_observations(self):
         """

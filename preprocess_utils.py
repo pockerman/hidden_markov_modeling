@@ -3,11 +3,11 @@ Preprocessing utilities
 """
 
 from pomegranate import*
-import scipy.stats as st
+from scipy import stats
 import numpy as np
 
 from exceptions import Error
-from helpers import windows_rd_statistics
+
 from helpers import listify_dicts_property
 from helpers import WindowState
 from helpers import flat_windows
@@ -38,7 +38,46 @@ def fit_distribution(data, dist_name="normal", **kwargs):
         dist = DiscreteDistribution.from_samples(data)
         return dist
 
-def cluster(data, nclusters, method, **kwargs):
+def compute_statistic(data, statistics):
+
+  if statistics == "mean":
+    return np.mean(data)
+  elif statistics == "var":
+    return np.var(data)
+  elif statistics == "median":
+    return np.median(data)
+  elif statistics == "min":
+    return np.amin(data)
+  elif statistics == "max":
+    return np.amax(data)
+  elif statistics == "mode":
+    return stats.mode(data, axis=None).mode[0]
+  elif statistics == "q75":
+    return np.percentile(data, [75])
+  elif statistics == "q25":
+    return np.percentile(data, [25])
+  elif statistics == "q50":
+    return np.percentile(data, [50])
+  elif statistics == "all":
+
+          mean = np.mean(data)
+          var = np.var(data)
+          median = np.median(data)
+          min_ = np.amin(data)
+          max_ = np.amax(data)
+          mode = stats.mode(data, axis=None).mode[0]
+          q75, q50, q25 = np.percentile(data, [75, 50, 25])
+          return {"mean": mean, "var": var,
+                  "median": median,
+                  "min": min_,
+                  "max": max_,
+                  "mode": mode,
+                  "iqr": q75 - q25,
+                  "q75": q75,
+                  "q25": q25,
+                  "q50": q50}
+
+def build_clusterer(data, nclusters, method, **kwargs):
 
   """
   A simple wrapper to various clustering approaches.
@@ -63,7 +102,7 @@ def cluster(data, nclusters, method, **kwargs):
     if kwargs["clusterer"]["config"]["metric"] == "MANHATAN":
       t_metric= type_metric.MANHATTAN
     elif kwargs["clusterer"]["config"]["metric"] == "EUCLIDEAN":
-      t_metric = type_metric.MANHATTAN
+      t_metric = type_metric.EUCLIDEAN
 
     metric = distance_metric(metric_type=t_metric)
 
@@ -73,11 +112,11 @@ def cluster(data, nclusters, method, **kwargs):
                          metric=metric)
     clusterer.process()
     return clusterer
-  elif method == "zscore":
-    selector = ZScoreWindowCluster(cutoff = kwargs["cutoff"])
-    return z_score_window_clusterer(windows=data,
-                                    n_consecutive_windows=kwargs["n_consecutive_windows"],
-                                    selector=selector)
+  #elif method == "zscore":
+  #  selector = ZScoreWindowCluster(cutoff = kwargs["cutoff"])
+  #  return z_score_window_clusterer(windows=data,
+  #                                  n_consecutive_windows=kwargs["n_consecutive_windows"],
+  #                                  selector=selector)
   elif method == "wmode":
     return mode_window_clusterer(windows=data,
                                  normal_rd=kwargs["normal_rd"],
@@ -103,8 +142,9 @@ def mode_window_clusterer(windows, normal_rd,
   return windows
 
 
+"""
 def calculate_windows_zscore(windows):
-  """
+  '''
   Returns an array of Z-scores for every window
   in the given windows list
 
@@ -117,7 +157,7 @@ def calculate_windows_zscore(windows):
   -------
   list of floats representing the z-score for each window
 
-  """
+  '''
 
   mu = windows_rd_statistics(windows, statistic="mean")
   var = windows_rd_statistics(windows, statistic="var")
@@ -131,7 +171,7 @@ def calculate_windows_zscore(windows):
   return z_scores
 
 def windows_tails_p(zscores, interval_length):
-  """
+  '''
   Calculate windows upper and lower tail probabilities arranged
   into window intervals of length interval_length
 
@@ -147,7 +187,7 @@ def windows_tails_p(zscores, interval_length):
   upper_ps, lower_ps : list of upper probabilities,
                         list of lower probabilities
 
-  """
+  '''
 
   if interval_length > len(zscores):
     raise Error(("You request an interval length {0} not supported by"+
@@ -163,7 +203,7 @@ def windows_tails_p(zscores, interval_length):
       # calculate the probability density
       # up to the zscore point
       # i.e caluclate P(Z <= z_i)
-      prob = st.norm.cdf(score)
+      prob = stats.norm.cdf(score)
 
       # p(Z > z_i) = 1.0 - p(Z <= z_i)
       return 1.0 - prob, prob
@@ -174,7 +214,7 @@ def windows_tails_p(zscores, interval_length):
       # calculate the probability density
       # up to the zscore point
       # i.e caluclate P(Z <= z_i)
-      prob = st.norm.cdf(zscore)
+      prob = stats.norm.cdf(zscore)
 
       up, low = get_upper_lower_prob_from_score(score=zscore)
 
@@ -238,10 +278,10 @@ def windows_tails_p(zscores, interval_length):
   return upper_ps, lower_ps
 
 def z_score_window_clusterer(windows, n_consecutive_windows, selector):
-  """
+  '''
   classify each window according to the given states
   by computing a Z-score
-  """
+  '''
 
   zscores = calculate_windows_zscore(windows=windows)
   upper_ps, lower_ps = windows_tails_p(zscores=zscores,
@@ -303,7 +343,7 @@ class ZScoreWindowCluster(object):
 
     raise Error("For window %s probability not found" % widx)
 
-
+"""
 
 
 
