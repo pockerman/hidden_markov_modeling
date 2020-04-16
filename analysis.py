@@ -1,5 +1,4 @@
 import argparse
-import pysam
 import logging
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -8,9 +7,142 @@ from pomegranate import*
 
 from helpers import read_configuration_file
 from helpers import set_up_logger
+from helpers import save_hmm
+from helpers import flat_windows_from_state
+from helpers import HMMCallback
+from helpers import print_logs_callback
+
 from bam_helpers import extract_windows
+from cluster import Cluster
+from hypothesis_testing import SignificanceTestLabeler
 from preprocess_utils import fit_distribution
+from preprocess_utils import build_clusterer
 from exceptions import Error
+
+
+def create_clusters(windows, configuration):
+
+  kwargs = {"clusterer":{ "name":configuration["clusterer"],
+                          "config":configuration["clusterer"]["config"]}}
+
+
+  clusterer =  build_clusterer(data=windows,
+                               nclusters=len(configuration["states"]),
+                               method="kmedoids",
+                               **kwargs)
+
+  clusters_indexes = clusterer.get_clusters()
+  clusters = []
+
+  for i in range(len(clusters_indexes)):
+    clusters.append(Cluster(id_ = i, indexes=clusters_indexes[i]))
+
+  labeler = SignificanceTestLabeler(clusters=clusters,
+                                    windows=windows)
+
+  labeled_clusters = labeler.label(test_config=configuration["labeler"])
+
+  # update windows states
+  for state in labeled_clusters:
+    cluster = labeled_clusters[state]
+    indexes = cluster.indexes
+
+    for idx in indexes:
+      windows[idx].set_state(cluster.state)
+
+  return labeled_clusters
+
+def init_hmm(clusters, windows, configuration):
+
+  # create the HMM
+  hmm_model = HiddenMarkovModel(name=configuration["HMM"]["name"],
+                                start=None, end=None)
+
+
+  state_to_dist = {}
+  states = []
+  for cluster in clusters:
+    state_to_dist[cluster.state.name] = \
+    fit_distribution(data=cluster.get_data_from_windows(windows=windows),
+                     dist_name=configuration["fit_states_dist"][cluster.state.name])
+    states.append(State(state_to_dist[cluster.state.name], name=cluster.state.name))
+
+
+  # add the states to the model
+  hmm_model.add_states(states)
+
+  # construct the transition matrix.
+  # We create a dense HMM with equal
+  # transition probabilities between each state
+  # this will be used for initialization when
+  # we fit the model. All states have an equal
+  # probability to be the starting state or we could
+
+  for i, cluster in enumerate(clusters):
+    hmm_model.add_transition(hmm_model.start,
+                             states[i],
+                              configuration["HMM"]["start_prob"][cluster.state.name])
+
+  for i in states:
+    for j in states:
+
+      if i == j:
+        hmm_model.add_transition(i, j, 0.95)
+      else:
+        hmm_model.add_transition(i, j, 0.05)
+
+  # finally we need to bake
+  hmm_model.bake(verbose=True)
+  return hmm_model
+
+def hmm_train(clusters, windows, configuration):
+
+  # initialize the model
+  hmm_model = init_hmm(clusters=clusters,
+                       windows=windows,
+                       configuration=configuration)
+
+
+  flatwindows = flat_windows_from_state(windows=windows,
+                                        configuration=configuration,
+                                        as_on_seq=False)
+
+  #flatwindows = flat_windows(windows=windows)
+
+  print("Flatwindows are: ", flatwindows)
+
+  #flatwindows = flat_windows(windows)
+  print("Start training HMM")
+
+  # fit the model
+  hmm_model, history = hmm_model.fit(sequences=[flatwindows],
+                                           #min_iterations=,
+                                           algorithm=configuration["HMM"]["train_solver"],
+                                           return_history=True,
+                                           verbose=True,
+                                           lr_decay=0.6,
+                                           callbacks=[HMMCallback(callback=print_logs_callback)],
+                                           inertia=0.01)
+
+  print("Done training HMM")
+  hmm_model.bake()
+
+  p_d_given_m = hmm_model.log_probability(sequence=flatwindows)
+  print("P(D|M): ", p_d_given_m)
+  print(hmm_model.predict_proba(flatwindows))
+  viterbi_path=hmm_model.viterbi(flatwindows)
+  trans, ems = hmm_model.forward_backward( flatwindows )
+  print(trans)
+
+  # plot the model
+  plt.figure( figsize=(10,6) )
+  hmm_model.plot()
+  plt.show()
+
+
+  save_hmm(hmm_model=hmm_model,
+                   configuration=configuration,
+                   win_interval_length=0)
 
 
 def main():
@@ -58,6 +190,7 @@ def main():
         else:
             print("\t\tNumber of windows: ", len(wga_windows))
 
+
         non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
         non_wga_end_idx = configuration["no_wga_file"]["end_idx"]
 
@@ -83,92 +216,22 @@ def main():
         logging.error("Unknown exception occured: " + str(e))
 
     print("Extracted dataset....")
+    print("Start clustering....")
+    # create clusters
+    wga_clusters = create_clusters(windows=wga_windows,
+                                        configuration=configuration)
+
+    print("Number of wga_clusters used: {0}".format(len(wga_clusters)))
+
+    for cluster in wga_clusters:
+      print("State modelled by cluster {0} is {1}".format(wga_clusters[cluster].cidx,
+                                                          wga_clusters[cluster].state.name))
+
+    hmm_train(clusters=wga_clusters.values(),
+              windows=wga_windows,
+              configuration=configuration)
+
     print("Finished analysis")
-
-    sns.set(color_codes=True)
-
-    # accumulate all RD observations
-    wga_rd_observations = []
-    non_wga_rd_observations = []
-
-    # now that we have the windows lets do some EDA
-    print("Number of windows: ", len(wga_rd_observations))
-
-    # get basic statistics from the windos
-    for idx, window in enumerate(wga_windows):
-        print("Window id ", idx)
-        stats = window.get_rd_stats(statistics="all")
-        print("\t mean: ",   stats["mean"])
-        print("\t var: ",    stats["var"])
-        print("\t median: ", stats["median"])
-
-        rd_data = window.get_rd_observations()
-        wga_rd_observations.extend(rd_data)
-        sns.distplot(rd_data)
-        plt.show()
-
-    mean = np.mean(wga_rd_observations)
-    var = np.var(wga_rd_observations)
-    median = np.median(wga_rd_observations)
-
-    print("mean: ", mean)
-    print("var: ", var)
-    print("median: ", median)
-
-    sns.distplot(wga_rd_observations)
-    plt.show()
-
-    # get basic statistics from the windos
-    for idx, window in enumerate(non_wga_windows):
-        print("Window id ", idx)
-        stats = window.get_rd_stats(statistics="all")
-        print("\t mean: ", stats["mean"])
-        print("\t var: ", stats["var"])
-        print("\t median: ", stats["median"])
-
-        rd_data = window.get_rd_observations()
-        non_wga_rd_observations.extend(rd_data)
-        sns.distplot(rd_data)
-        plt.show()
-
-    mean = np.mean(non_wga_rd_observations)
-    var = np.var(non_wga_rd_observations)
-    median = np.median(non_wga_rd_observations)
-
-    print("mean: ", mean)
-    print("var: ", var)
-    print("median: ", median)
-
-    sns.distplot(non_wga_rd_observations)
-    plt.show()
-
-    wga_gaussian_dist = fit_distribution(data=wga_rd_observations)
-    wga_gaussian_dist.plot(1000, edgecolor='c', color='c', bins=20)
-    plt.show()
-    #print("WGA  dist mean: ", wga_gaussian_dist.mu)
-    #print("WGA dist var: ", wga_gaussian_dist.cov)
-
-    non_wga_gaussian_dist = fit_distribution(data=non_wga_rd_observations)
-
-    non_wga_gaussian_dist.plot(1000, edgecolor='c', color='c', bins=20)
-    plt.show()
-    #print("WGA  dist mean: ", non_wga_gaussian_dist.mu)
-    #print("WGA dist var: ", non_wga_gaussian_dist.cov)
-
-    # uniform distribution generated
-    # from the available data
-    #uniform_dist = UniformDistribution.from_samples(rd_observations)
-    #uniform_dist.plot(1000, edgecolor='c', color='c', bins=20)
-    #plt.show()
-    #print("Uniform dist mean: ", uniform_dist.mu)
-    #print("Uniform dist var: ", uniform_dist.cov)
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
