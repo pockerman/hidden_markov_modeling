@@ -1,11 +1,12 @@
 """
 Hypothesis testing utilities
 """
-
+from collections import defaultdict
 import numpy as np
 import scipy.stats as st
 
 from preprocess_utils import compute_statistic
+from helpers import WindowState
 
 def zscore_statistic(data, null, **kwargs):
 
@@ -150,6 +151,120 @@ class HypothesisTest(object):
       print("\tstatistic computed: " +str(statistic))
       self._null.accepted=True
       self._alternative.accepted=False
+
+
+class SignificanceTestLabeler(object):
+
+  def __init__(self, clusters, windows):
+    self._clusters = clusters
+    self._windows = windows
+
+  def label(self, test_config):
+    """
+    Label the given clusters
+    """
+
+    cluster_data = defaultdict(list)
+
+    labeled_clusters = {}
+
+    if "NOT_NORMAL" in test_config["order"]:
+       for cluster in self._clusters:
+
+             print("Testing cluster: ", cluster.cidx)
+             cluster_data[cluster.cidx] = cluster.get_data_from_windows(windows=self._windows)
+             h0_normal = Equal(parameter_name=test_config["statistic_parameter"],
+                                value=test_config["statistical_parameter_value"])
+
+             ha_notnormal = NotEqual(parameter_name=test_config["statistic_parameter"],
+                                                value=test_config["statistical_parameter_value"])
+             hypothesis = HypothesisTest(null=h0_normal,
+                                         alternative = ha_notnormal,
+                                         alpha=test_config["significance"],
+                                         data=cluster_data[cluster.cidx],
+                                         statistic_calculator=zscore_statistic)
+             hypothesis.test()
+             if h0_normal.accepted:
+
+                 print("Cluster %s is NORMAL" %cluster.cidx)
+                 cluster.state = WindowState.NORMAL
+                 if WindowState.NORMAL in labeled_clusters:
+                    labeled_clusters[WindowState.NORMAL].merge(cluster)
+                 else:
+                    labeled_clusters[WindowState.NORMAL] = cluster
+
+             else:
+
+               cluster.state = WindowState.NOT_NORMAL
+               if WindowState.NOT_NORMAL in labeled_clusters:
+                 labeled_clusters[WindowState.NOT_NORMAL].merge(cluster)
+               else:
+                 labeled_clusters[WindowState.NOT_NORMAL] = cluster
+    else:
+      for cluster in self._clusters:
+
+        print("Testing cluster: ", cluster.cidx)
+
+        cluster_data[cluster.cidx] = cluster.get_data_from_windows(windows=self._windows)
+
+        # is the cluster a DELETE or sth else:
+        h0_delete = LessThan(parameter_name=test_config["statistic_parameter"],
+                             value=test_config["statistical_parameter_value"])
+        ha_delete = GreaterOrEqualThan(parameter_name=test_config["statistic_parameter"],
+                                       value=test_config["statistical_parameter_value"])
+
+        hypothesis_delete = HypothesisTest(null=h0_delete,
+                                           alternative = ha_delete,
+                                           alpha=test_config["significance"],
+                                           data=cluster_data[cluster.cidx],
+                                           statistic_calculator=zscore_statistic)
+
+        hypothesis_delete.test()
+
+        if h0_delete.accepted:
+        # this cluster is a delete cluster
+          print("Cluster %s is DELETE" %cluster.cidx)
+          cluster.state = WindowState.DELETE
+
+          if WindowState.DELETE in labeled_clusters:
+                labeled_clusters[WindowState.DELETE].merge(cluster)
+          else:
+                labeled_clusters[WindowState.DELETE] = cluster
+
+        else:
+
+          h0_normal = Equal(parameter_name=test_config["statistic_parameter"],
+                             value=test_config["statistical_parameter_value"])
+          ha_normal = GreaterOrEqualThan(parameter_name=test_config["statistic_parameter"],
+                             value=test_config["statistical_parameter_value"])
+
+          hypothesis_normal = HypothesisTest(null=h0_normal,
+                                             alternative = ha_normal,
+                                             alpha=test_config["significance"],
+                                             data=cluster_data[cluster.cidx],
+                                             statistic_calculator=zscore_statistic)
+
+          hypothesis_normal.test()
+
+          if h0_normal.accepted:
+            print("Cluster %s is NORMAL"%cluster.cidx)
+            cluster.state = WindowState.NORMAL
+
+            if WindowState.NORMAL in labeled_clusters:
+              labeled_clusters[WindowState.NORMAL].merge(cluster)
+            else:
+              labeled_clusters[WindowState.NORMAL] = cluster
+          else:
+            print("Cluster %s is INSERT"%cluster.cidx)
+            cluster.state = WindowState.INSERT
+
+            if WindowState.INSERT in labeled_clusters:
+              labeled_clusters[WindowState.INSERT].merge(cluster)
+            else:
+              labeled_clusters[WindowState.INSERT] = cluster
+
+    return labeled_clusters
+
 
 
 
