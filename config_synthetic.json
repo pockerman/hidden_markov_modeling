@@ -9,7 +9,7 @@
   "swap_state_freq":15,
   "minimum_occurences":{
 
-    "NORMAL":75,
+    "NORMAL":50,
     "DELETE":25,
     "INSERT":25
   },
@@ -24,7 +24,9 @@
     "name":"hypothesis_testing",
     "significance": 0.05,
     "statistic_cal":"zscore",
-    "statistic_parameter":"mean"
+    "statistic_parameter":"mean",
+    "statistical_parameter_value": 1.0,
+    "order":["NORMAL", "NOT_NORMAL"]
   },
   "clusterer":{
     "name":"kmedoids",
