@@ -1,10 +1,34 @@
 import json
 import numpy as np
 import logging
+import json
+from enum import Enum
+from scipy import stats
+
 from collections import namedtuple
 from exceptions import FullWindowException
 from exceptions import Error
 
+DUMMY_ID = -1
+
+class HMMCallback(object):
+
+  def __init__(self, callback):
+    self._callback = callback
+    self.model = None
+
+  def on_epoch_end(self, logs):
+    pass
+    #self._callback(logs)
+
+  def on_training_begin(self):
+    pass
+
+  def on_training_end(self, logs):
+    pass
+
+def print_logs_callback(logs):
+  print(logs)
 
 def read_configuration_file(config_file):
     """
@@ -15,6 +39,51 @@ def read_configuration_file(config_file):
     with open(config_file) as json_file:
         configuration = json.load(json_file)
         return configuration
+
+
+def save_windows(windows, configuration, win_interval_length):
+
+  if configuration["save_windows"]:
+    import json
+    with open(configuration["windows_filename"]+
+                  "_"+str(win_interval_length)+".json", 'w') as jsonfile:
+      json_str = windows_to_json(windows)
+      json.dump(json_str, jsonfile)
+
+def save_hmm(hmm_model, configuration, win_interval_length):
+
+  if configuration["HMM"]["save_model"]:
+    json_str = hmm_model.to_json()
+    import json
+    with open(configuration["HMM"]["save_hmm_filename"]+
+              "_"+str(win_interval_length)+".json", 'w') as jsonfile:
+      json.dump(json_str, jsonfile)
+
+def listify_dicts_property(list_dict_vals, property_name):
+  """
+  given a list of dictionaries return a list with the
+  values of the property with name property_name
+
+  Parameters
+  ----------
+  list_dict_vals : list of dictioanries
+
+  property_name : str
+    The property name to look for
+
+  Returns
+  -------
+  result : list
+
+  """
+
+  result = []
+
+  for item in list_dict_vals:
+    if item.get(property_name):
+      result.append(item[property_name])
+
+  return result
 
 
 def set_up_logger(configuration):
@@ -36,17 +105,189 @@ def set_up_logger(configuration):
 
     logging.basicConfig(filename=logger_file, level=logging_level)
 
-def flat_windows(windows):
+def flat_windows(windows, prop="RD"):
+
+  """
+  Returns a flattened list of windows by their
+  prop property observations
+  """
 
   win = []
 
   for window in windows:
+    if not isinstance(window, Window):
+      raise Error("The given window is not an insatnce of Window")
+
     win.append(window.get_rd_observations())
+  return win
+
+def flat_windows_from_state(windows, configuration, as_on_seq):
+
+  """
+  Returns a flattened list of windows by their
+  prop property observations
+  """
+
+  win = []
+
+  for window in windows:
+
+    if not isinstance(window, Window):
+      raise Error("The given window is not an insatnce of Window")
+
+    if window.get_state() == WindowState.NORMAL:
+      value = [configuration["normal_rd"]] if as_on_seq else configuration["normal_rd"]
+      win.append(value)
+    elif window.get_state() == WindowState.DELETE:
+      value = [configuration["delete_rd"]] if as_on_seq else configuration["delete_rd"]
+      win.append(value)
+    elif window.get_state() == WindowState.INSERT:
+      value = [configuration["insert_rd"]] if as_on_seq else configuration["insert_rd"]
+      win.append(value)
 
   return win
 
 
+def flat_windows_rd_from_indexes(indexes, windows):
+  rd_observations = []
+
+  for widx in indexes:
+    rd_observations.extend(windows[widx].get_rd_observations())
+  return rd_observations
+
+"""
+def windows_rd_statistics(windows, statistic="all"):
+
+  rd_observations = []
+
+  for window in windows:
+    rd_observations.extend(window.get_rd_observations())
+
+  return compute_statistic(data=rd_observations, statistsics=statistic)
+"""
+
+
+def windows_to_json(windows):
+  """
+  Generate a json formatted string
+  representing the windows
+  Parameters
+  ----------
+  windows : list
+    DESCRIPTION. A list of Window instances
+
+  Returns
+  -------
+  string
+
+  """
+
+  str_map = {}
+
+  for window in windows:
+    str_map[window.get_id()] = window.to_json()
+
+  return json.dumps(str_map)
+
+
+def windows_from_json(jsonmap):
+  """
+
+
+  Parameters
+  ----------
+  jsonmap : TYPE
+    DESCRIPTION.
+
+  Returns
+  -------
+  list of Window instances
+
+  """
+
+  windows = []
+
+  for idx in jsonmap.keys():
+
+    window_str = jsonmap[idx]
+    window_data = json.loads(window_str)
+    window = Window(idx=window_data["id"],
+                    capacity=window_data["capacity"])
+
+    for obs in window_data["observations"]:
+      obsdata = json.loads(obs)
+      observaion =observation_from_json(jsonmap=obsdata)
+      window.add(observation=observaion)
+
+    windows.append(window)
+  return windows
+
+
 Observation = namedtuple("Observation", ["position", "read_depth", "base"])
+
+def observation_to_json(observation):
+  """
+  Returns a json formatted string for the
+  given observation
+
+  Parameters
+  ----------
+  observation : Observation
+    DESCRIPTION.
+
+  Returns
+  -------
+  json_str : string
+
+  """
+
+  json_str = {"position":observation.position,
+              "read_depth": observation.read_depth,
+              "base": observation.base}
+
+  json_str = json.dumps(json_str)
+  return json_str
+
+
+def observation_from_json(jsonmap):
+
+  observation = Observation(position=jsonmap["position"],
+                            read_depth=jsonmap["read_depth"],
+                            base=jsonmap["base"])
+  return observation
+
+
+def add_window_observation(window, windows,
+                           observation, windowcapacity):
+    """
+    Add a new observation to the given window. If the
+    window has reached its capacity a new window
+    is created and then the observation is appened
+    :param window: The window instance to add the observation
+    :param windows: The list of windows where the window is cached
+    :param observation: The observation to add in the window
+    :param windowcapacity: The maximum window capacity
+    :return: instance of Window class
+    """
+
+    if window.has_capacity():
+        window.add(observation=observation)
+    else:
+        windows.append(window)
+        window = Window(idx=window.get_id()+1,
+                        capacity=windowcapacity)
+        window.add(observation=observation)
+
+    return window
+
+
+class WindowState(Enum):
+  DELETE = 0
+  NORMAL = 1
+  INSERT = 2
+  TUF = 3
+  NOT_NORMAL = 4
+  INVALID = 5
 
 
 class WindowIterator(object):
@@ -77,7 +318,10 @@ class Window(object):
     """
     Class representing a window for arranging of the data
     """
-    def __init__(self, capacity):
+    def __init__(self, idx, capacity):
+
+        # the id of the window
+        self._id = idx
 
         # maximum capacity of the window
         self._capacity = capacity
@@ -88,6 +332,9 @@ class Window(object):
 
         # the total number of insertions/deletions
         self._net_indels = 0
+
+        # the state of the window
+        self._state = WindowState.INVALID
 
     def add(self, observation):
 
@@ -111,7 +358,7 @@ class Window(object):
         window has not been exhausted
         :return: boolean
         """
-        return self.capacity() - len(self._observations) != 0
+        return (self.capacity() - len(self._observations)) != 0
 
     def get_range(self, start, end):
         """
@@ -131,21 +378,17 @@ class Window(object):
         :return:
         """
         valid_statistics = ["all",  "mean", "var",
-                            "median", "min", "max"]
+                            "median", "min", "max",
+                            "mode"]
+
         if statistics not in valid_statistics:
             raise Error("Invalid statistsics: '{0}'"
                         " not in {1}".format(statistics, valid_statistics))
 
         # accumulate RD as an array and use numpy
-        rd_data = [item[1] for item in self._observations]
-        mean = np.mean(rd_data)
-        var = np.var(rd_data)
-        median = np.median(rd_data)
-        min = np.amin(rd_data)
-        max = np.amax(rd_data)
-        return {"mean": mean, "var": var,
-                "median": median, "min": min,
-                "max": max}
+        rd_data = [item.read_depth for item in self._observations]
+        from preprocess_utils import compute_statistic
+        return compute_statistic(data=rd_data,statistics=statistics)
 
     def get_rd_observations(self):
         """
@@ -153,7 +396,7 @@ class Window(object):
         contained in the window
         :return:
         """
-        rd_data = [item[1] for item in self._observations]
+        rd_data = [item.read_depth for item in self._observations]
         return rd_data
 
     def get_gc_count(self):
@@ -204,6 +447,45 @@ class Window(object):
                 previous = pos
         return False
 
+
+    def get_id(self):
+      """
+      Returns the zero based id of the window
+
+      Returns
+      -------
+      self._id
+
+      """
+      return self._id
+
+    def set_state(self, state):
+      """
+      Set the state of the window
+
+      Parameters
+      ----------
+      state : WindowState
+        Enumeration describing the window state
+
+      Returns
+      -------
+      None.
+
+      """
+      self._state = state
+
+    def get_state(self):
+      """
+
+
+      Returns the state of the window
+      -------
+      WindowState
+
+      """
+      return self._state
+
     def insert_at(self, pos, data):
         """
         Insert the data at the specified position
@@ -213,6 +495,23 @@ class Window(object):
         :return:
         """
         self._observations.insert(pos, data)
+
+    def to_json(self):
+      """
+      Returns a json formatted string represneting
+      the window
+      """
+      json_str = {"id":self._id,
+                  "state":self._state.name,
+                  "capacity":self._capacity,}
+
+      observations = []
+      for obs in self._observations:
+        obs_json = observation_to_json(observation=obs)
+        observations.append(obs_json)
+
+      json_str["observations"] = observations
+      return json.dumps(json_str)
 
     def __len__(self):
         return len(self._observations)

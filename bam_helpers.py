@@ -5,10 +5,12 @@ import math
 import pysam
 import logging
 from collections import Counter
-from helpers import Window, Observation
+from helpers import Window, Observation, DUMMY_ID
+from helpers import add_window_observation
 from exceptions import FullWindowException
 from exceptions import Error
 
+DUMMY_BASE = "*"
 
 def extract_windows(chromosome, ref_filename, test_filename, **args):
 
@@ -24,6 +26,7 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
     windowcapacity = args["windowsize"]
     start_idx = args["start_idx"]
     end_idx = args["end_idx"]
+    quality_theshold = args.get("quality_theshold", None)
 
     with pysam.FastaFile(ref_filename) as ref_file:
 
@@ -42,19 +45,22 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
 
                 bam_out, errors, adjusted = bam_strip(chromosome=chromosome,
                                                       file=test_file,
-                                                      start=start_idx, stop=end_idx)
+                                                      start=start_idx, stop=end_idx,
+                                                      quality_theshold=quality_theshold,
+                                                      fastadata=ref_list)
 
                 print("\t Number of erros: ", errors)
                 print("\t Number of adjusted: ", adjusted)
                 print("\t bam output: ", len(bam_out))
 
-                # find insertions and deletions
-                indel_dict = get_indels(chromosome=chromosome, samfile=test_file,
-                                        start=start_idx, stop=end_idx)
-
                 # get the common bases
                 # TODO: explain what are we trying to do here
                 common_bases(bamdata=bam_out, fastadata=ref_list)
+
+                # find insertions and deletions
+                indel_dict = create_indels_dictionary(chromosome=chromosome,
+                                                      samfile=test_file,
+                                                      start=start_idx, stop=end_idx)
 
                 # extract the windows
                 windows = create_windows(bamlist=bam_out,
@@ -62,7 +68,9 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
                                           fastdata=ref_list,
                                           windowcapacity=windowcapacity,
                                           start=start_idx,
-                                          end=end_idx)
+                                          end=end_idx,
+                                          fill_missing_window_data=args.get("fill_missing_window_data", False),
+                                          fill_missing_window_data_factor=args.get("fill_missing_window_data_factor",0))
 
                 return windows
             except Exception as e:
@@ -70,7 +78,7 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
                 raise
 
 
-def bam_strip(chromosome, file, start, stop):
+def bam_strip(chromosome, file, start, stop, **kwargs):
 
     """
     get the contents of the file starting at start position and ending
@@ -80,80 +88,25 @@ def bam_strip(chromosome, file, start, stop):
     adjusted = 0
     bam_out = []
 
-    counter = 0
     # move column-wise
     for pileupcolumn in file.pileup(chromosome, start, stop,
                                         truncate=True, ignore_orphans=False):
 
             bam_out, adjusted_tmp, errors_tmp = \
-                get_query_sequences(pileupcolumn=pileupcolumn, bam_out=bam_out)
+                get_query_sequences(pileupcolumn=pileupcolumn, bam_out=bam_out,
+                                    use_indels=True,
+                                    do_not_use_indels_on_error=True,
+                                    quality_theshold=kwargs.get("quality_theshold", None),
+                                    fastadata=kwargs.get("fastadata", None))
+
             adjusted += adjusted_tmp
             errors += errors_tmp
 
     return bam_out, errors, adjusted
 
 
-def get_indels(chromosome, samfile, start, stop):
-
-    """
-    find  insertions/deletions  and put in dictionary
-    """
-    indels = {}
-
-    for i, pileupcolumn in enumerate(samfile.pileup(chromosome, start, stop,
-                                                    truncate=True, ignore_orphans=False)):
-        indel_count = 0
-        for pileupread in pileupcolumn.pileups:
-
-            # start counting indels when
-            # first indel is encountered
-
-            if (pileupread.indel != 0):
-                indel_count += 1
-
-            # TODO: Do we really need all the if-else stuff here?
-            if (indel_count == pileupcolumn.n) and pileupcolumn.n > 1:  # homozygous indels.
-                indel_1 = {str(pileupcolumn.pos):
-                               (pileupcolumn.get_query_sequences(add_indels=True))}
-                indels.update(indel_1)
-
-            elif indel_count >= 0.5 * pileupcolumn.n and pileupcolumn.n > 1:  # heterozygous indels.
-                indel_2 = {str(pileupcolumn.pos):
-                               (pileupcolumn.get_query_sequences(add_indels=True))}
-                indels.update(indel_2)
-
-            elif (indel_count > 0):  # spontaneous indels.
-                indel_3 = {str(pileupcolumn.pos):
-                               (pileupcolumn.get_query_sequences(add_indels=True))}
-                indels.update(indel_3)
-
-    return indels
-
-
-def add_window_observation(window, windows,
-                           observation, windowcapacity):
-    """
-    Add a new observation to the given window. If the
-    window has reached its capacity a new window
-    is created and then the observation is appened
-    :param window: The window instance to add the observation
-    :param windows: The list of windows where the window is cached
-    :param observation: The observation to add in the window
-    :param windowcapacity: The maximum window capacity
-    :return: instance of Window class
-    """
-
-    if window.has_capacity():
-        window.add(observation=observation)
-    else:
-        windows.append(window)
-        window = Window(capacity=windowcapacity)
-        window.add(observation=observation)
-
-    return window
-
-
-def create_windows(bamlist, indel_dict, fastdata, windowcapacity, start, end):
+def create_windows(bamlist, indel_dict, fastdata,
+                   windowcapacity, start, end, **kwargs):
 
     """
     Arrange the given bamlist into windows of size windowcapacity.
@@ -176,7 +129,8 @@ def create_windows(bamlist, indel_dict, fastdata, windowcapacity, start, end):
     # the returned list of windows
     windows = []
 
-    window = Window(capacity=windowcapacity)
+    idstart = 0
+    window = Window(idx=idstart, capacity=windowcapacity)
     previous_observation = None
 
     for idx, item in enumerate(bamlist):
@@ -193,8 +147,10 @@ def create_windows(bamlist, indel_dict, fastdata, windowcapacity, start, end):
 
                 # yes it is...nice add it to the window
                 # and update the observation
-                window = add_window_observation(window=window, windows=windows,
-                                                observation=observation, windowcapacity=windowcapacity)
+                window = add_window_observation(window=window,
+                                                windows=windows,
+                                                observation=observation,
+                                                windowcapacity=windowcapacity)
 
                 previous_observation = observation
             else:
@@ -207,7 +163,8 @@ def create_windows(bamlist, indel_dict, fastdata, windowcapacity, start, end):
                 # fill in the missing info from the
                 # reference file
                 window_gaps = _get_missing_gap_info(start=int(previous_observation.position)+1,
-                                                    end=int(observation.position)-1, fastdata=fastdata)
+                                                    end=int(observation.position)-1,
+                                                    fastdata=fastdata)
 
                 # after getting the missing info we try to add it
                 # to the window. we may have accumulated so much info that
@@ -240,16 +197,28 @@ def create_windows(bamlist, indel_dict, fastdata, windowcapacity, start, end):
                                             windowcapacity=windowcapacity)
             previous_observation = observation
 
-    # catch also the last window
+    # catch also the last window. The last
+    # window may not be using all its capacity
+    # as this depends on the partitioning. Optionally
+    # we fill in the missing data if that was requested
     if len(window) != window.capacity():
-        windows.append(window)
+
+      # fill in missing data if this is requested
+      if kwargs.get("fill_missing_window_data", False):
+        while window.has_capacity():
+          window.add(observation=Observation(position=DUMMY_ID,
+                                  read_depth=kwargs["fill_missing_window_data_factor"],
+                                  base= [DUMMY_BASE]))
+
+      windows.append(window)
 
     return windows
 
 
 def get_query_sequences(pileupcolumn, bam_out,
                         use_indels=True,
-                        do_not_use_indels_on_error=True):
+                        do_not_use_indels_on_error=True,
+                        **kwargs):
 
     """
     Given a pysam.PileupColumn instance, it updates the bam_out
@@ -280,51 +249,83 @@ def get_query_sequences(pileupcolumn, bam_out,
     errors = 0
 
     # add the reference position and the number
-    # of reads that correspond to this position
     temp.append(pileupcolumn.reference_pos)
-    temp.append(pileupcolumn.n)
 
-    try:
-        # append bases
-        temp.append(pileupcolumn.get_query_sequences(add_indels=use_indels))
-        bam_out.append(temp)
-    except Exception as e:
+    # if the count is zero then we consult the reference
+    # at this position if we have a reference file
+    if pileupcolumn.n == 0 and "fastadata" in kwargs:
 
-        # try a fall out extra step only if it makes sense
-        if do_not_use_indels_on_error and use_indels:
-            try:
+      # when we consult the reference no RD
+      temp.append(0)
 
-                # appending bases
-                temp.append(pileupcolumn.get_query_sequences(add_indels=False))
+      # plus 1 since bam is zero-bsed and FASTA is 1 based
+      tmp.append([kwargs["fastadata"][pileupcolumn.reference_pos + 1]])
+    elif pileupcolumn.n == 0:
+      # we cannot do anything log the error and return
+      logging.error("At position: {0} read \
+                    count is zero and cannot use ref file.".format(pileupcolumn.reference_pos))
+      return bam_out, 0, 1
+    else:
+      # we have reads  pileupcolumn.n != 0
+      temp.append(pileupcolumn.n)
 
-                # flag to show indels not assessed.
-                # TODO: Do we really need that?
-                temp.extend("*")
-                bam_out.append(temp)
+      # get the read qualities for the column
+      quality = pileupcolumn.get_query_qualities()
+      quality_threshold = kwargs.get("quality_theshold", None)
+      try:
+          # append bases only if the quality of the read
+          # satisfies our threshold
 
-                # once in here we always adjust
-                adjusted += 1
-            except:
-                errors += 1
-                if len(bam_out) != 0:
-                    logging.error("Previous position was: {0}".format(bam_out[len(bam_out) - 1][0]))
-                else:
-                    logging.error("At the startig position")
-                #temp.append(["ERROR"])
-                #bam_out.append(temp)
-        else:
-            errors += 1
+          query_sequences = pileupcolumn.get_query_sequences(add_indels=use_indels)
 
-            # we have an error we should note
-            logging.error("At ")
+          if len(query_sequences) != len(quality):
+            logging.error("len(query_sequences) not equal to len(quality). pysam error?")
+          else:
 
-            if len(bam_out) != 0:
-                logging.error("Previous position was: {0}".format(bam_out[len(bam_out)-1][0]))
+            if quality_threshold:
+              filtered_bases = [ query_sequences[i] for i, q in enumerate(quality)
+                                if q >= quality_threshold]
+
+
+              temp.append(filtered_bases)
             else:
-                logging.error("At the startig position")
+              temp.append(query_sequences)
+            bam_out.append(temp)
+      except Exception as e:
 
-            #temp.append(["ERROR"])
-            #bam_out.append(temp)
+          # try a fall out extra step only if it makes sense
+          if do_not_use_indels_on_error and use_indels:
+              try:
+
+                  query_sequences = pileupcolumn.get_query_sequences(add_indels=False)
+
+                  if len(query_sequences) != len(quality):
+                    logging.error("len(query_sequences) not equal to len(quality). pysam error?")
+                  else:
+
+                    if quality_threshold:
+                       filtered_bases = [ query_sequences[i] for i, q in enumerate(quality)
+                                         if q >= quality_threshold]
+                       temp.append(filtered_bases)
+                    else:
+                      temp.append(query_sequences)
+
+                    # flag to show indels not assessed.
+                    # TODO: Do we really need that?
+                    temp.extend("*")
+                    bam_out.append(temp)
+
+                    # once in here we always adjust
+                    adjusted += 1
+              except:
+                  errors += 1
+                  logging.error("An error occured at position {0} whilst \
+                                reading query sequences.".format(pileupcolumn.reference_pos))
+          else:
+              errors += 1
+              logging.error("An error occured at position {0} whilst \
+                            reading query sequences.".format(pileupcolumn.reference_pos))
+
 
     return bam_out, adjusted, errors
 
@@ -401,7 +402,8 @@ def common_bases(bamdata, fastadata):
                     # not into the list as a separate list.
                     x.extend(common_count[0][0])
         except Exception as e:
-            raise Error("An error occurred whilst extracting common_bases")
+            raise Error("An error occurred whilst extracting \
+                        common_bases {0}".format(str(e)))
 
 
 def _get_insertions_and_deletions_from_indel(indel, insertions, deletions):

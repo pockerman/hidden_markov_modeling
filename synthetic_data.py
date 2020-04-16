@@ -1,23 +1,108 @@
-import argparse
-import logging
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
+"""
+Use synthetic data to evaluate implementation
+and assumptions. The following states are
+generated
+
+NORMAL
+DELETE
+INSERT
+
+"""
+
 from pomegranate import*
+import matplotlib.pyplot as plt
+import argparse
+#import seaborn as sns
+import numpy as np
+#import matplotlib.pyplot as plt
+#from collections import defaultdict
+#from scipy import stats
 
 from helpers import read_configuration_file
-from helpers import set_up_logger
-from helpers import save_hmm
+from helpers import Window
+#from helpers import WindowState
+from helpers import Observation
+from helpers import add_window_observation
+from helpers import DUMMY_ID
+#from helpers import windows_to_json
+from helpers import flat_windows
 from helpers import flat_windows_from_state
 from helpers import HMMCallback
 from helpers import print_logs_callback
+#from helpers import windows_rd_statistics
+from helpers import save_hmm
 
-from bam_helpers import extract_windows
+#from helpers import flat_windows_rd_from_indexes
 from cluster import Cluster
+#from cluster import clusters_statistics
 from hypothesis_testing import SignificanceTestLabeler
-from preprocess_utils import fit_distribution
-from preprocess_utils import build_clusterer
 from exceptions import Error
+from bam_helpers import DUMMY_BASE
+from preprocess_utils import build_clusterer
+from preprocess_utils import fit_distribution
+
+
+def create_synthetic_data(configuration, create_windows=True):
+
+  bases = ['A', 'T', 'C', 'G']
+  flip = ["YES", "NO"]
+  states = {"NORMAL": configuration["normal_rd"],
+            "DELETE": configuration["delete_rd"],
+            "INSERT": configuration["insert_rd"]}
+
+  seq_size = configuration["sequence_size"]
+
+  synthetic_data = []
+  state_name = np.random.choice(list(states.keys()))
+
+  counter = 0
+  for i in range(seq_size):
+
+    if np.random.choice(flip) == 'YES' and \
+      counter > configuration["minimum_occurences"][state_name]:
+      state_name = np.random.choice(list(states.keys()))
+      synthetic_data.append(states[state_name])
+      counter = 0
+      counter += 1
+    else:
+      synthetic_data.append(states[state_name])
+      counter += 1
+
+
+  if len(synthetic_data) != seq_size:
+    raise Error("Invalid size of synthetic \
+                data {0} not equal to {1}".format(len(synthetic_data), seq_size))
+
+  if not create_windows:
+    return synthetic_data
+
+  windows = []
+
+  idstart = 0
+  window = Window(idx=idstart, capacity=configuration["window_size"])
+
+  for idx, item in enumerate(synthetic_data):
+
+    # create an observation
+    observation = Observation(position=idx,
+                                  read_depth=item,
+                                  base=bases)
+    window = add_window_observation(window=window, windows=windows,
+                                        observation=observation,
+                                        windowcapacity=configuration["window_size"])
+
+
+  if len(window) != window.capacity():
+
+      # fill in missing data if this is requested
+      if configuration.get("fill_missing_window_data", False):
+        while window.has_capacity():
+          window.add(observation=Observation(position=DUMMY_ID,
+                                  read_depth=configuration["fill_missing_window_data_factor"],
+                                  base= [DUMMY_BASE]))
+
+  windows.append(window)
+  return windows
 
 
 def create_clusters(windows, configuration):
@@ -95,6 +180,7 @@ def init_hmm(clusters, windows, configuration):
   hmm_model.bake(verbose=True)
   return hmm_model
 
+
 def hmm_train(clusters, windows, configuration):
 
   # initialize the model
@@ -144,95 +230,35 @@ def hmm_train(clusters, windows, configuration):
                    configuration=configuration,
                    win_interval_length=0)
 
-
 def main():
 
-    print("Starting analysis")
-    description = "Check the README file for information on how to use the script"
-    parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('--config', type=str, default='config.json',
-                        help='You must specify a json formatted configuration file')
-    args = parser.parse_args()
+    # load the configuration
+    description = "Check the README file for \
+      information on how to use the script"
 
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('--config', type=str,
+                        default="config_synthetic.json",
+                        help='You must specify a json \
+                          formatted configuration file')
+
+    args = parser.parse_args()
     config_file = args.config
     configuration = read_configuration_file(config_file)
 
-    # configure the logger to use
-    set_up_logger(configuration=configuration)
-    logging.info("Checking if logger is sane...")
+    windows = create_synthetic_data(configuration=configuration)
 
-    wga_start_idx = configuration["reference_file"]["start_idx"]
-    wga_end_idx = configuration["reference_file"]["end_idx"]
-    windowsize = configuration["window_size"]
-    chromosome = configuration["chromosome"]
+    clusters = create_clusters(windows=windows, configuration=configuration)
 
-    print("\t\tStart index used: ", wga_start_idx)
-    print("\t\tEnd index used: ", wga_end_idx)
-    print("\t\tWindow size: ", windowsize)
-    print("\t\tChromosome: ", chromosome)
+    print("Number of clusters used: {0}".format(len(clusters)))
 
-    args = {"start_idx": int(wga_start_idx),
-            "end_idx": (wga_end_idx),
-            "windowsize": int(windowsize)}
+    for cluster in clusters:
+      print("State modelled by cluster {0} is {1}".format(clusters[cluster].cidx,
+                                                          clusters[cluster].state.name))
 
-    try:
-
-        # TODO: Extractig initial windows is independent
-        # we can do so in parallel
-
-        # extract the windows for the WGA treated file
-        wga_windows = extract_windows(chromosome=chromosome,
-                                      ref_filename=configuration["reference_file"]["name"],
-                                      test_filename=configuration["test_file"]["filename"], **args)
-
-        if len(wga_windows) == 0:
-            raise Error("WGA windows have not been created")
-        else:
-            print("\t\tNumber of windows: ", len(wga_windows))
-
-
-        non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
-        non_wga_end_idx = configuration["no_wga_file"]["end_idx"]
-
-        args = {"start_idx": int(non_wga_start_idx),
-                "end_idx": (non_wga_end_idx),
-                "windowsize": int(windowsize)}
-
-        # exrtact the non-wga windows
-        non_wga_windows = extract_windows(chromosome=chromosome,
-                                          ref_filename=configuration["reference_file"]["name"],
-                                          test_filename=configuration["no_wga_file"]["filename"], **args)
-
-        if len(non_wga_windows) == 0:
-            raise Error("Non-WGA windows have not  been created")
-        else:
-            print("\t\tNumber of windows: ", len(wga_windows))
-
-    except KeyError as e:
-        logging.error("Key: {0} does not exit".format(str(e)))
-    except Error as e:
-        logging.error(str(e))
-    except Exception as e:
-        logging.error("Unknown exception occured: " + str(e))
-
-    print("Extracted dataset....")
-    print("Start clustering....")
-    # create clusters
-    wga_clusters = create_clusters(windows=wga_windows,
-                                        configuration=configuration)
-
-    print("Number of wga_clusters used: {0}".format(len(wga_clusters)))
-
-    for cluster in wga_clusters:
-      print("State modelled by cluster {0} is {1}".format(wga_clusters[cluster].cidx,
-                                                          wga_clusters[cluster].state.name))
-
-    hmm_train(clusters=wga_clusters.values(),
-              windows=wga_windows,
-              configuration=configuration)
-
-    print("Finished analysis")
+    hmm_train(clusters=clusters.values(), windows=windows, configuration=configuration)
 
 
 if __name__ == '__main__':
-    main()
+  main()
+
