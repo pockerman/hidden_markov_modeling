@@ -334,7 +334,7 @@ class Window(object):
         self._net_indels = 0
 
         # the state of the window
-        self._state = None
+        self._state = WindowState.INVALID
 
     def add(self, observation):
 
