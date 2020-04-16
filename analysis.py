@@ -145,21 +145,7 @@ def hmm_train(clusters, windows, configuration):
                    win_interval_length=0)
 
 
-def main():
-
-    print("Starting analysis")
-    description = "Check the README file for information on how to use the script"
-    parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('--config', type=str, default='config.json',
-                        help='You must specify a json formatted configuration file')
-    args = parser.parse_args()
-
-    config_file = args.config
-    configuration = read_configuration_file(config_file)
-
-    # configure the logger to use
-    set_up_logger(configuration=configuration)
-    logging.info("Checking if logger is sane...")
+def make_windows(configuration):
 
     wga_start_idx = configuration["test_file"]["start_idx"]
     wga_end_idx = configuration["test_file"]["end_idx"]
@@ -215,6 +201,8 @@ def main():
         else:
             print("\t\tNumber of windows: ", len(wga_windows))
 
+        return wga_windows, non_wga_windows
+
     except KeyError as e:
         logging.error("Key: {0} does not exit".format(str(e)))
     except Error as e:
@@ -222,11 +210,32 @@ def main():
     except Exception as e:
         logging.error("Unknown exception occured: " + str(e))
 
+
+
+
+def main():
+
+    print("Starting analysis")
+    description = "Check the README file for information on how to use the script"
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('--config', type=str, default='config.json',
+                        help='You must specify a json formatted configuration file')
+    args = parser.parse_args()
+
+    config_file = args.config
+    configuration = read_configuration_file(config_file)
+
+    # configure the logger to use
+    set_up_logger(configuration=configuration)
+    logging.info("Checking if logger is sane...")
+
+    wga_windows = make_windows(configuration=configuration)
+
     print("Extracted dataset....")
     print("Start clustering....")
     # create clusters
-    wga_clusters = create_clusters(windows=wga_windows,
-                                        configuration=configuration)
+    wga_clusters, _ = create_clusters(windows=wga_windows,
+                                      configuration=configuration)
 
     print("Number of wga_clusters used: {0}".format(len(wga_clusters)))
 
