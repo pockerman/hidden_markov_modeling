@@ -390,19 +390,23 @@ def common_bases(bamdata, fastadata):
                 # from the entry position 2 and backwards
                 del (x[2:])
 
-                # when the most common mapped base to the position is an
-                # indel then all elements of the string are appended
-                # to the list (see screenshot on windows staff account).
-                if len(common_count[0][0]) > 1:
-                    indel = common_count[0][0]
-                    x.extend(indel[0])
-                else:
+                try:
+                    # when the most common mapped base to the position is an
+                    # indel then all elements of the string are appended
+                    # to the list (see screenshot on windows staff account).
+                    if len(common_count[0][0]) > 1:
+                      indel = common_count[0][0]
+                      x.extend(indel[0])
+                    else:
 
-                    # extend adds the new elements into the list,
-                    # not into the list as a separate list.
-                    x.extend(common_count[0][0])
+                      # extend adds the new elements into the list,
+                      # not into the list as a separate list.
+                      x.extend(common_count[0][0])
+                except Exception as e:
+                   print("Common count is: ", common_count)
+                   print("x is: ", x)
         except Exception as e:
-            raise Error("An error occurred whilst extracting \
+            raise Error("An error occurred whilst extracting\
                         common_bases {0}".format(str(e)))
 
 
