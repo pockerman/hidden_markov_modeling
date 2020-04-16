@@ -388,23 +388,29 @@ def common_bases(bamdata, fastadata):
 
                 # delete from the original bam entry what is present
                 # from the entry position 2 and backwards
-                del (x[2:])
+
 
                 try:
                     # when the most common mapped base to the position is an
                     # indel then all elements of the string are appended
                     # to the list (see screenshot on windows staff account).
                     if len(common_count[0][0]) > 1:
+                      del (x[2:])
                       indel = common_count[0][0]
-                      x.extend(indel[0])
-                    else:
+                      x.extend([indel[0]])
+                    elif len(common_count[0][0]) == 0:
 
+                      del (x[2:])
                       # extend adds the new elements into the list,
                       # not into the list as a separate list.
-                      x.extend(common_count[0][0])
+                      x.extend([common_count[0][0]])
+                    else:
+                       logging.warning(" No common bases found don't know what to do")
+
                 except Exception as e:
                    print("Common count is: ", common_count)
                    print("x is: ", x)
+                   raise
         except Exception as e:
             raise Error("An error occurred whilst extracting\
                         common_bases {0}".format(str(e)))
