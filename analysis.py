@@ -229,7 +229,7 @@ def main():
     set_up_logger(configuration=configuration)
     logging.info("Checking if logger is sane...")
 
-    wga_windows = make_windows(configuration=configuration)
+    wga_windows, non_wga_windows = make_windows(configuration=configuration)
 
     print("Extracted dataset....")
     print("Start clustering....")
