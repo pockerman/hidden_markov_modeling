@@ -12,19 +12,19 @@ INSERT
 from pomegranate import*
 import matplotlib.pyplot as plt
 import argparse
-import seaborn as sns
+#import seaborn as sns
 import numpy as np
-import matplotlib.pyplot as plt
-from collections import defaultdict
-from scipy import stats
+#import matplotlib.pyplot as plt
+#from collections import defaultdict
+#from scipy import stats
 
 from helpers import read_configuration_file
 from helpers import Window
-from helpers import WindowState
+#from helpers import WindowState
 from helpers import Observation
 from helpers import add_window_observation
 from helpers import DUMMY_ID
-from helpers import windows_to_json
+#from helpers import windows_to_json
 from helpers import flat_windows
 from helpers import flat_windows_from_state
 from helpers import HMMCallback
@@ -32,10 +32,10 @@ from helpers import print_logs_callback
 #from helpers import windows_rd_statistics
 from helpers import save_hmm
 
-from helpers import flat_windows_rd_from_indexes
+#from helpers import flat_windows_rd_from_indexes
 from cluster import Cluster
-from cluster import clusters_statistics
-from hypothesis_testing import*
+#from cluster import clusters_statistics
+from hypothesis_testing import SignificanceTestLabeler
 from exceptions import Error
 from bam_helpers import DUMMY_BASE
 from preprocess_utils import build_clusterer
@@ -80,7 +80,6 @@ def create_synthetic_data(configuration, create_windows=True):
 
   idstart = 0
   window = Window(idx=idstart, capacity=configuration["window_size"])
-  previous_observation = None
 
   for idx, item in enumerate(synthetic_data):
 
@@ -106,8 +105,6 @@ def create_synthetic_data(configuration, create_windows=True):
   return windows
 
 
-
-
 def create_clusters(windows, configuration):
 
   kwargs = {"clusterer":{ "name":configuration["clusterer"],
@@ -125,115 +122,20 @@ def create_clusters(windows, configuration):
   for i in range(len(clusters_indexes)):
     clusters.append(Cluster(id_ = i, indexes=clusters_indexes[i]))
 
-  print(clusters)
+  labeler = SignificanceTestLabeler(clusters=clusters,
+                                    windows=windows)
 
-  cluster_stats = clusters_statistics(clusters=clusters, windows=windows)
-  #print("Cluster statistics: ", cluster_stats)
-  cluster_data = defaultdict(list)
+  labeled_clusters = labeler.label(test_config=configuration["labeler"])
 
-  labeled_clusters = {}
+  # update windows states
+  for state in labeled_clusters:
+    cluster = labeled_clusters[state]
+    indexes = cluster.indexes
 
-
-  if "NOT_NORMAL" in configuration["states"]:
-
-    for cluster in clusters:
-
-      print("Testing cluster: ", cluster.cidx)
-
-      cluster_data[cluster.cidx] = cluster.get_data_from_windows(windows=windows)
-
-    # is the cluster a DELETE or sth else:
-      h0_normal = Equal(parameter_name="mean", value=1.0)
-      ha_notnormal = NotEqual(parameter_name="mean", value=1.0)
-
-      hypothesis = HypothesisTest(null=h0_normal,
-                                       alternative = ha_notnormal,
-                                       alpha=0.05,
-                                       data=cluster_data[cluster.cidx],
-                                       statistic_calculator=zscore_statistic)
-
-      hypothesis.test()
-
-      if h0_normal.accepted:
-      # this cluster is a delete cluster
-        print("Cluster %s is NORMAL" %cluster.cidx)
-        cluster.state = WindowState.NORMAL
-
-        if WindowState.NORMAL in labeled_clusters:
-              labeled_clusters[WindowState.NORMAL].merge(cluster)
-        else:
-              labeled_clusters[WindowState.NORMAL] = cluster
-
-      else:
-
-        if WindowState.NOT_NORMAL in labeled_clusters:
-              labeled_clusters[WindowState.NOT_NORMAL].merge(cluster)
-        else:
-              labeled_clusters[WindowState.NOT_NORMAL] = cluster
-
-  else:
-
-    for cluster in clusters:
-
-      print("Testing cluster: ", cluster.cidx)
-
-      cluster_data[cluster.cidx] = cluster.get_data_from_windows(windows=windows)
-
-      # is the cluster a DELETE or sth else:
-      h0_delete = LessThan(parameter_name="mean", value=1.0)
-      ha_delete = GreaterOrEqualThan(parameter_name="mean", value=1.0)
-
-      hypothesis_delete = HypothesisTest(null=h0_delete,
-                                       alternative = ha_delete,
-                                       alpha=0.05,
-                                       data=cluster_data[cluster.cidx],
-                                       statistic_calculator=zscore_statistic)
-
-      hypothesis_delete.test()
-
-      if h0_delete.accepted:
-      # this cluster is a delete cluster
-        print("Cluster %s is DELETE" %cluster.cidx)
-        cluster.state = WindowState.DELETE
-
-        if WindowState.DELETE in labeled_clusters:
-              labeled_clusters[WindowState.DELETE].merge(cluster)
-        else:
-              labeled_clusters[WindowState.DELETE] = cluster
-
-      else:
-
-        h0_normal = Equal(parameter_name="mean", value=1.0)
-        ha_normal = GreaterOrEqualThan(parameter_name="mean", value=1.0)
-
-        hypothesis_normal = HypothesisTest(null=h0_normal,
-                                             alternative = ha_normal,
-                                             alpha=0.05,
-                                             data=cluster_data[cluster.cidx],
-                                             statistic_calculator=zscore_statistic)
-
-        hypothesis_normal.test()
-
-        if h0_normal.accepted:
-          print("Cluster %s is NORMAL"%cluster.cidx)
-          cluster.state = WindowState.NORMAL
-
-          if WindowState.NORMAL in labeled_clusters:
-            labeled_clusters[WindowState.NORMAL].merge(cluster)
-          else:
-            labeled_clusters[WindowState.NORMAL] = cluster
-        else:
-          print("Cluster %s is INSERT"%cluster.cidx)
-          cluster.state = WindowState.INSERT
-
-          if WindowState.INSERT in labeled_clusters:
-            labeled_clusters[WindowState.INSERT].merge(cluster)
-          else:
-            labeled_clusters[WindowState.INSERT] = cluster
-
+    for idx in indexes:
+      windows[idx].set_state(cluster.state)
 
   return labeled_clusters
-
 
 def init_hmm(clusters, windows, configuration):
 
@@ -249,9 +151,6 @@ def init_hmm(clusters, windows, configuration):
     fit_distribution(data=cluster.get_data_from_windows(windows=windows),
                      dist_name=configuration["fit_states_dist"][cluster.state.name])
     states.append(State(state_to_dist[cluster.state.name], name=cluster.state.name))
-
-
-  print(state_to_dist)
 
 
   # add the states to the model
@@ -293,6 +192,10 @@ def hmm_train(clusters, windows, configuration):
   flatwindows = flat_windows_from_state(windows=windows,
                                         configuration=configuration,
                                         as_on_seq=False)
+
+  #flatwindows = flat_windows(windows=windows)
+
+  print("Flatwindows are: ", flatwindows)
 
   #flatwindows = flat_windows(windows)
   print("Start training HMM")
@@ -350,7 +253,6 @@ def main():
     print("Number of clusters used: {0}".format(len(clusters)))
 
     for cluster in clusters:
-      print(cluster)
       print("State modelled by cluster {0} is {1}".format(clusters[cluster].cidx,
                                                           clusters[cluster].state.name))
 
