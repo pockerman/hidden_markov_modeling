@@ -2,8 +2,6 @@
   "normal_rd":1,
   "delete_rd":0,
   "insert_rd":2,
-  "min_num_inserts":20,
-  "max_num_deletes":20,
   "window_size":100,
   "sequence_size":2000,
   "swap_state_freq":15,

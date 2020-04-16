@@ -161,8 +161,14 @@ def main():
     set_up_logger(configuration=configuration)
     logging.info("Checking if logger is sane...")
 
-    wga_start_idx = configuration["reference_file"]["start_idx"]
-    wga_end_idx = configuration["reference_file"]["end_idx"]
+    wga_start_idx = configuration["test_file"]["start_idx"]
+    wga_end_idx = configuration["test_file"]["end_idx"]
+
+    if wga_end_idx == "none":
+      wga_end_idx = None
+    else:
+      wga_end_idx = int(wga_end_idx)
+
     windowsize = configuration["window_size"]
     chromosome = configuration["chromosome"]
 
@@ -172,7 +178,7 @@ def main():
     print("\t\tChromosome: ", chromosome)
 
     args = {"start_idx": int(wga_start_idx),
-            "end_idx": (wga_end_idx),
+            "end_idx": wga_end_idx,
             "windowsize": int(windowsize)}
 
     try:
@@ -183,7 +189,8 @@ def main():
         # extract the windows for the WGA treated file
         wga_windows = extract_windows(chromosome=chromosome,
                                       ref_filename=configuration["reference_file"]["name"],
-                                      test_filename=configuration["test_file"]["filename"], **args)
+                                      test_filename=configuration["test_file"]["filename"],
+                                      **args)
 
         if len(wga_windows) == 0:
             raise Error("WGA windows have not been created")

@@ -7,7 +7,7 @@
   "no_wga_file": {
      "filename": "/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam",
      "start_idx": 0,
-     "end_idx": 1000100
+     "end_idx": "none"
   },
   "test_file":{
     "filename": "/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam",
