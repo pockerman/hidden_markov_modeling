@@ -52,10 +52,6 @@ def load_data(configuration):
     return wga_windows
 
 
-def build_hmm():
-  pass
-
-
 def main():
 
     # load the configuration
@@ -79,7 +75,7 @@ def main():
         json.dump(json_str, jsonfile)
 
 
-    windows = flat_windows(wga_windows)
+    #windows = flat_windows(wga_windows)
 
     # use clustering to cluster similar windows together
     # then use the resulting clusters to fit probability
