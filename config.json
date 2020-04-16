@@ -5,12 +5,12 @@
     "end_idx": 1000100
   },
   "no_wga_file": {
-     "filename": "data/m585_chopper_1_1000101.bam",
+     "filename": "data/m585_verysensitive_trim_sorted.bam",
      "start_idx": 0,
-     "end_idx": 1000100
+     "end_idx": "none"
   },
   "test_file":{
-    "filename": "data/m605_chopped_1_1000101.bam",
+    "filename": "data/m605_verysensitive_trim_sorted.bam",
     "start_idx": 0,
     "end_idx": 1000100
   },
