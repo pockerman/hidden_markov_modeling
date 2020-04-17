@@ -195,7 +195,7 @@ def make_windows(configuration):
 
         # exrtact the non-wga windows
         non_wga_windows = extract_windows(chromosome=chromosome,
-                                          ref_filename=configuration["reference_file"]["name"],
+                                          ref_filename=configuration["reference_file"]["filename"],
                                           test_filename=configuration["no_wga_file"]["filename"], **args)
 
         if len(non_wga_windows) == 0:
