@@ -33,11 +33,7 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
         print("\t Reference file: ", ref_file.filename)
 
         with pysam.AlignmentFile(test_filename, "rb") as test_file:
-            print("\t Test file")
-            print("\t", test_file.filename)
-            print("\t", test_file.description)
-
-            print("=============================\n")
+            print("\t Test file", test_file.filename)
 
             try:
 
@@ -49,7 +45,7 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
                                                       quality_theshold=quality_theshold,
                                                       fastadata=ref_list)
 
-                print("\t Number of erros: ", errors)
+                print("\t Number of errors: ", errors)
                 print("\t Number of adjusted: ", adjusted)
                 print("\t bam output: ", len(bam_out))
 
