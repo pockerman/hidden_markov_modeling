@@ -78,8 +78,12 @@ def init_hmm(clusters, windows, configuration):
   # we fit the model. All states have an equal
   # probability to be the starting state or we could
 
-  for i, cluster in enumerate(clusters):
-    hmm_model.add_transition(hmm_model.start,
+  if len(clusters) == 1:
+    hmm_model.add_transition(hmm_model.start, states[0], 1.0)
+  else:
+
+    for i, cluster in enumerate(clusters):
+      hmm_model.add_transition(hmm_model.start,
                              states[i],
                               configuration["HMM"]["start_prob"][cluster.state.name])
 
@@ -97,7 +101,7 @@ def init_hmm(clusters, windows, configuration):
 
 def hmm_train(clusters, windows, configuration):
 
-  print("\tStart HMM training....")
+  print("Start HMM training....")
 
   # initialize the model
   hmm_model = init_hmm(clusters=clusters,
@@ -114,7 +118,6 @@ def hmm_train(clusters, windows, configuration):
   #print("Flatwindows are: ", flatwindows)
 
   #flatwindows = flat_windows(windows)
-  print("Start training HMM")
 
   # fit the model
   hmm_model, history = hmm_model.fit(sequences=[flatwindows],
@@ -160,10 +163,10 @@ def make_windows(configuration):
     windowsize = configuration["window_size"]
     chromosome = configuration["chromosome"]
 
-    print("\t\tStart index used: ", wga_start_idx)
-    print("\t\tEnd index used: ", wga_end_idx)
-    print("\t\tWindow size: ", windowsize)
-    print("\t\tChromosome: ", chromosome)
+    print("\tStart index used: ", wga_start_idx)
+    print("\tEnd index used: ", wga_end_idx)
+    print("\tWindow size: ", windowsize)
+    print("\tChromosome: ", chromosome)
 
     args = {"start_idx": int(wga_start_idx),
             "end_idx": wga_end_idx,
@@ -183,7 +186,7 @@ def make_windows(configuration):
         if len(wga_windows) == 0:
             raise Error("WGA windows have not been created")
         else:
-            print("\t\tNumber of windows: ", len(wga_windows))
+            print("\tNumber of windows: ", len(wga_windows))
 
 
         non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
@@ -201,7 +204,7 @@ def make_windows(configuration):
         if len(non_wga_windows) == 0:
             raise Error("Non-WGA windows have not  been created")
         else:
-            print("\t\tNumber of windows: ", len(wga_windows))
+            print("\tNumber of non-wga windows: ", len(wga_windows))
 
         return wga_windows, non_wga_windows
 
@@ -211,9 +214,6 @@ def make_windows(configuration):
         logging.error(str(e))
     except Exception as e:
         logging.error("Unknown exception occured: " + str(e))
-
-
-
 
 def main():
 
@@ -231,9 +231,10 @@ def main():
     set_up_logger(configuration=configuration)
     logging.info("Checking if logger is sane...")
 
+    print("Creating windows...")
     wga_windows, non_wga_windows = make_windows(configuration=configuration)
 
-    print("Extracted dataset....")
+    print("Created windows....")
     print("Start clustering....")
 
     wga_clusters = create_clusters(windows=wga_windows,
