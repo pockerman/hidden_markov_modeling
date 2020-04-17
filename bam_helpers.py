@@ -92,6 +92,10 @@ def bam_strip(chromosome, file, start, stop, **kwargs):
     for pileupcolumn in file.pileup(chromosome, start, stop,
                                         truncate=True, ignore_orphans=False):
 
+
+            if kwargs.get("quality_theshold", None) is not None:
+              pileupcolumn.set_min_base_quality(min_base_quality=kwargs.get("quality_theshold", None))
+
             bam_out, adjusted_tmp, errors_tmp = \
                 get_query_sequences(pileupcolumn=pileupcolumn,
                                     bam_out=bam_out,
@@ -269,8 +273,7 @@ def get_query_sequences(pileupcolumn, bam_out,
                     count is zero and cannot use ref file.".format(pileupcolumn.reference_pos))
       return bam_out, 0, 1
     else:
-      # we have reads  pileupcolumn.n != 0
-      temp.append(pileupcolumn.nsegments)
+
 
       # get the read qualities for the column
       quality = pileupcolumn.get_query_qualities()
@@ -291,8 +294,14 @@ def get_query_sequences(pileupcolumn, bam_out,
                                 if q >= quality_threshold]
 
 
+              # we have reads  pileupcolumn.nsegments ignores
+              # the applied quality filter. Assume that the
+              # number of segments is always larger
+              nsegments = pileupcolumn.nsegments - len(filtered_bases)
+              temp.append(nsegments)
               temp.append(filtered_bases)
             else:
+              temp.append(pileupcolumn.nsegments)
               temp.append(query_sequences)
             bam_out.append(temp)
       except Exception as e:
@@ -311,8 +320,12 @@ def get_query_sequences(pileupcolumn, bam_out,
                     if quality_threshold:
                        filtered_bases = [ query_sequences[i] for i, q in enumerate(quality)
                                          if q >= quality_threshold]
+
+                       nsegments = pileupcolumn.nsegments - len(filtered_bases)
+                       temp.append(nsegments)
                        temp.append(filtered_bases)
                     else:
+                      temp.append(pileupcolumn.nsegments)
                       temp.append(query_sequences)
 
                     # flag to show indels not assessed.
