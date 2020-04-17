@@ -201,6 +201,9 @@ def make_windows(configuration):
                                                                           windows=wga_windows),
                                         statistics="all")
 
+        print("Window statistics: ")
+        print(statistics)
+
 
         #non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
         #non_wga_end_idx = configuration["no_wga_file"]["end_idx"]
