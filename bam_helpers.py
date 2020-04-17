@@ -224,11 +224,13 @@ def get_query_sequences(pileupcolumn, bam_out,
     """
     Given a pysam.PileupColumn instance, it updates the bam_out
     list with the relevant entries corresponding to the given column.
-    That is it appends to bam_out the following
-    sublist
-    [pileupcolumn.reference_pos, pileupcolumn.n, [list of bases mapping to the reference_pos]]
+    That is it appends to bam_out the following sublist
+    [pileupcolumn.reference_pos,
+     pileupcolumn.n,
+     [list of bases mapping to the reference_pos]]
 
-    If an error occurs, the sublist of bases mapping to the reference position is substituted
+    If an error occurs, the sublist of bases mapping to the
+    reference position is substituted
     with the string "ERROR".
     Client code then should decide how to fill this entry or disregard it altogether
 
@@ -254,21 +256,21 @@ def get_query_sequences(pileupcolumn, bam_out,
 
     # if the count is zero then we consult the reference
     # at this position if we have a reference file
-    if pileupcolumn.n == 0 and "fastadata" in kwargs:
+    if pileupcolumn.nsegments == 0 and "fastadata" in kwargs:
 
       # when we consult the reference no RD
       temp.append(0)
 
       # plus 1 since bam is zero-bsed and FASTA is 1 based
       temp.append([kwargs["fastadata"][pileupcolumn.reference_pos + 1]])
-    elif pileupcolumn.n == 0:
+    elif pileupcolumn.nsegments == 0:
       # we cannot do anything log the error and return
       logging.error("At position: {0} read \
                     count is zero and cannot use ref file.".format(pileupcolumn.reference_pos))
       return bam_out, 0, 1
     else:
       # we have reads  pileupcolumn.n != 0
-      temp.append(pileupcolumn.n)
+      temp.append(pileupcolumn.nsegments)
 
       # get the read qualities for the column
       quality = pileupcolumn.get_query_qualities()
@@ -280,7 +282,8 @@ def get_query_sequences(pileupcolumn, bam_out,
           query_sequences = pileupcolumn.get_query_sequences(add_indels=use_indels)
 
           if len(query_sequences) != len(quality):
-            logging.error("len(query_sequences) not equal to len(quality). pysam error?")
+            logging.error("len(query_sequences) not equal\
+                          to len(quality). pysam error?")
           else:
 
             if quality_threshold:
@@ -301,7 +304,8 @@ def get_query_sequences(pileupcolumn, bam_out,
                   query_sequences = pileupcolumn.get_query_sequences(add_indels=False)
 
                   if len(query_sequences) != len(quality):
-                    logging.error("len(query_sequences) not equal to len(quality). pysam error?")
+                    logging.error("len(query_sequences) not equal to \
+                                  len(quality). pysam error?")
                   else:
 
                     if quality_threshold:
@@ -368,7 +372,7 @@ def common_bases(bamdata, fastadata):
     is a list containing lists of the form
     # [reference_pos, count_number, [list of bases.  usually a single base]]
     :param bamdata: The bamdata to fill in
-    :param fasta: The reference data
+    :param fastadata: The reference data
     :return:
     """
 
