@@ -151,8 +151,14 @@ def flat_windows_from_state(windows, configuration, as_on_seq):
 def flat_windows_rd_from_indexes(indexes, windows):
   rd_observations = []
 
-  for widx in indexes:
-    rd_observations.extend(windows[widx].get_rd_observations())
+  if indexes is None:
+    # do all the windows
+    for window in windows:
+      rd_observations.extend(window.get_rd_observations())
+  else:
+
+    for widx in indexes:
+      rd_observations.extend(windows[widx].get_rd_observations())
   return rd_observations
 
 """

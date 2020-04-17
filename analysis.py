@@ -12,11 +12,13 @@ from helpers import flat_windows
 from helpers import flat_windows_from_state
 from helpers import HMMCallback
 from helpers import print_logs_callback
+from helpers import flat_windows_rd_from_indexes
 
 from bam_helpers import extract_windows
 from cluster import Cluster
 from hypothesis_testing import SignificanceTestLabeler
 from preprocess_utils import fit_distribution
+from preprocess_utils import compute_statistic
 from preprocess_utils import build_clusterer
 from exceptions import Error
 
@@ -134,10 +136,15 @@ def hmm_train(clusters, windows, configuration):
 
   p_d_given_m = hmm_model.log_probability(sequence=flatwindows)
   print("P(D|M): ", p_d_given_m)
-  print(hmm_model.predict_proba(flatwindows))
-  viterbi_path=hmm_model.viterbi(flatwindows)
-  trans, ems = hmm_model.forward_backward( flatwindows )
+  print(hmm_model.predict_proba(flatwindows[0]))
+  viterbi_path=hmm_model.viterbi(flatwindows[0])
+  trans, ems = hmm_model.forward_backward( flatwindows[0] )
+
+  print("Tansition matrix")
   print(trans)
+
+  print("Emission matrix")
+  print(ems)
 
   # plot the model
   #plt.figure( figsize=(10,6) )
@@ -187,6 +194,12 @@ def make_windows(configuration):
             raise Error("WGA windows have not been created")
         else:
             print("\tNumber of windows: ", len(wga_windows))
+
+
+        # compute the statistics about the windows
+        statistics = compute_statistics(data=flat_windows_rd_from_indexes(indexes=None,
+                                                                          windows=wga_windows),
+                                        statistics="all")
 
 
         #non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
