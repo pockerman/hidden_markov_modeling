@@ -109,15 +109,14 @@ def hmm_train(clusters, windows, configuration):
                        configuration=configuration)
 
 
-  flatwindows = flat_windows_from_state(windows=windows,
-                                        configuration=configuration,
-                                        as_on_seq=False)
+  #flatwindows = flat_windows_from_state(windows=windows,
+  #                                      configuration=configuration,
+  #                                      as_on_seq=False)
 
-  #flatwindows = flat_windows(windows=windows)
+  flatwindows = flat_windows(windows=windows)
 
   #print("Flatwindows are: ", flatwindows)
 
-  #flatwindows = flat_windows(windows)
 
   # fit the model
   hmm_model, history = hmm_model.fit(sequences=[flatwindows],
@@ -246,6 +245,9 @@ def main():
     for cluster in wga_clusters:
       print("State modelled by cluster {0} is {1}".format(wga_clusters[cluster].cidx,
                                                           wga_clusters[cluster].state.name))
+      print("Cluster statistics: ")
+      print(wga_clusters[cluster].get_statistics(windows=wga_windows,
+                                                 statistic="all"))
 
     hmm_train(clusters=wga_clusters.values(),
               windows=wga_windows,
