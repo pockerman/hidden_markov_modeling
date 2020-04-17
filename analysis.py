@@ -1,13 +1,14 @@
 import argparse
 import logging
-import matplotlib.pyplot as plt
-import seaborn as sns
+#import matplotlib.pyplot as plt
+#import seaborn as sns
 import numpy as np
 from pomegranate import*
 
 from helpers import read_configuration_file
 from helpers import set_up_logger
 from helpers import save_hmm
+from helpers import flat_windows
 from helpers import flat_windows_from_state
 from helpers import HMMCallback
 from helpers import print_logs_callback
