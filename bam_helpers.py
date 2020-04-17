@@ -394,6 +394,10 @@ def common_bases(bamdata, fastadata):
                 # this position from hg38 ref fasta
                 #x.append((fastadata[x[0] + 1]))
                 logging.error(" Bam item does not have the correct format")
+            elif x[1] == 1 and x[2] == '':
+                logging.warning("An entry of the form {0} found.\
+                                Turnd RD to zero".format(str(x)))
+                x[1] = 0
 
             else:
                 # provides the element which reaches the
