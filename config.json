@@ -1,6 +1,6 @@
 {
   "reference_file":{
-    "name": "data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
+    "filename": "data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
     "start_idx" :0,
     "end_idx": 1000100
   },

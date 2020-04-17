@@ -93,7 +93,8 @@ def bam_strip(chromosome, file, start, stop, **kwargs):
                                         truncate=True, ignore_orphans=False):
 
             bam_out, adjusted_tmp, errors_tmp = \
-                get_query_sequences(pileupcolumn=pileupcolumn, bam_out=bam_out,
+                get_query_sequences(pileupcolumn=pileupcolumn,
+                                    bam_out=bam_out,
                                     use_indels=True,
                                     do_not_use_indels_on_error=True,
                                     quality_theshold=kwargs.get("quality_theshold", None),
@@ -248,7 +249,7 @@ def get_query_sequences(pileupcolumn, bam_out,
     adjusted = 0
     errors = 0
 
-    # add the reference position and the number
+    # add the reference position
     temp.append(pileupcolumn.reference_pos)
 
     # if the count is zero then we consult the reference
@@ -259,7 +260,7 @@ def get_query_sequences(pileupcolumn, bam_out,
       temp.append(0)
 
       # plus 1 since bam is zero-bsed and FASTA is 1 based
-      tmp.append([kwargs["fastadata"][pileupcolumn.reference_pos + 1]])
+      temp.append([kwargs["fastadata"][pileupcolumn.reference_pos + 1]])
     elif pileupcolumn.n == 0:
       # we cannot do anything log the error and return
       logging.error("At position: {0} read \
@@ -407,11 +408,11 @@ def common_bases(bamdata, fastadata):
                       x.extend([common_count[0][0]])
                   else:
                       logging.warning(" No common bases found don't know what to do")
-                      logging.warning(" x looked at is ", x)
+                      logging.warning(" x looked at is {0}".format(x))
 
                 except Exception as e:
-                   print("Common count is: ", common_count)
-                   print("x is: ", x)
+                   print("Common count is: {0}".format(common_count))
+                   print("x is: {0}" .format(x))
                    raise
         except Exception as e:
             raise Error("An error occurred whilst extracting\

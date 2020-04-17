@@ -97,6 +97,8 @@ def init_hmm(clusters, windows, configuration):
 
 def hmm_train(clusters, windows, configuration):
 
+  print("\tStart HMM training....")
+
   # initialize the model
   hmm_model = init_hmm(clusters=clusters,
                        windows=windows,
@@ -109,7 +111,7 @@ def hmm_train(clusters, windows, configuration):
 
   #flatwindows = flat_windows(windows=windows)
 
-  print("Flatwindows are: ", flatwindows)
+  #print("Flatwindows are: ", flatwindows)
 
   #flatwindows = flat_windows(windows)
   print("Start training HMM")
@@ -135,9 +137,9 @@ def hmm_train(clusters, windows, configuration):
   print(trans)
 
   # plot the model
-  plt.figure( figsize=(10,6) )
-  hmm_model.plot()
-  plt.show()
+  #plt.figure( figsize=(10,6) )
+  #hmm_model.plot()
+  #plt.show()
 
 
   save_hmm(hmm_model=hmm_model,
@@ -174,7 +176,7 @@ def make_windows(configuration):
 
         # extract the windows for the WGA treated file
         wga_windows = extract_windows(chromosome=chromosome,
-                                      ref_filename=configuration["reference_file"]["name"],
+                                      ref_filename=configuration["reference_file"]["filename"],
                                       test_filename=configuration["test_file"]["filename"],
                                       **args)
 
