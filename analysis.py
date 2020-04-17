@@ -109,15 +109,14 @@ def hmm_train(clusters, windows, configuration):
                        configuration=configuration)
 
 
-  flatwindows = flat_windows_from_state(windows=windows,
-                                        configuration=configuration,
-                                        as_on_seq=False)
+  #flatwindows = flat_windows_from_state(windows=windows,
+  #                                      configuration=configuration,
+  #                                      as_on_seq=False)
 
-  #flatwindows = flat_windows(windows=windows)
+  flatwindows = flat_windows(windows=windows)
 
   #print("Flatwindows are: ", flatwindows)
 
-  #flatwindows = flat_windows(windows)
 
   # fit the model
   hmm_model, history = hmm_model.fit(sequences=[flatwindows],
