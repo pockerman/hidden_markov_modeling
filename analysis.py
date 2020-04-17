@@ -235,8 +235,8 @@ def main():
 
     print("Extracted dataset....")
     print("Start clustering....")
-    # create clusters
-    wga_clusters, _ = create_clusters(windows=wga_windows,
+
+    wga_clusters = create_clusters(windows=wga_windows,
                                       configuration=configuration)
 
     print("Number of wga_clusters used: {0}".format(len(wga_clusters)))
