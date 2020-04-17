@@ -189,24 +189,24 @@ def make_windows(configuration):
             print("\tNumber of windows: ", len(wga_windows))
 
 
-        non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
-        non_wga_end_idx = configuration["no_wga_file"]["end_idx"]
+        #non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
+        #non_wga_end_idx = configuration["no_wga_file"]["end_idx"]
 
-        args = {"start_idx": int(non_wga_start_idx),
-                "end_idx": (non_wga_end_idx),
-                "windowsize": int(windowsize)}
+        #args = {"start_idx": int(non_wga_start_idx),
+        #        "end_idx": (non_wga_end_idx),
+        #        "windowsize": int(windowsize)}
 
         # exrtact the non-wga windows
-        non_wga_windows = extract_windows(chromosome=chromosome,
-                                          ref_filename=configuration["reference_file"]["filename"],
-                                          test_filename=configuration["no_wga_file"]["filename"], **args)
+        #non_wga_windows = extract_windows(chromosome=chromosome,
+        #                                  ref_filename=configuration["reference_file"]["filename"],
+        #                                  test_filename=configuration["no_wga_file"]["filename"], **args)
 
-        if len(non_wga_windows) == 0:
-            raise Error("Non-WGA windows have not  been created")
-        else:
-            print("\tNumber of non-wga windows: ", len(wga_windows))
+        #if len(non_wga_windows) == 0:
+        #    raise Error("Non-WGA windows have not  been created")
+        #else:
+        #    print("\tNumber of non-wga windows: ", len(wga_windows))
 
-        return wga_windows, non_wga_windows
+        return wga_windows, [] #non_wga_windows
 
     except KeyError as e:
         logging.error("Key: {0} does not exit".format(str(e)))
@@ -238,8 +238,9 @@ def main():
     print("Start clustering....")
 
     wga_clusters = create_clusters(windows=wga_windows,
-                                      configuration=configuration)
+                                   configuration=configuration)
 
+    print("Finished clustering...")
     print("Number of wga_clusters used: {0}".format(len(wga_clusters)))
 
     for cluster in wga_clusters:
