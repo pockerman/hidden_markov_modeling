@@ -197,7 +197,7 @@ def make_windows(configuration):
 
 
         # compute the statistics about the windows
-        statistics = compute_statistics(data=flat_windows_rd_from_indexes(indexes=None,
+        statistics = compute_statistic(data=flat_windows_rd_from_indexes(indexes=None,
                                                                           windows=wga_windows),
                                         statistics="all")
 
