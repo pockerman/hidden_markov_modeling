@@ -246,6 +246,9 @@ def main():
     for cluster in wga_clusters:
       print("State modelled by cluster {0} is {1}".format(wga_clusters[cluster].cidx,
                                                           wga_clusters[cluster].state.name))
+      print("Cluster statistics: ")
+      print(wga_clusters[cluster].get_statistics(windows=wga_windows,
+                                                 statistic="all"))
 
     hmm_train(clusters=wga_clusters.values(),
               windows=wga_windows,
