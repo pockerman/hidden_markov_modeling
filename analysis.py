@@ -70,6 +70,10 @@ def init_hmm(clusters, windows, configuration):
                      dist_name=configuration["fit_states_dist"][cluster.state.name])
     states.append(State(state_to_dist[cluster.state.name], name=cluster.state.name))
 
+    print("For cluster: {0}".format(cluster.state.name))
+    print("Distribution:")
+    print(state_to_dist[cluster.state.name])
+
 
   # add the states to the model
   hmm_model.add_states(states)
@@ -94,8 +98,11 @@ def init_hmm(clusters, windows, configuration):
     for j in states:
 
       if i == j:
+        # high probabiity for self-transitioning
         hmm_model.add_transition(i, j, 0.95)
       else:
+
+        #low probability for change state transition
         hmm_model.add_transition(i, j, 0.05)
 
   # finally we need to bake

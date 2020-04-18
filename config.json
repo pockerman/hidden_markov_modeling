@@ -33,7 +33,7 @@
     "statistic_cal":"zscore",
     "statistic_parameter":"mean",
     "statistical_parameter_value": 2.0,
-    "order":["NORMAL", "NOT_NORMAL"]
+    "order":["DELETE", "NORMAL", "INSERT"]
   },
   "clusterer":{
     "name":"kmedoids",
@@ -42,20 +42,22 @@
     "metric":"MANHATAN"
     }
   },
-  "states":["NORMAL", "NOT_NORMAL"],
+  "states":["NORMAL", "DELETE", "INSERT"],
   "HMM": {
     "name":"HMM_Model",
     "train_solver": "baum-welch",
     "save_model":true,
     "save_hmm_filename":"HMM_Model",
     "start_prob":{
-      "NORMAL": 1.0,
-      "NOT_NORMAL": 0.0
+      "NORMAL": 0.95,
+      "DELETE": 0.025,
+      "INSERT": 0.025
     }
   },
    "fit_states_dist":{
-    "NOT_NORMAL": "normal",
+    "INSERT": "normal",
     "NORMAL":"normal"
+    "DELETE":"normal"
   },
   "logger_file":"tuf.log",
   "logger_level": "INFO"
