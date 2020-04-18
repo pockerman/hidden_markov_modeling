@@ -208,9 +208,9 @@ class SignificanceTestLabeler(object):
         cluster_data[cluster.cidx] = cluster.get_data_from_windows(windows=self._windows)
 
         # is the cluster a DELETE or sth else:
-        h0_delete = LessThan(parameter_name=test_config["statistic_parameter"],
-                             value=test_config["statistical_parameter_value"])
-        ha_delete = GreaterOrEqualThan(parameter_name=test_config["statistic_parameter"],
+        h0_delete = LessOrEqualThan(parameter_name=test_config["statistic_parameter"],
+                             value=1.0)#test_config["statistical_parameter_value"])
+        ha_delete = GreaterThan(parameter_name=test_config["statistic_parameter"],
                                        value=test_config["statistical_parameter_value"])
 
         hypothesis_delete = HypothesisTest(null=h0_delete,
