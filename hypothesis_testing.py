@@ -26,7 +26,7 @@ def zscore_statistic(data, null, **kwargs):
       if direction == ">" or direction == ">=":
         prob = 1.0 - st.norm.cdf(score)
         return prob, statistic
-      elif direction == ">" or direction == ">=":
+      elif direction == "<" or direction == "<=":
         prob = st.norm.cdf(score)
         return prob, statistic
       else:
@@ -235,7 +235,7 @@ class SignificanceTestLabeler(object):
 
           h0_normal = Equal(parameter_name=test_config["statistic_parameter"],
                              value=test_config["statistical_parameter_value"])
-          ha_normal = GreaterOrEqualThan(parameter_name=test_config["statistic_parameter"],
+          ha_normal = GreaterThan(parameter_name=test_config["statistic_parameter"],
                              value=test_config["statistical_parameter_value"])
 
           hypothesis_normal = HypothesisTest(null=h0_normal,
