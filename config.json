@@ -56,7 +56,7 @@
   },
    "fit_states_dist":{
     "INSERT": "normal",
-    "NORMAL":"normal"
+    "NORMAL":"normal",
     "DELETE":"normal"
   },
   "logger_file":"tuf.log",
