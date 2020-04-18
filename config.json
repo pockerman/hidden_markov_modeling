@@ -32,14 +32,14 @@
     "significance": 0.05,
     "statistic_cal":"zscore",
     "statistic_parameter":"mean",
-    "statistical_parameter_value": 1.0,
+    "statistical_parameter_value": 2.0,
     "order":["NORMAL", "NOT_NORMAL"]
   },
   "clusterer":{
     "name":"kmedoids",
     "config":{
     "init_cluster_idx":"random_from_data",
-    "metric":"EUCLIDEAN"
+    "metric":"MANHATAN"
     }
   },
   "states":["NORMAL", "NOT_NORMAL"],
