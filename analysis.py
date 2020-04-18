@@ -134,7 +134,7 @@ def hmm_train(clusters, windows, configuration):
   print("Done training HMM")
   hmm_model.bake()
 
-  p_d_given_m = hmm_model.log_probability(sequence=flatwindows)
+  p_d_given_m = hmm_model.log_probability(sequence=flatwindows[0])
   print("P(D|M): ", p_d_given_m)
   print(hmm_model.predict_proba(flatwindows[0]))
   viterbi_path=hmm_model.viterbi(flatwindows[0])
