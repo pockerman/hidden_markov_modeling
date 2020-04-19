@@ -218,7 +218,7 @@ def make_windows(configuration):
           config["statistics"] = statistics
 
           wga_windows = remove_outliers(windows = wga_windows,
-                          removemethod=configuration[outlier_remove]["name"],
+                          removemethod=configuration["outlier_remove"]["name"],
                           config=config)
 
           print("\tNumber of windows after outlier removal: ", len(wga_windows))
