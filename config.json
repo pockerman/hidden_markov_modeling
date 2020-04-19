@@ -27,7 +27,7 @@
   "outlier_remove":{
 
     "name":"zscore",
-    config:{
+    "config":{
       "sigma_factor":3
     }
   },
