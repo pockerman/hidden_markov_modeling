@@ -38,6 +38,8 @@ def create_clusters(windows, configuration):
   clusters_indexes = clusterer.get_clusters()
   clusters = []
 
+  print("Starting cluster labeling...")
+
   for i in range(len(clusters_indexes)):
     clusters.append(Cluster(id_ = i, indexes=clusters_indexes[i]))
 
@@ -45,6 +47,8 @@ def create_clusters(windows, configuration):
                                     windows=windows)
 
   labeled_clusters = labeler.label(test_config=configuration["labeler"])
+
+  print("Finished cluster labeling...")
 
   # update windows states
   for state in labeled_clusters:
