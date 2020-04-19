@@ -24,8 +24,13 @@
   "chromosome": "chr1",
   "save_windows":false,
   "windows_filename":"hmm_windows.json",
-  "min_rd": 1,
-  "max_rd": 2,
+  "outlier_remove":{
+
+    "name":"zscore",
+    config:{
+      "sigma_factor":3
+    }
+  },
   "labeler":{
 
     "name":"hypothesis_testing",

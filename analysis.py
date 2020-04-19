@@ -20,6 +20,7 @@ from hypothesis_testing import SignificanceTestLabeler
 from preprocess_utils import fit_distribution
 from preprocess_utils import compute_statistic
 from preprocess_utils import build_clusterer
+from preprocess_utils import remove_outliers
 from exceptions import Error
 
 
@@ -210,6 +211,21 @@ def make_windows(configuration):
 
         print("Window statistics: ")
         print(statistics)
+
+        if "outlier_remove" in configuration:
+
+          config = configuration["outlier_remove"]["config"]
+          config["statistics"] = statistics
+
+          wga_windows = remove_outliers(windows = wga_windows,
+                          removemethod=configuration[outlier_remove]["name"],
+                          config=config)
+
+          print("\tNumber of windows after outlier removal: ", len(wga_windows))
+
+        else:
+          print("No outlier removal performed")
+
 
 
         #non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
