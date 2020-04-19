@@ -16,6 +16,7 @@ from helpers import flat_windows_rd_from_indexes
 
 from bam_helpers import extract_windows
 from cluster import Cluster
+from cluster import clusters_statistics
 from hypothesis_testing import SignificanceTestLabeler
 from preprocess_utils import fit_distribution
 from preprocess_utils import compute_statistic
