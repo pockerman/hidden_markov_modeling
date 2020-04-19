@@ -77,6 +77,34 @@ def compute_statistic(data, statistics):
                   "q25": q25,
                   "q50": q50}
 
+def zscore_outlier_removal(windows, config):
+
+  newwindows = []
+
+  for window in windows:
+    stats = window.get_rd_stats(statistics="mean")
+    mu = stats["mean"]
+
+    sigma = np.sqrt(config["statistics"]["var"])
+    zsocre = (mu - config["statistics"]["mean"])/sigma
+
+    if zscore < -config["sigma_factor"]* sigma or\
+      zscore > config["sigma_factor"]* sigma:
+        continue
+    else:
+      newwindows.append(window)
+
+  return newwindows
+
+
+def remove_outliers(windows, removemethod, config):
+
+  if removemethod == zscore:
+    return zscore_outlier_removal(windows=windows, config)
+
+  raise Error("Unknown outlier removal method: {0}".format(removemethod))
+
+
 def build_clusterer(data, nclusters, method, **kwargs):
 
   """

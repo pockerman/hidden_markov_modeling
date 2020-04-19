@@ -239,7 +239,7 @@ class SignificanceTestLabeler(object):
                              value=test_config["statistical_parameter_value"])
 
           hypothesis_normal = HypothesisTest(null=h0_normal,
-                                             alternative = ha_normal,
+                                             alternative=ha_normal,
                                              alpha=test_config["significance"],
                                              data=cluster_data[cluster.cidx],
                                              statistic_calculator=zscore_statistic)
