@@ -87,8 +87,10 @@ def zscore_outlier_removal(windows, config):
     sigma = np.sqrt(config["statistics"]["var"])
     zscore = (mu - config["statistics"]["mean"])/sigma
 
-    if zscore < - config["sigma_factor"]*sigma or\
-      zscore > config["sigma_factor"]*sigma:
+
+
+    if zscore < - config["sigma_factor"] or\
+      zscore > config["sigma_factor"]:
         continue
     else:
       newwindows.append(window)
