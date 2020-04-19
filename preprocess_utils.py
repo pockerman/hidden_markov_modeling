@@ -88,7 +88,7 @@ def zscore_outlier_removal(windows, config):
     sigma = np.sqrt(config["statistics"]["var"])
     zsocre = (mu - config["statistics"]["mean"])/sigma
 
-    if zscore < -config["sigma_factor"]* sigma or\
+    if zscore < - config["sigma_factor"]* sigma or\
       zscore > config["sigma_factor"]* sigma:
         continue
     else:
@@ -100,7 +100,7 @@ def zscore_outlier_removal(windows, config):
 def remove_outliers(windows, removemethod, config):
 
   if removemethod == zscore:
-    return zscore_outlier_removal(windows=windows, config)
+    return zscore_outlier_removal(windows=windows, config=config)
 
   raise Error("Unknown outlier removal method: {0}".format(removemethod))
 
