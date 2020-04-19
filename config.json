@@ -28,7 +28,7 @@
 
     "name":"zscore",
     "config":{
-      "sigma_factor":3
+      "sigma_factor":2
     }
   },
   "labeler":{
