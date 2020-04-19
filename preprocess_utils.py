@@ -82,8 +82,7 @@ def zscore_outlier_removal(windows, config):
   newwindows = []
 
   for window in windows:
-    stats = window.get_rd_stats(statistics="mean")
-    mu = stats["mean"]
+    mu = window.get_rd_stats(statistics="mean")
 
     sigma = np.sqrt(config["statistics"]["var"])
     zsocre = (mu - config["statistics"]["mean"])/sigma
@@ -99,7 +98,7 @@ def zscore_outlier_removal(windows, config):
 
 def remove_outliers(windows, removemethod, config):
 
-  if removemethod == zscore:
+  if removemethod == "zscore":
     return zscore_outlier_removal(windows=windows, config=config)
 
   raise Error("Unknown outlier removal method: {0}".format(removemethod))

@@ -249,10 +249,13 @@ def make_windows(configuration):
 
     except KeyError as e:
         logging.error("Key: {0} does not exit".format(str(e)))
+        raise
     except Error as e:
         logging.error(str(e))
+        raise
     except Exception as e:
         logging.error("Unknown exception occured: " + str(e))
+        raise
 
 def main():
 

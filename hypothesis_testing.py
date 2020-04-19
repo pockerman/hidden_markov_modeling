@@ -15,8 +15,7 @@ def zscore_statistic(data, null, **kwargs):
                                   statistics = null.name)
 
     # compute the variance
-    var = compute_statistic(data=data,
-                                  statistics = "var")
+    var = compute_statistic(data=data, statistics = "var")
 
     score = (statistic - null.value)/(np.sqrt(var))#/np.sqrt(len(data)))
 
