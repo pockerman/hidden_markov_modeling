@@ -52,12 +52,12 @@ def create_clusters(windows, configuration):
   # let's do some plotting of what is in the cluster
   #sns.set(color_codes=True)
 
-  print("Plot clusters")
+  print("Saving cluster indices")
 
   for cluster in clusters:
-    filename = "cluster_"+cluster.cidx+"counts.txt"
+    filename = "cluster_"+str(cluster.cidx) +"_counts.txt"
     with open(filename, 'w') as file:
-      file.write(cluster.get_data_from_windows(windows=windows))
+      file.write(str(cluster.get_data_from_windows(windows=windows)))
 
   labeler = SignificanceTestLabeler(clusters=clusters,
                                     windows=windows)

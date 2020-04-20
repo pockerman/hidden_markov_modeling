@@ -213,7 +213,7 @@ class SignificanceTestLabeler(object):
                                        value=test_config["statistical_parameter_value"])
 
         hypothesis_delete = HypothesisTest(null=h0_delete,
-                                           alternative = ha_delete,
+                                           alternative=ha_delete,
                                            alpha=test_config["significance"],
                                            data=cluster_data[cluster.cidx],
                                            statistic_calculator=zscore_statistic)
