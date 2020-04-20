@@ -169,11 +169,11 @@ def build_clusterer(data, nclusters, method, **kwargs):
           initial_index_medoids.append(idx)
 
 
-    clusterer, initial_index_medoids = kmedoids(data=windows,
-                                                initial_index_medoids=initial_index_medoids,
-                                                metric=metric)
+    clusterer  = kmedoids(data=windows,
+                          initial_index_medoids=initial_index_medoids,
+                          metric=metric)
     clusterer.process()
-    return clusterer
+    return clusterer, initial_index_medoids
   elif method == "wmode":
     return mode_window_clusterer(windows=data,
                                  normal_rd=kwargs["normal_rd"],
