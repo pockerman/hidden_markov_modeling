@@ -483,9 +483,9 @@ class Window(object):
 
     def get_state(self):
       """
+      the state of the window
 
-
-      Returns the state of the window
+      Returns
       -------
       WindowState
 

@@ -44,7 +44,8 @@
     "name":"kmedoids",
     "config":{
     "init_cluster_idx":"random_from_data",
-    "metric":"MANHATAN"
+    "metric":"MANHATAN",
+    "use_window_means":true
     }
   },
   "states":["NORMAL", "DELETE", "INSERT"],

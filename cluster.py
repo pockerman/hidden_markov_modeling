@@ -67,3 +67,11 @@ class Cluster(object):
      window_data = self.get_data_from_windows(windows=windows)
      return compute_statistic(data=window_data,statistics=statistic)
 
+  def get_window_statistics(self, windows, statistic):
+    statistics = []
+
+    for idx in self.indexes:
+      window = windows[idx]
+      statistics.append(window.get_rd_stats(statistics=statistic))
+    return statistics
+
