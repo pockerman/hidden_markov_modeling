@@ -1,7 +1,7 @@
 import argparse
 import logging
-#import matplotlib.pyplot as plt
-#import seaborn as sns
+import matplotlib.pyplot as plt
+import seaborn as sns
 import numpy as np
 from pomegranate import*
 
@@ -47,6 +47,15 @@ def create_clusters(windows, configuration):
   cluster_stats = clusters_statistics(clusters=clusters, windows=windows)
   print("Cluster statistics (before labeling): ")
   print(cluster_stats)
+
+  # let's do some plotting of what is in the cluster
+  sns.set(color_codes=True)
+
+  for cluster in clusters:
+    x = cluster.get_data_from_windows(windows=windows)
+    sns.distplot(x, kde=False, rug=True);
+    plt.show()
+
 
   labeler = SignificanceTestLabeler(clusters=clusters,
                                     windows=windows)
