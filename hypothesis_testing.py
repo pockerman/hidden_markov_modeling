@@ -29,12 +29,12 @@ def zscore_statistic(data, null, **kwargs):
         prob = st.norm.cdf(score)
         return prob, statistic
       else:
-        prob = 2.0*(1.0 - st.norm.cdf(score))
+        prob = 2.0*(1.0 - st.norm.cdf(np.abs(score))
       return prob, statistic
     else:
 
       # assume two-sided by default
-      prob = 2.0*(1.0 - st.norm.cdf(score))
+      prob = 2.0*(1.0 - st.norm.cdf(np.fabs(score))
       return prob, statistic
 
 class Hypothesis(object):
