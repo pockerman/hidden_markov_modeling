@@ -116,8 +116,8 @@ def build_clusterer(data, nclusters, method, **kwargs):
   argumens are expected in the kwargs dict.
   """
 
-  if "use_window_means" in kwargs["config"]\
-    and kwargs["config"]["use_window_means"]:
+  if "use_window_means" in kwargs["clusterer"]["config"]\
+    and kwargs["clusterer"]["config"]["use_window_means"]:
       windows = []
       for window in data:
         windows.append(window.get_rd_stats(statistics="mean"))
