@@ -32,10 +32,12 @@ def create_clusters(windows, configuration):
                           "config":configuration["clusterer"]["config"]}}
 
 
-  clusterer =  build_clusterer(data=windows,
-                               nclusters=len(configuration["states"]),
-                               method="kmedoids",
-                               **kwargs)
+  clusterer, initial_index_medoids =  build_clusterer(data=windows,
+                                                      nclusters=len(configuration["states"]),
+                                                      method="kmedoids",
+                                                      **kwargs)
+
+  print("Initial medoids indexes: ", initial_index_medoids)
 
   clusters_indexes = clusterer.get_clusters()
   clusters = []
@@ -57,7 +59,13 @@ def create_clusters(windows, configuration):
   for cluster in clusters:
     filename = "cluster_"+str(cluster.cidx) +"_counts.txt"
     with open(filename, 'w') as file:
-      file.write(str(cluster.get_data_from_windows(windows=windows)))
+
+      if configuration["clusterer"]["config"]["use_window_means"]:
+        file.write(str(cluster.get_window_statistics(windows=windows,
+                                                     statistic="mean")))
+      else:
+
+        file.write(str(cluster.get_data_from_windows(windows=windows)))
 
   labeler = SignificanceTestLabeler(clusters=clusters,
                                     windows=windows)

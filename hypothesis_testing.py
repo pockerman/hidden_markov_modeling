@@ -17,7 +17,7 @@ def zscore_statistic(data, null, **kwargs):
     # compute the variance
     var = compute_statistic(data=data, statistics = "var")
 
-    score = (statistic - null.value)/(np.sqrt(var))#/np.sqrt(len(data)))
+    score = (statistic - null.value)/(np.sqrt(var))
 
     if "alternative" in kwargs:
       direction = kwargs["alternative"].direction
