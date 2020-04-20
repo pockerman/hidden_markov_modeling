@@ -3,6 +3,7 @@ import logging
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+import csv
 from pomegranate import*
 
 from helpers import read_configuration_file
@@ -49,13 +50,14 @@ def create_clusters(windows, configuration):
   print(cluster_stats)
 
   # let's do some plotting of what is in the cluster
-  sns.set(color_codes=True)
+  #sns.set(color_codes=True)
+
+  print("Plot clusters")
 
   for cluster in clusters:
-    x = cluster.get_data_from_windows(windows=windows)
-    sns.distplot(x, kde=False, rug=True);
-    plt.show()
-
+    filename = "cluster_"+cluster.cidx+"counts.txt"
+    with open(filename, 'w') as file:
+      file.write(cluster.get_data_from_windows(windows=windows))
 
   labeler = SignificanceTestLabeler(clusters=clusters,
                                     windows=windows)
