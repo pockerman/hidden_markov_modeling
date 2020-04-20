@@ -120,7 +120,7 @@ def build_clusterer(data, nclusters, method, **kwargs):
     and kwargs["clusterer"]["config"]["use_window_means"]:
       windows = []
       for window in data:
-        windows.append(window.get_rd_stats(statistics="mean"))
+        windows.append([window.get_rd_stats(statistics="mean")])
   else:
       windows = flat_windows(data)
 
