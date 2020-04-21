@@ -233,6 +233,12 @@ def make_windows(configuration):
             print("\tNumber of windows: ", len(wga_windows))
 
 
+        # compute the statistics about the windows
+        statistics = compute_statistic(data=
+                                       flat_windows_rd_from_indexes(indexes=None,
+                                                                    windows=wga_windows),
+                                        statistics="all")
+
         if "outlier_remove" in configuration:
 
           config = configuration["outlier_remove"]["config"]
@@ -284,6 +290,9 @@ def make_windows(configuration):
             print("\tNumber of non-wga windows: ", len(wga_windows))
 
 
+        statistics = compute_statistic(data=flat_windows_rd_from_indexes(indexes=None,
+                                                                          windows=non_wga_windows),
+                                        statistics="all")
         if "outlier_remove" in configuration:
 
           config = configuration["outlier_remove"]["config"]
