@@ -58,12 +58,25 @@ def create_clusters(windows, configuration):
   print("Saving cluster indices")
 
   for cluster in clusters:
-    filename = "cluster_"+str(cluster.cidx) +"_counts.txt"
+    filename = "cluster_"+str(cluster.cidx) +"_wga_w_means.txt"
     with open(filename, 'w') as file:
 
       if configuration["clusterer"]["config"]["use_window_means"]:
         file.write(str(cluster.get_window_statistics(windows=windows,
-                                                     statistic="mean")))
+                                                     statistic="mean",
+                                                     window_type="wga_w")))
+      else:
+
+        file.write(str(cluster.get_data_from_windows(windows=windows)))
+
+  for cluster in clusters:
+    filename = "cluster_"+str(cluster.cidx) +"_no_wga_w_means.txt"
+    with open(filename, 'w') as file:
+
+      if configuration["clusterer"]["config"]["use_window_means"]:
+        file.write(str(cluster.get_window_statistics(windows=windows,
+                                                     statistic="mean",
+                                                     window_type="n_wga_w")))
       else:
 
         file.write(str(cluster.get_data_from_windows(windows=windows)))

@@ -68,14 +68,14 @@ class Cluster(object):
      window_data = self.get_data_from_windows(windows=windows)
      return compute_statistic(data=window_data,statistics=statistic)
 
-  def get_window_statistics(self, windows, statistic):
+  def get_window_statistics(self, windows, statistic, **kwargs):
     statistics = []
 
     for idx in self.indexes:
       window = windows[idx]
 
       if isinstance(window, MixedWindowView):
-        statistics.append(window.get_rd_stats(name="wga_w",
+        statistics.append(window.get_rd_stats(name=kwargs["window_type"],
                                               statistics=statistic))
       else:
         statistics.append(window.get_rd_stats(statistics=statistic))
