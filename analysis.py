@@ -48,9 +48,9 @@ def create_clusters(windows, configuration):
   for i in range(len(clusters_indexes)):
     clusters.append(Cluster(id_ = i, indexes=clusters_indexes[i]))
 
-  cluster_stats = clusters_statistics(clusters=clusters, windows=windows)
-  print("Cluster statistics (before labeling): ")
-  print(cluster_stats)
+  #cluster_stats = clusters_statistics(clusters=clusters, windows=windows)
+  #print("Cluster statistics (before labeling): ")
+  #print(cluster_stats)
 
   # let's do some plotting of what is in the cluster
   #sns.set(color_codes=True)
