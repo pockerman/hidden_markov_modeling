@@ -319,7 +319,7 @@ def make_windows(configuration):
         if "outlier_remove" in configuration:
 
           config = configuration["outlier_remove"]["config"]
-          config["statistics"] = wga_statistics
+          config["statistics"] = non_wga_statistics
 
           mixed_windows = remove_outliers(windows=mixed_windows,
                           removemethod=configuration["outlier_remove"]["name"],
