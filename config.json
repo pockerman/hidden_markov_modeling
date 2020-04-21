@@ -2,17 +2,17 @@
   "reference_file":{
     "filename": "/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
     "start_idx" :0,
-    "end_idx": 1010000
+    "end_idx": 1000000
   },
   "no_wga_file": {
      "filename": "/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam",
      "start_idx": 0,
-     "end_idx": 1010000
+     "end_idx": 1000000
   },
   "test_file":{
     "filename": "/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam",
     "start_idx": 0,
-    "end_idx": 1010000
+    "end_idx": 1000000
   },
   "normal_rd":1,
   "delete_rd":0,
