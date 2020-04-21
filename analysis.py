@@ -249,37 +249,14 @@ def make_windows(configuration):
 
 
         # compute the statistics about the windows
-        statistics = compute_statistic(data=
+        wga_statistics = compute_statistic(data=
                                        flat_windows_rd_from_indexes(indexes=None,
                                                                     windows=wga_windows),
                                         statistics="all")
 
-        """
-        if "outlier_remove" in configuration:
-
-          config = configuration["outlier_remove"]["config"]
-          config["statistics"] = statistics
-
-          wga_windows = remove_outliers(windows=wga_windows,
-                                        removemethod=configuration["outlier_remove"]["name"],
-                                        config=config)
-
-          print("\tNumber of windows after outlier removal: ", len(wga_windows))
-
-        else:
-          print("No outlier removal performed")
-        """
-
-
-        # compute the statistics about for the windows
-        # after removing the outliers
-        statistics = compute_statistic(data=
-                                       flat_windows_rd_from_indexes(indexes=None,
-                                                                    windows=wga_windows),
-                                        statistics="all")
 
         print("Total Window statistics: ")
-        print(statistics)
+        print(wga_statistics)
 
 
         # accumulat window means so that we plot them
@@ -309,25 +286,10 @@ def make_windows(configuration):
             print("\tNumber of non-wga windows: ", len(non_wga_windows))
 
 
-        statistics = compute_statistic(data=flat_windows_rd_from_indexes(indexes=None,
+        non_wga_statistics = compute_statistic(data=
+                                               flat_windows_rd_from_indexes(indexes=None,
                                                                           windows=non_wga_windows),
-                                        statistics="all")
-
-        """
-        if "outlier_remove" in configuration:
-
-          config = configuration["outlier_remove"]["config"]
-          config["statistics"] = statistics
-
-          non_wga_windows = remove_outliers(windows=non_wga_windows,
-                          removemethod=configuration["outlier_remove"]["name"],
-                          config=config)
-
-          print("\tNumber of windows after outlier removal: ", len(non_wga_windows))
-        else:
-          print("No outlier removal performed")
-        """
-
+                                               statistics="all")
 
         window_stats = [window.get_rd_stats(statistics="mean")
                         for window in non_wga_windows]
@@ -337,20 +299,19 @@ def make_windows(configuration):
           file.write(str(window_stats))
 
 
-        statistics = compute_statistic(data=flat_windows_rd_from_indexes(indexes=None,
-                                                                          windows=non_wga_windows),
-                                        statistics="all")
-
         print("Total Non WGA Window statistics: ")
-        print(statistics)
+        print(non_wga_statistics)
 
 
         # zip mixed windows the smallest length
         # prevails
         mixed_windows = []
+
         for win1, win2 in zip(wga_windows, non_wga_windows):
           mixed_windows.append(MixedWindowView(wga_w=win1,
                                                n_wga_w=win2))
+
+        print("Number of mixed windows: ", len(mixed_windows))
 
 
         # do the outlier removal
@@ -358,13 +319,13 @@ def make_windows(configuration):
         if "outlier_remove" in configuration:
 
           config = configuration["outlier_remove"]["config"]
-          config["statistics"] = statistics
+          config["statistics"] = wga_statistics
 
           mixed_windows = remove_outliers(windows=mixed_windows,
                           removemethod=configuration["outlier_remove"]["name"],
                           config=config)
 
-          print("\tNumber of windows after outlier removal: ", len(non_wga_windows))
+          print("\tNumber of windows after outlier removal: ", len(mixed_windows))
         else:
           print("No outlier removal performed")
 
