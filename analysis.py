@@ -255,6 +255,14 @@ def make_windows(configuration):
           print("No outlier removal performed")
 
 
+        window_stats = [window.get_rd_stats(statistics="mean") for window in wga_windows]
+
+        filename = "windows_means.txt"
+        with open(filename, 'w') as file:
+          file.write(str(window_stats))
+
+
+
 
         #non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
         #non_wga_end_idx = configuration["no_wga_file"]["end_idx"]
