@@ -259,9 +259,9 @@ def make_windows(configuration):
           config = configuration["outlier_remove"]["config"]
           config["statistics"] = statistics
 
-          wga_windows = remove_outliers(windows = wga_windows,
-                          removemethod=configuration["outlier_remove"]["name"],
-                          config=config)
+          wga_windows = remove_outliers(windows=wga_windows,
+                                        removemethod=configuration["outlier_remove"]["name"],
+                                        config=config)
 
           print("\tNumber of windows after outlier removal: ", len(wga_windows))
 
@@ -269,7 +269,8 @@ def make_windows(configuration):
           print("No outlier removal performed")
 
 
-        # compute the statistics about the windows
+        # compute the statistics about for the windows
+        # after removing the outliers
         statistics = compute_statistic(data=
                                        flat_windows_rd_from_indexes(indexes=None,
                                                                     windows=wga_windows),
@@ -279,6 +280,7 @@ def make_windows(configuration):
         print(statistics)
 
 
+        # accumulat window means so that we plot them
         window_stats = [window.get_rd_stats(statistics="mean")
                         for window in wga_windows]
 
@@ -318,6 +320,8 @@ def make_windows(configuration):
                           config=config)
 
           print("\tNumber of windows after outlier removal: ", len(non_wga_windows))
+        else:
+          print("No outlier removal performed")
 
 
         window_stats = [window.get_rd_stats(statistics="mean")
@@ -336,7 +340,8 @@ def make_windows(configuration):
         print(statistics)
 
 
-        # zip mixed windows
+        # zip mixed windows the smallest length
+        # prevails
         mixed_windows = []
         for win1, win2 in zip(wga_windows, non_wga_windows):
           mixed_windows.append(MixedWindowView(wga_w=win1,
@@ -380,7 +385,7 @@ def main():
     wga_clusters = create_clusters(windows=mixed_windows,
                                    configuration=configuration)
 
-    #print("Finished clustering...")
+    print("Finished clustering...")
     #print("Number of wga_clusters used: {0}".format(len(wga_clusters)))
 
     #for cluster in wga_clusters:
