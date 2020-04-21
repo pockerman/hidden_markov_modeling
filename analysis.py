@@ -254,6 +254,7 @@ def make_windows(configuration):
                                                                     windows=wga_windows),
                                         statistics="all")
 
+        """
         if "outlier_remove" in configuration:
 
           config = configuration["outlier_remove"]["config"]
@@ -267,6 +268,7 @@ def make_windows(configuration):
 
         else:
           print("No outlier removal performed")
+        """
 
 
         # compute the statistics about for the windows
@@ -304,12 +306,14 @@ def make_windows(configuration):
         if len(non_wga_windows) == 0:
             raise Error("Non-WGA windows have not  been created")
         else:
-            print("\tNumber of non-wga windows: ", len(wga_windows))
+            print("\tNumber of non-wga windows: ", len(non_wga_windows))
 
 
         statistics = compute_statistic(data=flat_windows_rd_from_indexes(indexes=None,
                                                                           windows=non_wga_windows),
                                         statistics="all")
+
+        """
         if "outlier_remove" in configuration:
 
           config = configuration["outlier_remove"]["config"]
@@ -322,6 +326,7 @@ def make_windows(configuration):
           print("\tNumber of windows after outlier removal: ", len(non_wga_windows))
         else:
           print("No outlier removal performed")
+        """
 
 
         window_stats = [window.get_rd_stats(statistics="mean")
@@ -348,7 +353,23 @@ def make_windows(configuration):
                                                n_wga_w=win2))
 
 
-        return mixed_windows #non_wga_windows
+        # do the outlier removal
+
+        if "outlier_remove" in configuration:
+
+          config = configuration["outlier_remove"]["config"]
+          config["statistics"] = statistics
+
+          mixed_windows = remove_outliers(windows=mixed_windows,
+                          removemethod=configuration["outlier_remove"]["name"],
+                          config=config)
+
+          print("\tNumber of windows after outlier removal: ", len(non_wga_windows))
+        else:
+          print("No outlier removal performed")
+
+
+        return mixed_windows
 
     except KeyError as e:
         logging.error("Key: {0} does not exit".format(str(e)))
