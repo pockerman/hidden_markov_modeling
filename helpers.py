@@ -332,8 +332,9 @@ class Window(object):
         # maximum capacity of the window
         self._capacity = capacity
 
-        # holds the observations i.e. the base
-        # strings observed into the window
+        # holds tuples of observations:
+        # the first tuple is the wga_treated
+        # and the second is the non wga_treated
         self._observations = []
 
         # the total number of insertions/deletions
@@ -546,5 +547,51 @@ class Window(object):
         :return:
         """
         self._observations[o] = value
+
+
+class MixedWindowView(object):
+  """
+  A class that holds two instances of windows
+  """
+
+  def __init__(self, wga_w, n_wga_w):
+    self._windows={"wga_w": wga_w,
+                   "n_wga_w": n_wga_w}
+
+    # the state of the window
+    self._state = WindowState.INVALID
+
+
+  @property
+  def state(self):
+    return self._state
+
+  @state.setter
+  def state(self, value):
+    self._state = value
+
+  def get_rd_stats(self, statistics="all", name="both"):
+        """
+        Returns a statistical summary as a dictionary
+        of the read depth variable in the window
+        :param statistics:
+        :return:
+        """
+
+        if name == "both":
+          return (self._windows["wga_w"].get_rd_stats(statistics=statistics), self._windows["n_wga_w"].get_rd_stats(statistics=statistics))
+        elif name == 'wga_w':
+          return self._windows["wga_w"].get_rd_stats(statistics=statistics)
+        elif name == 'n_wga_w':
+          return self._windows["n_wga_w"].get_rd_stats(statistics=statistics)
+        else:
+          raise Error("Name {0} is invalid ".format(name))
+
+
+
+
+
+
+
 
 

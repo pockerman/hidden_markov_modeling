@@ -14,6 +14,7 @@ from helpers import flat_windows_from_state
 from helpers import HMMCallback
 from helpers import print_logs_callback
 from helpers import flat_windows_rd_from_indexes
+from helpers import MixedWindowView
 
 from bam_helpers import extract_windows
 from cluster import Cluster
@@ -264,24 +265,32 @@ def make_windows(configuration):
 
 
 
-        #non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
-        #non_wga_end_idx = configuration["no_wga_file"]["end_idx"]
+        non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
+        non_wga_end_idx = configuration["no_wga_file"]["end_idx"]
 
-        #args = {"start_idx": int(non_wga_start_idx),
-        #        "end_idx": (non_wga_end_idx),
-        #        "windowsize": int(windowsize)}
+        args = {"start_idx": int(non_wga_start_idx),
+                "end_idx": (non_wga_end_idx),
+                "windowsize": int(windowsize)}
 
         # exrtact the non-wga windows
-        #non_wga_windows = extract_windows(chromosome=chromosome,
-        #                                  ref_filename=configuration["reference_file"]["filename"],
-        #                                  test_filename=configuration["no_wga_file"]["filename"], **args)
+        non_wga_windows = extract_windows(chromosome=chromosome,
+                                          ref_filename=configuration["reference_file"]["filename"],
+                                          test_filename=configuration["no_wga_file"]["filename"], **args)
 
-        #if len(non_wga_windows) == 0:
-        #    raise Error("Non-WGA windows have not  been created")
-        #else:
-        #    print("\tNumber of non-wga windows: ", len(wga_windows))
+        if len(non_wga_windows) == 0:
+            raise Error("Non-WGA windows have not  been created")
+        else:
+            print("\tNumber of non-wga windows: ", len(wga_windows))
 
-        return wga_windows, [] #non_wga_windows
+
+        # zip mixed windows
+        mixed_windows = []
+        for win1, win2 in zip(wga_windows, non_wga_windows):
+          mixed_windows.append(MixedWindowView(wga_w=win1,
+                                               n_wga_w=win2))
+
+
+        return mixed_windows #non_wga_windows
 
     except KeyError as e:
         logging.error("Key: {0} does not exit".format(str(e)))
@@ -310,12 +319,12 @@ def main():
     logging.info("Checking if logger is sane...")
 
     print("Creating windows...")
-    wga_windows, non_wga_windows = make_windows(configuration=configuration)
+    mixed_windows = make_windows(configuration=configuration)
 
     print("Created windows....")
     print("Start clustering....")
 
-    wga_clusters = create_clusters(windows=wga_windows,
+    wga_clusters = create_clusters(windows=mixed_windows,
                                    configuration=configuration)
 
     print("Finished clustering...")
@@ -328,9 +337,9 @@ def main():
       print(wga_clusters[cluster].get_statistics(windows=wga_windows,
                                                  statistic="all"))
 
-    hmm_train(clusters=wga_clusters.values(),
-              windows=wga_windows,
-              configuration=configuration)
+    #hmm_train(clusters=wga_clusters.values(),
+    #          windows=wga_windows,
+    #          configuration=configuration)
 
     print("Finished analysis")
 

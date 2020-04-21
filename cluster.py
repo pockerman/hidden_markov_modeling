@@ -61,7 +61,7 @@ class Cluster(object):
 
   def get_data_from_windows(self, windows):
     return flat_windows_rd_from_indexes(indexes=self._indexes,
-                                                     windows=windows)
+                                        windows=windows)
 
   def get_statistics(self, windows, statistic):
      window_data = self.get_data_from_windows(windows=windows)
