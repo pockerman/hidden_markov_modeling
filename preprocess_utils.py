@@ -125,8 +125,8 @@ def build_clusterer(data, nclusters, method, **kwargs):
                      window_data[0]["var"],
                      window_data[1]["mean"],
                      window_data[1]["var"])
-        windows.append((window_vals[0], window_vals[1],
-                        window_vals[2], window_vals[3]))
+        windows.append((window_vals[0], #window_vals[1],
+                        window_vals[2], ))#window_vals[3]))
   else:
       windows = flat_windows(data)
 
