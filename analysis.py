@@ -291,7 +291,7 @@ def make_windows(configuration):
 
         for window in mixed_windows:
           wga_rds.extend(window.get_rd_counts(name="wga_w"))
-          no_wga_rds.extend(window.get_rd_counts(name="no_wga_w"))
+          no_wga_rds.extend(window.get_rd_counts(name="n_wga_w"))
 
         wga_statistics = compute_statistic(data=wga_rds, statistics="all")
         no_wga_statistics = compute_statistic(data=no_wga_rds, statistics="all")
