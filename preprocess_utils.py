@@ -82,14 +82,20 @@ def zscore_outlier_removal(windows, config):
   newwindows = []
 
   for window in windows:
-    mu = window.get_rd_stats(statistics="mean", name="n_wga_w")
+    mu = window.get_rd_stats(statistics="mean", name="both")
 
-    sigma = np.sqrt(config["statistics"]["var"])
-    zscore = (mu - config["statistics"]["mean"])/sigma
+    sigma_wga = np.sqrt(config["statistics"]["wga_w"]["var"])
+    zscore_wga = (mu[0] - config["statistics"]["wga_w"]["mean"])/sigma_wga
+
+    sigma_no_wga = np.sqrt(config["statistics"]["n_wga_w"]["var"])
+    zscore_no_wga = (mu[1] - config["statistics"]["n_wga_w"]["mean"])/sigma_no_wga
 
 
-    if zscore < - config["sigma_factor"] or\
-      zscore > config["sigma_factor"]:
+    if zscore_wga < - config["sigma_factor"] or\
+      zscore_wga > config["sigma_factor"]:
+        continue
+    elif zscore_no_wga < - config["sigma_factor"] or\
+      zscore_no_wga > config["sigma_factor"]:
         continue
     else:
       newwindows.append(window)

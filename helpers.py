@@ -570,6 +570,18 @@ class MixedWindowView(object):
   def state(self, value):
     self._state = value
 
+  def get_rd_counts(self, name):
+
+     if name == "both":
+          return (self._windows["wga_w"].get_rd_observations(), self._windows["n_wga_w"].get_rd_observations())
+     elif name == 'wga_w':
+          return self._windows["wga_w"].get_rd_observations()
+     elif name == 'n_wga_w':
+          return self._windows["n_wga_w"].get_rd_observations()
+     else:
+          raise Error("Name {0} is invalid ".format(name))
+
+
   def get_rd_stats(self, statistics="all", name="both"):
         """
         Returns a statistical summary as a dictionary

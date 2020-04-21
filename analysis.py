@@ -248,17 +248,6 @@ def make_windows(configuration):
             print("\tNumber of windows: ", len(wga_windows))
 
 
-        # compute the statistics about the windows
-        wga_statistics = compute_statistic(data=
-                                       flat_windows_rd_from_indexes(indexes=None,
-                                                                    windows=wga_windows),
-                                        statistics="all")
-
-
-        print("Total Window statistics: ")
-        print(wga_statistics)
-
-
         # accumulat window means so that we plot them
         window_stats = [window.get_rd_stats(statistics="mean")
                         for window in wga_windows]
@@ -286,23 +275,6 @@ def make_windows(configuration):
             print("\tNumber of non-wga windows: ", len(non_wga_windows))
 
 
-        non_wga_statistics = compute_statistic(data=
-                                               flat_windows_rd_from_indexes(indexes=None,
-                                                                          windows=non_wga_windows),
-                                               statistics="all")
-
-        window_stats = [window.get_rd_stats(statistics="mean")
-                        for window in non_wga_windows]
-
-        filename = "no_wga_windows_means.txt"
-        with open(filename, 'w') as file:
-          file.write(str(window_stats))
-
-
-        print("Total Non WGA Window statistics: ")
-        print(non_wga_statistics)
-
-
         # zip mixed windows the smallest length
         # prevails
         mixed_windows = []
@@ -313,13 +285,44 @@ def make_windows(configuration):
 
         print("Number of mixed windows: ", len(mixed_windows))
 
+        # compute the global statistics of the windows
+        wga_rds = []
+        no_wga_rds = []
+
+        for window in mixed_windows:
+          wga_rds.extend(window.get_rd_counts(name="wga_w"))
+          no_wga_rds.extend(window.get_rd_counts(name="no_wga_w"))
+
+        wga_statistics = compute_statistic(data=wga_rds, statistics="all")
+        no_wga_statistics = compute_statistic(data=no_wga_rds, statistics="all")
+
+        print("WGA stats: ", wga_statistics)
+        print("No WGA stats: ", no_wga_statistics)
+
+        # save also the means
+
+        window_stats = [window.get_rd_stats(statistics="mean", name="n_wga_w")
+                        for window in mixed_windows]
+
+        filename = "no_wga_windows_means.txt"
+        with open(filename, 'w') as file:
+          file.write(str(window_stats))
+
+        window_stats = [window.get_rd_stats(statistics="mean", name="wga_w")
+                        for window in mixed_windows]
+
+        filename = "windows_means.txt"
+        with open(filename, 'w') as file:
+          file.write(str(window_stats))
+
 
         # do the outlier removal
 
         if "outlier_remove" in configuration:
 
           config = configuration["outlier_remove"]["config"]
-          config["statistics"] = non_wga_statistics
+          config["statistics"] = {"n_wga_w": no_wga_statistics,
+                                  "wga_w":wga_statistics}
 
           mixed_windows = remove_outliers(windows=mixed_windows,
                           removemethod=configuration["outlier_remove"]["name"],
