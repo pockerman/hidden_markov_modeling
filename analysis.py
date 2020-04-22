@@ -74,7 +74,8 @@ def create_clusters(windows, configuration):
     filename = "cluster_"+str(cluster.cidx) +"_no_wga_w_means.txt"
     with open(filename, 'w') as file:
 
-      if configuration["clusterer"]["config"]["use_window_means"]:
+      if configuration["clusterer"]["config"]["use_window_means"]or\
+        configuration["clusterer"]["config"]["use_window_variance"]:
         file.write(str(cluster.get_window_statistics(windows=windows,
                                                      statistic="mean",
                                                      window_type="n_wga_w")))
