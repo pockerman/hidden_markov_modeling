@@ -48,7 +48,7 @@
     "use_window_means":true
     }
   },
-  "states":["NORMAL", "DELETE", "INSERT"],
+  "states":["NORMAL", "DELETE", "INSERT", "TUF"],
   "HMM": {
     "name":"HMM_Model",
     "train_solver": "baum-welch",
