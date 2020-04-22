@@ -81,7 +81,7 @@ def create_clusters(windows, configuration):
 
         file.write(str(cluster.get_data_from_windows(windows=windows)))
 
-  """
+
   labeler = SignificanceTestLabeler(clusters=clusters,
                                     windows=windows)
 
@@ -89,7 +89,8 @@ def create_clusters(windows, configuration):
 
   print("Finished cluster labeling...")
 
-  # update windows states
+  # update windows states according
+  # to the cluster label they live in
   for state in labeled_clusters:
     cluster = labeled_clusters[state]
     indexes = cluster.indexes
@@ -98,7 +99,7 @@ def create_clusters(windows, configuration):
       windows[idx].set_state(cluster.state)
 
   return labeled_clusters
-  """
+
 
 def init_hmm(clusters, windows, configuration):
 
