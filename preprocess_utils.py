@@ -140,6 +140,17 @@ def build_clusterer(data, nclusters, method, **kwargs):
                        window_data[1]["mean"])
 
           windows.append(window_vals)
+  elif "use_window_variance" in kwargs["clusterer"]["config"]\
+    and kwargs["clusterer"]["config"]["use_window_variance"]:
+
+      print("Using window variance only for cluster feature")
+      windows = []
+      for window in data:
+        window_data = window.get_rd_stats(statistics="all")
+
+        window_vals=(window_data[0]["var"],
+                       window_data[1]["var"])
+        windows.append(window_vals)
   else:
       windows = flat_windows(data)
 
