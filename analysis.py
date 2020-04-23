@@ -237,6 +237,9 @@ def make_windows(configuration):
                 "end_idx": (non_wga_end_idx),
                 "windowsize": int(windowsize)}
 
+        if "quality_theshold" in configuration:
+          args["quality_theshold"] = configuration["quality_theshold"]
+
         # exrtact the non-wga windows
         non_wga_windows = extract_windows(chromosome=chromosome,
                                           ref_filename=configuration["reference_file"]["filename"],
