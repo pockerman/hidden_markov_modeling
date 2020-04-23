@@ -122,12 +122,12 @@ def build_clusterer(data, nclusters, method, **kwargs):
   argumens are expected in the kwargs dict.
   """
 
-  features = ["clusterer"]["config"]["features"]
+  features = kwargs["clusterer"]["config"]["features"]
   windows = []
 
   print("{0} cluster features used {1}".format(INFO, features))
 
-  for window in windows:
+  for window in data:
 
     window_data = window.get_rd_stats(statistics="all")
     window_values =[]
@@ -136,7 +136,7 @@ def build_clusterer(data, nclusters, method, **kwargs):
       window_values.append(window_data[0][feature])
       window_values.append(window_data[1][feature])
 
-    windows.append(window_vals)
+    windows.append(window_values)
 
 
   """
