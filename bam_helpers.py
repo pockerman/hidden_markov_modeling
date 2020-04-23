@@ -420,7 +420,13 @@ def common_bases(bamdata, fastadata):
                 logging.error(" Bam item does not have the correct format")
             elif x[1] != 0  and x[2] == '':
                 logging.warning("An entry of the form {0} found. Turnd RD to zero".format(str(x)))
-                #x[1] = 0
+
+                #  we miss a base so set the RD to zero
+                x[1] = 0
+
+                # and consult the refernce
+                # (plus 1 since fasta is zero based  )
+                x[2] = [fastadata[x[0] + 1]]
             else:
                 # provides the element which reaches the
                 # highest occurrence first.
