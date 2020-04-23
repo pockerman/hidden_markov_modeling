@@ -140,8 +140,8 @@ def create_windows(bamlist, indel_dict, fastdata,
     if not fastdata:
         raise Error("No reference sequence is provided")
 
-    print("{0} Estimated number\
-          of windows: {1} ".format(INFO, len(bamlist)//windowcapacity))
+    print("{0} Estimated number"
+          " of windows: {1} ".format(INFO, len(bamlist)//windowcapacity))
 
     # the returned list of windows
     windows = []
@@ -178,9 +178,11 @@ def create_windows(bamlist, indel_dict, fastdata,
                 # on the size of the gap.
 
                 # fill in the missing info from the
-                # reference file
-                window_gaps = _get_missing_gap_info(start=int(previous_observation.position)+1,
-                                                    end=int(observation.position)-1,
+                # reference file positions are adjusted
+                # in _get_missing_gap_info to start +1, end +1
+                # to access the referece section
+                window_gaps = _get_missing_gap_info(start=int(previous_observation.position),
+                                                    end=int(observation.position),
                                                     fastdata=fastdata)
 
                 # after getting the missing info we try to add it
@@ -466,6 +468,8 @@ def common_bases(bamdata, fastadata):
             raise Error("An error occurred whilst extracting\
                         common_bases {0}".format(str(e)))
 
+    return bamdata
+
 
 def _get_insertions_and_deletions_from_indel(indel, insertions, deletions):
 
@@ -516,7 +520,8 @@ def _get_insertion_deletion_difference(unique_insertions, unique_deletions):
 
 def _get_missing_gap_info(start, end, fastdata):
 
-    fastdata_range = fastdata[start:end]
+    # plus 1 as this fasta is one based
+    fastdata_range = fastdata[start + 1: end + 1 ]
 
     # the position of the skipped element.
     skipped_pos = start
@@ -531,5 +536,8 @@ def _get_missing_gap_info(start, end, fastdata):
         skipped_temp.append(0)
         skipped_temp.append(base)
         window_gaps.append(skipped_temp)
+
+        # increase by one the reference position
+        skipped_pos += 1
 
     return window_gaps
