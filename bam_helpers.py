@@ -461,6 +461,13 @@ def common_bases(bamdata, fastadata):
                       # not into the list as a separate list.
                       x.extend([common_count[0][0]])
                     """
+                  elif x[1] != 0 and x[2] == []:
+
+                      logging.warning(" Found a delete marking it")
+                      logging.warning(" x looked at is {0}".format(x))
+                      # this is a delete mark is as such
+                      x[2] = ["-"]
+
                   else:
                       logging.warning(" No common bases found don't know what to do")
                       logging.warning(" x looked at is {0}".format(x))
