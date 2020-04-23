@@ -211,6 +211,9 @@ def make_windows(configuration):
             "end_idx": wga_end_idx,
             "windowsize": int(windowsize)}
 
+    if "quality_theshold" in configuration:
+      args["quality_theshold"] = configuration["quality_theshold"]
+
     try:
 
         print("{0} Creating WGA Windows...".format(INFO))

@@ -87,19 +87,22 @@ def bam_strip(chromosome, file, start, stop, **kwargs):
     adjusted = 0
     bam_out = []
 
+    quality_threshold = kwargs.get("quality_theshold", None)
+
+    if quality_threshold is not None:
+      print("{0} Using quality threshold {1}".format(INFO, quality_threshold))
+    else:
+      print("{0} Not using quality threshold {1}".format(INFO))
+
+
     # move column-wise
     for pileupcolumn in file.pileup(chromosome, start, stop,
                                     truncate=True, ignore_orphans=False):
 
 
             # if there is a quality threshold then use it
-            quality_threshold = kwargs.get("quality_theshold", None)
             if quality_threshold is not None:
-              print("{0} Using quality threshold {1}".format(INFO, quality_threshold))
               pileupcolumn.set_min_base_quality(min_base_quality=quality_threshold)
-
-            else:
-              print("{0} Not using quality threshold {1}".format(INFO))
 
 
             bam_out, adjusted_tmp, errors_tmp = \
