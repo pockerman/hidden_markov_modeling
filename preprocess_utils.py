@@ -11,6 +11,7 @@ from exceptions import Error
 from helpers import listify_dicts_property
 from helpers import WindowState
 from helpers import flat_windows
+from helpers import INFO
 
 VALID_DISTS = ['normal', 'uniform',
                'poisson','discrete',]
@@ -123,6 +124,8 @@ def build_clusterer(data, nclusters, method, **kwargs):
 
   features = ["clusterer"]["config"]["features"]
   windows = []
+
+  print("{0} cluster features used {1}".format(INFO, features))
 
   for window in windows:
 

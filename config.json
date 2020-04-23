@@ -45,9 +45,7 @@
     "config":{
     "init_cluster_idx":"random_from_data",
     "metric":"MANHATAN",
-    "features":["mean",],
-    "use_window_means":true,
-    "use_window_variance":false
+    "features":["mean",]
     }
   },
   "states":["NORMAL", "DELETE", "INSERT", "TUF"],
