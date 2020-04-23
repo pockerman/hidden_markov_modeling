@@ -365,7 +365,7 @@ def main():
     print("Creating windows...")
     mixed_windows = make_windows(configuration=configuration)
 
-    print("{0} Done...".format{INFO})
+    print("{0} Done...".format(INFO))
     print("{0} Start clustering....".format(INFO))
 
     wga_clusters = create_clusters(windows=mixed_windows,
