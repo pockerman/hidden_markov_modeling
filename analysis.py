@@ -202,10 +202,10 @@ def make_windows(configuration):
     windowsize = configuration["window_size"]
     chromosome = configuration["chromosome"]
 
-    print("{0} Start index used: {1}".format(INFO, wga_start_idx))
-    print("{0} End index used: {1}".format(INFO,wga_end_idx))
+    print("{0} Start index: {1}".format(INFO, wga_start_idx))
+    print("{0} End index:   {1}".format(INFO,wga_end_idx))
     print("{0} Window size: {1}".format(INFO, windowsize))
-    print("{0} Chromosome: {1}".format(INFO, chromosome))
+    print("{0} Chromosome:  {1}".format(INFO, chromosome))
 
     args = {"start_idx": int(wga_start_idx),
             "end_idx": wga_end_idx,
