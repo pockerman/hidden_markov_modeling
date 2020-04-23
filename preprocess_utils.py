@@ -11,9 +11,10 @@ from exceptions import Error
 from helpers import listify_dicts_property
 from helpers import WindowState
 from helpers import flat_windows
+from helpers import INFO
 
-VALID_DISTS = ['normal', 'uniform', 'poisson',
-               'discrete',]
+VALID_DISTS = ['normal', 'uniform',
+               'poisson','discrete',]
 
 
 def fit_distribution(data, dist_name="normal", **kwargs):
@@ -82,15 +83,20 @@ def zscore_outlier_removal(windows, config):
   newwindows = []
 
   for window in windows:
-    mu = window.get_rd_stats(statistics="mean")
+    mu = window.get_rd_stats(statistics="mean", name="both")
 
-    sigma = np.sqrt(config["statistics"]["var"])
-    zscore = (mu - config["statistics"]["mean"])/sigma
+    sigma_wga = np.sqrt(config["statistics"]["wga_w"]["var"])
+    zscore_wga = (mu[0] - config["statistics"]["wga_w"]["mean"])/sigma_wga
+
+    sigma_no_wga = np.sqrt(config["statistics"]["n_wga_w"]["var"])
+    zscore_no_wga = (mu[1] - config["statistics"]["n_wga_w"]["mean"])/sigma_no_wga
 
 
-
-    if zscore < - config["sigma_factor"] or\
-      zscore > config["sigma_factor"]:
+    if zscore_wga < - config["sigma_factor"] or\
+      zscore_wga > config["sigma_factor"]:
+        continue
+    elif zscore_no_wga < - config["sigma_factor"] or\
+      zscore_no_wga > config["sigma_factor"]:
         continue
     else:
       newwindows.append(window)
@@ -116,13 +122,57 @@ def build_clusterer(data, nclusters, method, **kwargs):
   argumens are expected in the kwargs dict.
   """
 
+  features = ["clusterer"]["config"]["features"]
+  windows = []
+
+  print("{0} cluster features used {1}".format(INFO, features))
+
+  for window in windows:
+
+    window_data = window.get_rd_stats(statistics="all")
+    window_values =[]
+
+    for feature in features:
+      window_values.append(window_data[0][feature])
+      window_values.append(window_data[1][feature])
+
+    windows.append(window_vals)
+
+
+  """
   if "use_window_means" in kwargs["clusterer"]["config"]\
     and kwargs["clusterer"]["config"]["use_window_means"]:
       windows = []
       for window in data:
-        windows.append([window.get_rd_stats(statistics="mean")])
+        window_data = window.get_rd_stats(statistics="all")
+
+        if kwargs["clusterer"]["config"]["use_window_variance"]:
+          window_vals=(window_data[0]["mean"],
+                     window_data[0]["var"],
+                     window_data[1]["mean"],
+                     window_data[1]["var"])
+          windows.append((window_vals[0], window_vals[1],
+                          window_vals[2], window_vals[3]))
+        else:
+
+          window_vals=(window_data[0]["mean"],
+                       window_data[1]["mean"])
+
+          windows.append(window_vals)
+  elif "use_window_variance" in kwargs["clusterer"]["config"]\
+    and kwargs["clusterer"]["config"]["use_window_variance"]:
+
+      print("Using window variance only for cluster feature")
+      windows = []
+      for window in data:
+        window_data = window.get_rd_stats(statistics="all")
+
+        window_vals=(window_data[0]["var"],
+                       window_data[1]["var"])
+        windows.append(window_vals)
   else:
       windows = flat_windows(data)
+  """
 
   if method == "kmeans":
 
@@ -167,6 +217,8 @@ def build_clusterer(data, nclusters, method, **kwargs):
 
         else:
           initial_index_medoids.append(idx)
+    else:
+        initial_index_medoids=kwargs["clusterer"]["config"]["init_cluster_idx"]
 
 
     clusterer  = kmedoids(data=windows,
@@ -174,34 +226,7 @@ def build_clusterer(data, nclusters, method, **kwargs):
                           metric=metric)
     clusterer.process()
     return clusterer, initial_index_medoids
-  elif method == "wmode":
-    return mode_window_clusterer(windows=data,
-                                 normal_rd=kwargs["normal_rd"],
-                                 delete_rd=kwargs["delete_rd"],
-                                 insert_rd=kwargs["insert_rd"])
 
 
   raise Error("Invalid clustering method: " + method )
-
-
-def mode_window_clusterer(windows, normal_rd,
-                          delete_rd, insert_rd):
-
-  for window in windows:
-    mode = window.get_rd_stats(statistics="mode")
-
-    if mode == normal_rd:
-      window.set_state(WindowState.NORMAL)
-    elif mode == delete_rd:
-      window.set_state(WindowState.DELETE)
-    elif mode == insert_rd:
-      window.set_state(WindowState.INSERT)
-  return windows
-
-
-
-
-
-
-
 
