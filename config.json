@@ -45,10 +45,11 @@
     "config":{
     "init_cluster_idx":"random_from_data",
     "metric":"MANHATAN",
-    "use_window_means":true
+    "use_window_means":true,
+    "use_window_variance":false
     }
   },
-  "states":["NORMAL", "DELETE", "INSERT"],
+  "states":["NORMAL", "DELETE", "INSERT", "TUF"],
   "HMM": {
     "name":"HMM_Model",
     "train_solver": "baum-welch",

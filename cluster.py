@@ -3,6 +3,7 @@ Cluster: A collection of windows
 """
 from helpers import WindowState
 from helpers import flat_windows_rd_from_indexes
+from helpers import MixedWindowView
 from preprocess_utils import compute_statistic
 
 def clusters_statistics(clusters, windows):
@@ -61,17 +62,22 @@ class Cluster(object):
 
   def get_data_from_windows(self, windows):
     return flat_windows_rd_from_indexes(indexes=self._indexes,
-                                                     windows=windows)
+                                        windows=windows)
 
   def get_statistics(self, windows, statistic):
      window_data = self.get_data_from_windows(windows=windows)
      return compute_statistic(data=window_data,statistics=statistic)
 
-  def get_window_statistics(self, windows, statistic):
+  def get_window_statistics(self, windows, statistic, **kwargs):
     statistics = []
 
     for idx in self.indexes:
       window = windows[idx]
-      statistics.append(window.get_rd_stats(statistics=statistic))
+
+      if isinstance(window, MixedWindowView):
+        statistics.append(window.get_rd_stats(name=kwargs["window_type"],
+                                              statistics=statistic))
+      else:
+        statistics.append(window.get_rd_stats(statistics=statistic))
     return statistics
 

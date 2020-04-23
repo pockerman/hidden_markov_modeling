@@ -14,6 +14,7 @@ from helpers import flat_windows_from_state
 from helpers import HMMCallback
 from helpers import print_logs_callback
 from helpers import flat_windows_rd_from_indexes
+from helpers import MixedWindowView
 
 from bam_helpers import extract_windows
 from cluster import Cluster
@@ -47,9 +48,9 @@ def create_clusters(windows, configuration):
   for i in range(len(clusters_indexes)):
     clusters.append(Cluster(id_ = i, indexes=clusters_indexes[i]))
 
-  cluster_stats = clusters_statistics(clusters=clusters, windows=windows)
-  print("Cluster statistics (before labeling): ")
-  print(cluster_stats)
+  #cluster_stats = clusters_statistics(clusters=clusters, windows=windows)
+  #print("Cluster statistics (before labeling): ")
+  #print(cluster_stats)
 
   # let's do some plotting of what is in the cluster
   #sns.set(color_codes=True)
@@ -57,16 +58,32 @@ def create_clusters(windows, configuration):
   print("Saving cluster indices")
 
   for cluster in clusters:
-    filename = "cluster_"+str(cluster.cidx) +"_counts.txt"
+    filename = "cluster_"+str(cluster.cidx) +"_wga_w_means.txt"
     with open(filename, 'w') as file:
 
-      if configuration["clusterer"]["config"]["use_window_means"]:
+      if configuration["clusterer"]["config"]["use_window_means"] or\
+        configuration["clusterer"]["config"]["use_window_variance"]:
         file.write(str(cluster.get_window_statistics(windows=windows,
-                                                     statistic="mean")))
+                                                     statistic="mean",
+                                                     window_type="wga_w")))
       else:
 
         file.write(str(cluster.get_data_from_windows(windows=windows)))
 
+  for cluster in clusters:
+    filename = "cluster_"+str(cluster.cidx) +"_no_wga_w_means.txt"
+    with open(filename, 'w') as file:
+
+      if configuration["clusterer"]["config"]["use_window_means"]or\
+        configuration["clusterer"]["config"]["use_window_variance"]:
+        file.write(str(cluster.get_window_statistics(windows=windows,
+                                                     statistic="mean",
+                                                     window_type="n_wga_w")))
+      else:
+
+        file.write(str(cluster.get_data_from_windows(windows=windows)))
+
+  """
   labeler = SignificanceTestLabeler(clusters=clusters,
                                     windows=windows)
 
@@ -74,7 +91,8 @@ def create_clusters(windows, configuration):
 
   print("Finished cluster labeling...")
 
-  # update windows states
+  # update windows states according
+  # to the cluster label they live in
   for state in labeled_clusters:
     cluster = labeled_clusters[state]
     indexes = cluster.indexes
@@ -83,6 +101,8 @@ def create_clusters(windows, configuration):
       windows[idx].set_state(cluster.state)
 
   return labeled_clusters
+  """
+
 
 def init_hmm(clusters, windows, configuration):
 
@@ -232,56 +252,92 @@ def make_windows(configuration):
             print("\tNumber of windows: ", len(wga_windows))
 
 
-        # compute the statistics about the windows
-        statistics = compute_statistic(data=flat_windows_rd_from_indexes(indexes=None,
-                                                                          windows=wga_windows),
-                                        statistics="all")
-
-        print("Window statistics: ")
-        print(statistics)
-
-        if "outlier_remove" in configuration:
-
-          config = configuration["outlier_remove"]["config"]
-          config["statistics"] = statistics
-
-          wga_windows = remove_outliers(windows = wga_windows,
-                          removemethod=configuration["outlier_remove"]["name"],
-                          config=config)
-
-          print("\tNumber of windows after outlier removal: ", len(wga_windows))
-
-        else:
-          print("No outlier removal performed")
-
-
-        window_stats = [window.get_rd_stats(statistics="mean") for window in wga_windows]
+        # accumulat window means so that we plot them
+        window_stats = [window.get_rd_stats(statistics="mean")
+                        for window in wga_windows]
 
         filename = "windows_means.txt"
         with open(filename, 'w') as file:
           file.write(str(window_stats))
 
 
+        non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
+        non_wga_end_idx = configuration["no_wga_file"]["end_idx"]
 
-
-        #non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
-        #non_wga_end_idx = configuration["no_wga_file"]["end_idx"]
-
-        #args = {"start_idx": int(non_wga_start_idx),
-        #        "end_idx": (non_wga_end_idx),
-        #        "windowsize": int(windowsize)}
+        args = {"start_idx": int(non_wga_start_idx),
+                "end_idx": (non_wga_end_idx),
+                "windowsize": int(windowsize)}
 
         # exrtact the non-wga windows
-        #non_wga_windows = extract_windows(chromosome=chromosome,
-        #                                  ref_filename=configuration["reference_file"]["filename"],
-        #                                  test_filename=configuration["no_wga_file"]["filename"], **args)
+        non_wga_windows = extract_windows(chromosome=chromosome,
+                                          ref_filename=configuration["reference_file"]["filename"],
+                                          test_filename=configuration["no_wga_file"]["filename"], **args)
 
-        #if len(non_wga_windows) == 0:
-        #    raise Error("Non-WGA windows have not  been created")
-        #else:
-        #    print("\tNumber of non-wga windows: ", len(wga_windows))
+        if len(non_wga_windows) == 0:
+            raise Error("Non-WGA windows have not  been created")
+        else:
+            print("\tNumber of non-wga windows: ", len(non_wga_windows))
 
-        return wga_windows, [] #non_wga_windows
+
+        # zip mixed windows the smallest length
+        # prevails
+        mixed_windows = []
+
+        for win1, win2 in zip(wga_windows, non_wga_windows):
+          mixed_windows.append(MixedWindowView(wga_w=win1,
+                                               n_wga_w=win2))
+
+        print("Number of mixed windows: ", len(mixed_windows))
+
+        # compute the global statistics of the windows
+        wga_rds = []
+        no_wga_rds = []
+
+        for window in mixed_windows:
+          wga_rds.extend(window.get_rd_counts(name="wga_w"))
+          no_wga_rds.extend(window.get_rd_counts(name="n_wga_w"))
+
+        wga_statistics = compute_statistic(data=wga_rds, statistics="all")
+        no_wga_statistics = compute_statistic(data=no_wga_rds, statistics="all")
+
+        print("WGA stats: ", wga_statistics)
+        print("No WGA stats: ", no_wga_statistics)
+
+        # save also the means
+
+        window_stats = [window.get_rd_stats(statistics="mean", name="n_wga_w")
+                        for window in mixed_windows]
+
+        filename = "no_wga_windows_means.txt"
+        with open(filename, 'w') as file:
+          file.write(str(window_stats))
+
+        window_stats = [window.get_rd_stats(statistics="mean", name="wga_w")
+                        for window in mixed_windows]
+
+        filename = "windows_means.txt"
+        with open(filename, 'w') as file:
+          file.write(str(window_stats))
+
+
+        # do the outlier removal
+
+        if "outlier_remove" in configuration:
+
+          config = configuration["outlier_remove"]["config"]
+          config["statistics"] = {"n_wga_w": no_wga_statistics,
+                                  "wga_w":wga_statistics}
+
+          mixed_windows = remove_outliers(windows=mixed_windows,
+                          removemethod=configuration["outlier_remove"]["name"],
+                          config=config)
+
+          print("\tNumber of windows after outlier removal: ", len(mixed_windows))
+        else:
+          print("No outlier removal performed")
+
+
+        return mixed_windows
 
     except KeyError as e:
         logging.error("Key: {0} does not exit".format(str(e)))
@@ -310,27 +366,27 @@ def main():
     logging.info("Checking if logger is sane...")
 
     print("Creating windows...")
-    wga_windows, non_wga_windows = make_windows(configuration=configuration)
+    mixed_windows = make_windows(configuration=configuration)
 
     print("Created windows....")
     print("Start clustering....")
 
-    wga_clusters = create_clusters(windows=wga_windows,
+    wga_clusters = create_clusters(windows=mixed_windows,
                                    configuration=configuration)
 
     print("Finished clustering...")
-    print("Number of wga_clusters used: {0}".format(len(wga_clusters)))
+    #print("Number of wga_clusters used: {0}".format(len(wga_clusters)))
 
-    for cluster in wga_clusters:
-      print("State modelled by cluster {0} is {1}".format(wga_clusters[cluster].cidx,
-                                                          wga_clusters[cluster].state.name))
-      print("Cluster statistics: ")
-      print(wga_clusters[cluster].get_statistics(windows=wga_windows,
-                                                 statistic="all"))
+    #for cluster in wga_clusters:
+    #  print("State modelled by cluster {0} is {1}".format(wga_clusters[cluster].cidx,
+    #                                                      wga_clusters[cluster].state.name))
+    #  print("Cluster statistics: ")
+    #  print(wga_clusters[cluster].get_statistics(windows=wga_windows,
+    #                                             statistic="all"))
 
-    hmm_train(clusters=wga_clusters.values(),
-              windows=wga_windows,
-              configuration=configuration)
+    #hmm_train(clusters=wga_clusters.values(),
+    #          windows=wga_windows,
+    #          configuration=configuration)
 
     print("Finished analysis")
 
