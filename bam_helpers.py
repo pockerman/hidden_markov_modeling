@@ -346,7 +346,7 @@ def get_query_sequences(pileupcolumn, bam_out,
                        filtered_bases = [ query_sequences[i] for i, q in enumerate(quality)
                                          if q >= quality_threshold]
 
-                       nsegments = pileupcolumn.nsegments - len(filtered_bases)
+                       nsegments = pileupcolumn.nsegments #- len(filtered_bases)
                        temp.append(nsegments)
                        temp.append(filtered_bases)
                     else:
@@ -418,6 +418,7 @@ def common_bases(bamdata, fastadata):
 
         try:
             # the bamdata should be [ref_pos, count, [bases]]
+            # TODO:
             if x[1] == 1 and len(x) < 3:
                 # appending the corresponding base for
                 # this position from hg38 ref fasta
@@ -437,25 +438,29 @@ def common_bases(bamdata, fastadata):
                 # highest occurrence first.
                 common_count = Counter(x[2]).most_common(1)
 
-                # delete from the original bam entry what is present
-                # from the entry position 2 and backwards
-
-
                 try:
                     # when the most common mapped base to the position is an
                     # indel then all elements of the string are appended
                     # to the list (see screenshot on windows staff account).
                   if len(common_count) != 0:
+
+                    # we will use the most common
+                    del (x[2:])
+                    indel = common_count[0][0]
+                    x.extend([indel[0]])
+
+                    """
                     if len(common_count[0][0]) > 1:
                       del (x[2:])
                       indel = common_count[0][0]
                       x.extend([indel[0]])
-                    else: #len(common_count[0][0]) == 0:
+                    else:
 
                       del (x[2:])
                       # extend adds the new elements into the list,
                       # not into the list as a separate list.
                       x.extend([common_count[0][0]])
+                    """
                   else:
                       logging.warning(" No common bases found don't know what to do")
                       logging.warning(" x looked at is {0}".format(x))
@@ -491,31 +496,6 @@ def _get_insertions_and_deletions_from_indel(indel, insertions, deletions):
             # insertions are represented with a "-". Any indels that map to the position
             # are appended to deletions e.g. [T+2N] and insertions lists e.g. [A-3GTT]
             deletions.append(base)
-
-
-def _uniquefy_insertions_and_deletions(insertions, deletions):
-
-    insertions_set = set(insertions)
-    deletions_set = set(deletions)
-
-    # grab the third character in the string, which is he number of inserted/deleted bases.
-    unique_insertions = [int(x[2]) for x in insertions_set]
-    unique_deletions = [int(x[2]) for x in deletions_set]
-    return unique_insertions, unique_deletions
-
-
-def _get_insertion_deletion_difference(unique_insertions, unique_deletions):
-        """
-        Returns the absolute difference
-        between the two given lists
-        :param unique_insertions:
-        :param unique_deletions:
-        :return:
-        """
-        sum_unique_insert = sum(unique_insertions)
-        sum_unique_delete = sum(unique_deletions)
-        net_indel = math.fabs(sum_unique_delete - sum_unique_insert)
-        return net_indel
 
 
 def _get_missing_gap_info(start, end, fastdata):
