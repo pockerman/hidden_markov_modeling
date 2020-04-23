@@ -7,7 +7,7 @@ import logging
 from collections import Counter
 from helpers import Window, Observation, DUMMY_ID
 from helpers import add_window_observation
-from helpers import INFO
+from helpers import INFO, WARNING
 from exceptions import FullWindowException
 from exceptions import Error
 
@@ -89,18 +89,25 @@ def bam_strip(chromosome, file, start, stop, **kwargs):
 
     # move column-wise
     for pileupcolumn in file.pileup(chromosome, start, stop,
-                                        truncate=True, ignore_orphans=False):
+                                    truncate=True, ignore_orphans=False):
 
 
-            if kwargs.get("quality_theshold", None) is not None:
-              pileupcolumn.set_min_base_quality(min_base_quality=kwargs.get("quality_theshold", None))
+            # if there is a quality threshold then use it
+            quality_threshold = kwargs.get("quality_theshold", None)
+            if quality_threshold is not None:
+              print("{0} Using quality threshold {1}".format(INFO, quality_threshold))
+              pileupcolumn.set_min_base_quality(min_base_quality=quality_threshold)
+
+            else:
+              print("{0} Not using quality threshold {1}".format(INFO))
+
 
             bam_out, adjusted_tmp, errors_tmp = \
                 get_query_sequences(pileupcolumn=pileupcolumn,
                                     bam_out=bam_out,
                                     use_indels=True,
                                     do_not_use_indels_on_error=True,
-                                    quality_theshold=kwargs.get("quality_theshold", None),
+                                    quality_theshold=quality_threshold,
                                     fastadata=kwargs.get("fastadata", None))
 
             adjusted += adjusted_tmp
@@ -129,6 +136,9 @@ def create_windows(bamlist, indel_dict, fastdata,
 
     if not fastdata:
         raise Error("No reference sequence is provided")
+
+    print("{0} Estimated number\
+          of windows: {1} ".format(INFO, len(bamlist)//windowcapacity))
 
     # the returned list of windows
     windows = []
@@ -207,11 +217,18 @@ def create_windows(bamlist, indel_dict, fastdata,
     # we fill in the missing data if that was requested
     if len(window) != window.capacity():
 
+      print("{0} Window size {1} is not equal capacity {2} ".format(WARNING, len(window), window.capacity()))
+
       # fill in missing data if this is requested
       if kwargs.get("fill_missing_window_data", False):
+
+        miss_factor =kwargs["fill_missing_window_data_factor"]
+        print("{0} Window size {1} is not \
+              equal capacity {2} ".format(WARNING, miss_factor))
+
         while window.has_capacity():
           window.add(observation=Observation(position=DUMMY_ID,
-                                  read_depth=kwargs["fill_missing_window_data_factor"],
+                                  read_depth=miss_factor,
                                   base= [DUMMY_BASE]))
 
       windows.append(window)
@@ -281,6 +298,7 @@ def get_query_sequences(pileupcolumn, bam_out,
           # append bases only if the quality of the read
           # satisfies our threshold
 
+          # if
           query_sequences = pileupcolumn.get_query_sequences(add_indels=use_indels)
 
           if len(query_sequences) != len(quality):
@@ -293,10 +311,13 @@ def get_query_sequences(pileupcolumn, bam_out,
                                 if q >= quality_threshold]
 
 
-              # we have reads  pileupcolumn.nsegments ignores
-              # the applied quality filter. Assume that the
+              # From the pysam documentation:
+              # pileupcolumn.nsegments
+              # ignores the base quality filter
+              # Assume that the
               # number of segments is always larger
-              nsegments = pileupcolumn.nsegments - len(filtered_bases)
+              # and subtract the
+              nsegments = pileupcolumn.nsegments #- len(filtered_bases)
               temp.append(nsegments)
               temp.append(filtered_bases)
             else:
