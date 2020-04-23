@@ -7,6 +7,7 @@ import logging
 from collections import Counter
 from helpers import Window, Observation, DUMMY_ID
 from helpers import add_window_observation
+from helpers import INFO
 from exceptions import FullWindowException
 from exceptions import Error
 
@@ -30,10 +31,10 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
 
     with pysam.FastaFile(ref_filename) as ref_file:
 
-        print("\t Reference file: ", ref_file.filename)
+        print("{0} Reference file: {1}".format(INFO, ref_file.filename))
 
         with pysam.AlignmentFile(test_filename, "rb") as test_file:
-            print("\t Test file", test_file.filename)
+            print("{0} Alternative file: {1} ".format(INFO, test_file.filename))
 
             try:
 
@@ -45,9 +46,11 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
                                                       quality_theshold=quality_theshold,
                                                       fastadata=ref_list)
 
-                print("\t Number of errors: ", errors)
-                print("\t Number of adjusted: ", adjusted)
-                print("\t bam output: ", len(bam_out))
+                print("{0} Number of errors: {1}".format(INFO, errors))
+                print("{0} Number of adjusted: {1}".format(INFO, adjusted))
+                print("{0} Bam length: {1}".format(INFO, len(bam_out)))
+
+                print("{0} Extracting common bases".format(INFO))
 
                 # get the common bases
                 # TODO: explain what are we trying to do here

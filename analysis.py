@@ -58,33 +58,6 @@ def create_clusters(windows, configuration):
   print("{0} Saving cluster indices".format(INFO))
   save_clusters(clusters=clusters, windows=windows, statistic="mean")
 
-  """
-  for cluster in clusters:
-    filename = "cluster_"+str(cluster.cidx) +"_wga_w_means.txt"
-    with open(filename, 'w') as file:
-
-      if configuration["clusterer"]["config"]["use_window_means"] or\
-        configuration["clusterer"]["config"]["use_window_variance"]:
-        file.write(str(cluster.get_window_statistics(windows=windows,
-                                                     statistic="mean",
-                                                     window_type="wga_w")))
-      else:
-
-        file.write(str(cluster.get_data_from_windows(windows=windows)))
-
-  for cluster in clusters:
-    filename = "cluster_"+str(cluster.cidx) +"_no_wga_w_means.txt"
-    with open(filename, 'w') as file:
-
-      if configuration["clusterer"]["config"]["use_window_means"]or\
-        configuration["clusterer"]["config"]["use_window_variance"]:
-        file.write(str(cluster.get_window_statistics(windows=windows,
-                                                     statistic="mean",
-                                                     window_type="n_wga_w")))
-      else:
-
-        file.write(str(cluster.get_data_from_windows(windows=windows)))
-  """
 
   """
   labeler = SignificanceTestLabeler(clusters=clusters,
@@ -240,6 +213,7 @@ def make_windows(configuration):
 
     try:
 
+        print("{0} Creating WGA Windows...".format(INFO))
         # extract the windows for the WGA treated file
         wga_windows = extract_windows(chromosome=chromosome,
                                       ref_filename=configuration["reference_file"]["filename"],
@@ -252,6 +226,7 @@ def make_windows(configuration):
             print("{0} Number of WGA windows: {1}".format(INFO, len(wga_windows)))
 
 
+        print("{0} Creating No WGA Windows...".format(INFO))
         non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
         non_wga_end_idx = configuration["no_wga_file"]["end_idx"]
 
@@ -295,24 +270,6 @@ def make_windows(configuration):
         print("{0} No WGA stats: {1}".format(INFO, no_wga_statistics))
 
         save_windows_statistic(windows=mixed_windows, statistic="mean")
-
-        """
-        # save also the means
-
-        window_stats = [window.get_rd_stats(statistics="mean", name="n_wga_w")
-                        for window in mixed_windows]
-
-        filename = "no_wga_windows_means.txt"
-        with open(filename, 'w') as file:
-          file.write(str(window_stats))
-
-        window_stats = [window.get_rd_stats(statistics="mean", name="wga_w")
-                        for window in mixed_windows]
-
-        filename = "windows_means.txt"
-        with open(filename, 'w') as file:
-          file.write(str(window_stats))
-        """
 
 
         # do the outlier removal
@@ -362,7 +319,7 @@ def main():
     set_up_logger(configuration=configuration)
     logging.info("Checking if logger is sane...")
 
-    print("Creating windows...")
+    print("{0} Creating windows...".format(INFO))
     mixed_windows = make_windows(configuration=configuration)
 
     print("{0} Done...".format(INFO))
