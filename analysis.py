@@ -15,6 +15,9 @@ from helpers import HMMCallback
 from helpers import print_logs_callback
 from helpers import flat_windows_rd_from_indexes
 from helpers import MixedWindowView
+from helpers import INFO
+from analysis_helpers import save_clusters
+from analysis_helpers import save_windows_statistic
 
 from bam_helpers import extract_windows
 from cluster import Cluster
@@ -33,17 +36,17 @@ def create_clusters(windows, configuration):
                           "config":configuration["clusterer"]["config"]}}
 
 
-  clusterer, initial_index_medoids =  build_clusterer(data=windows,
+  # create the clusters
+  clusterer, initial_index_medoids = build_clusterer(data=windows,
                                                       nclusters=len(configuration["states"]),
                                                       method="kmedoids",
                                                       **kwargs)
 
-  print("Initial medoids indexes: ", initial_index_medoids)
+  print("{0} Initial medoids indexes: {1}".format(INFO, initial_index_medoids))
 
+  # get the window indexes
   clusters_indexes = clusterer.get_clusters()
   clusters = []
-
-  print("Starting cluster labeling...")
 
   for i in range(len(clusters_indexes)):
     clusters.append(Cluster(id_ = i, indexes=clusters_indexes[i]))
@@ -52,11 +55,10 @@ def create_clusters(windows, configuration):
   #print("Cluster statistics (before labeling): ")
   #print(cluster_stats)
 
-  # let's do some plotting of what is in the cluster
-  #sns.set(color_codes=True)
+  print("{0} Saving cluster indices".format(INFO))
+  save_clusters(clusters=clusters, windows=windows, statistic="mean")
 
-  print("Saving cluster indices")
-
+  """
   for cluster in clusters:
     filename = "cluster_"+str(cluster.cidx) +"_wga_w_means.txt"
     with open(filename, 'w') as file:
@@ -82,6 +84,7 @@ def create_clusters(windows, configuration):
       else:
 
         file.write(str(cluster.get_data_from_windows(windows=windows)))
+  """
 
   """
   labeler = SignificanceTestLabeler(clusters=clusters,
@@ -226,19 +229,16 @@ def make_windows(configuration):
     windowsize = configuration["window_size"]
     chromosome = configuration["chromosome"]
 
-    print("\tStart index used: ", wga_start_idx)
-    print("\tEnd index used: ", wga_end_idx)
-    print("\tWindow size: ", windowsize)
-    print("\tChromosome: ", chromosome)
+    print("{0} Start index used: {1}".format(INFO, wga_start_idx))
+    print("{0} End index used: {1}".format(INFO,wga_end_idx))
+    print("{0} Window size: {1}".format(INFO, windowsize))
+    print("{0} Chromosome: {1}".format(INFO, chromosome))
 
     args = {"start_idx": int(wga_start_idx),
             "end_idx": wga_end_idx,
             "windowsize": int(windowsize)}
 
     try:
-
-        # TODO: Extractig initial windows is independent
-        # we can do so in parallel
 
         # extract the windows for the WGA treated file
         wga_windows = extract_windows(chromosome=chromosome,
@@ -249,16 +249,7 @@ def make_windows(configuration):
         if len(wga_windows) == 0:
             raise Error("WGA windows have not been created")
         else:
-            print("\tNumber of windows: ", len(wga_windows))
-
-
-        # accumulat window means so that we plot them
-        window_stats = [window.get_rd_stats(statistics="mean")
-                        for window in wga_windows]
-
-        filename = "windows_means.txt"
-        with open(filename, 'w') as file:
-          file.write(str(window_stats))
+            print("{0} Number of WGA windows: {1}".format(INFO, len(wga_windows)))
 
 
         non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
@@ -276,7 +267,7 @@ def make_windows(configuration):
         if len(non_wga_windows) == 0:
             raise Error("Non-WGA windows have not  been created")
         else:
-            print("\tNumber of non-wga windows: ", len(non_wga_windows))
+            print("{0} Number of non-wga windows: {1}".format(INFO, len(non_wga_windows)))
 
 
         # zip mixed windows the smallest length
@@ -287,7 +278,7 @@ def make_windows(configuration):
           mixed_windows.append(MixedWindowView(wga_w=win1,
                                                n_wga_w=win2))
 
-        print("Number of mixed windows: ", len(mixed_windows))
+        print("{0} Number of mixed windows: {1}".format(INFO,len(mixed_windows)))
 
         # compute the global statistics of the windows
         wga_rds = []
@@ -300,9 +291,12 @@ def make_windows(configuration):
         wga_statistics = compute_statistic(data=wga_rds, statistics="all")
         no_wga_statistics = compute_statistic(data=no_wga_rds, statistics="all")
 
-        print("WGA stats: ", wga_statistics)
-        print("No WGA stats: ", no_wga_statistics)
+        print("{0} WGA stats: {1}".format(INFO, wga_statistics))
+        print("{0} No WGA stats: {1}".format(INFO, no_wga_statistics))
 
+        save_windows_statistic(windows=mixed_windows, statistic="mean")
+
+        """
         # save also the means
 
         window_stats = [window.get_rd_stats(statistics="mean", name="n_wga_w")
@@ -318,11 +312,13 @@ def make_windows(configuration):
         filename = "windows_means.txt"
         with open(filename, 'w') as file:
           file.write(str(window_stats))
+        """
 
 
         # do the outlier removal
 
-        if "outlier_remove" in configuration:
+        if "outlier_remove" in configuration and\
+          configuration["outlier_remove"]:
 
           config = configuration["outlier_remove"]["config"]
           config["statistics"] = {"n_wga_w": no_wga_statistics,
@@ -332,9 +328,10 @@ def make_windows(configuration):
                           removemethod=configuration["outlier_remove"]["name"],
                           config=config)
 
-          print("\tNumber of windows after outlier removal: ", len(mixed_windows))
+          print("{0} Number of windows after outlier removal: {1}".format(INFO,
+                                                                          len(mixed_windows)))
         else:
-          print("No outlier removal performed")
+          print("{0} No outlier removal performed".format(INFO))
 
 
         return mixed_windows
@@ -351,7 +348,7 @@ def make_windows(configuration):
 
 def main():
 
-    print("Starting analysis")
+    print("{0} Starting analysis".format(INFO))
     description = "Check the README file for information on how to use the script"
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('--config', type=str, default='config.json',
@@ -368,13 +365,13 @@ def main():
     print("Creating windows...")
     mixed_windows = make_windows(configuration=configuration)
 
-    print("Created windows....")
-    print("Start clustering....")
+    print("{0} Done...".format{INFO})
+    print("{0} Start clustering....".format(INFO))
 
     wga_clusters = create_clusters(windows=mixed_windows,
                                    configuration=configuration)
 
-    print("Finished clustering...")
+    print("{0} Done...".format(INFO))
     #print("Number of wga_clusters used: {0}".format(len(wga_clusters)))
 
     #for cluster in wga_clusters:
@@ -388,7 +385,7 @@ def main():
     #          windows=wga_windows,
     #          configuration=configuration)
 
-    print("Finished analysis")
+    print("{0} Finished analysis".format(INFO))
 
 
 if __name__ == '__main__':

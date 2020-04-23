@@ -12,8 +12,8 @@ from helpers import listify_dicts_property
 from helpers import WindowState
 from helpers import flat_windows
 
-VALID_DISTS = ['normal', 'uniform', 'poisson',
-               'discrete',]
+VALID_DISTS = ['normal', 'uniform',
+               'poisson','discrete',]
 
 
 def fit_distribution(data, dist_name="normal", **kwargs):
@@ -121,6 +121,22 @@ def build_clusterer(data, nclusters, method, **kwargs):
   argumens are expected in the kwargs dict.
   """
 
+  features = ["clusterer"]["config"]["features"]
+  windows = []
+
+  for window in windows:
+
+    window_data = window.get_rd_stats(statistics="all")
+    window_values =[]
+
+    for feature in features:
+      window_values.append(window_data[0][feature])
+      window_values.append(window_data[1][feature])
+
+    windows.append(window_vals)
+
+
+  """
   if "use_window_means" in kwargs["clusterer"]["config"]\
     and kwargs["clusterer"]["config"]["use_window_means"]:
       windows = []
@@ -153,6 +169,7 @@ def build_clusterer(data, nclusters, method, **kwargs):
         windows.append(window_vals)
   else:
       windows = flat_windows(data)
+  """
 
   if method == "kmeans":
 
@@ -206,34 +223,7 @@ def build_clusterer(data, nclusters, method, **kwargs):
                           metric=metric)
     clusterer.process()
     return clusterer, initial_index_medoids
-  elif method == "wmode":
-    return mode_window_clusterer(windows=data,
-                                 normal_rd=kwargs["normal_rd"],
-                                 delete_rd=kwargs["delete_rd"],
-                                 insert_rd=kwargs["insert_rd"])
 
 
   raise Error("Invalid clustering method: " + method )
-
-
-def mode_window_clusterer(windows, normal_rd,
-                          delete_rd, insert_rd):
-
-  for window in windows:
-    mode = window.get_rd_stats(statistics="mode")
-
-    if mode == normal_rd:
-      window.set_state(WindowState.NORMAL)
-    elif mode == delete_rd:
-      window.set_state(WindowState.DELETE)
-    elif mode == insert_rd:
-      window.set_state(WindowState.INSERT)
-  return windows
-
-
-
-
-
-
-
 

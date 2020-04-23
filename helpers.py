@@ -10,6 +10,7 @@ from exceptions import FullWindowException
 from exceptions import Error
 
 DUMMY_ID = -1
+INFO="INFO:"
 
 class HMMCallback(object):
 
