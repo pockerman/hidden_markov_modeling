@@ -92,7 +92,7 @@ def bam_strip(chromosome, file, start, stop, **kwargs):
     if quality_threshold is not None:
       print("{0} Using quality threshold {1}".format(INFO, quality_threshold))
     else:
-      print("{0} Not using quality threshold {1}".format(INFO))
+      print("{0} Not using quality threshold".format(INFO))
 
 
     # move column-wise
@@ -102,7 +102,7 @@ def bam_strip(chromosome, file, start, stop, **kwargs):
 
             # if there is a quality threshold then use it
             if quality_threshold is not None:
-              pileupcolumn.set_min_base_quality(min_base_quality=quality_threshold)
+              pileupcolumn.set_min_base_quality(quality_threshold)
 
 
             bam_out, adjusted_tmp, errors_tmp = \
