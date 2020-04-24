@@ -48,6 +48,13 @@
     "features":["mean"]
     }
   },
+  "cluster_distribution":{
+    "name": "kde",
+    "config":{
+      "kernel":"gaussian",
+      "bandwidth": 0.2
+    }
+  },
   "states":["NORMAL", "DELETE", "INSERT", "TUF"],
   "HMM": {
     "name":"HMM_Model",

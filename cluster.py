@@ -6,32 +6,7 @@ from helpers import flat_windows_rd_from_indexes
 from helpers import MixedWindowView
 from preprocess_utils import compute_statistic
 
-def clusters_statistics(clusters, windows):
-  """
-  Claculate various statistics for the windows
-  clustered in clusters
 
-  Parameters
-  ----------
-  clusters : list of lists
-    Contains the clustered window indexes. There are
-    len(clusters) clusters
-  windows : list of Window objects
-    DESCRIPTION.
-
-  Returns
-  -------
-  a map with the calculated statistics for each
-  cluster
-
-  """
-
-  statistics = {}
-
-  for c in range(len(clusters)):
-
-    statistics[c] = clusters[c].get_statistics(windows=windows, statistic="all")
-  return statistics
 
 class Cluster(object):
 
@@ -39,6 +14,7 @@ class Cluster(object):
     self._id = id_
     self._indexes = indexes
     self._state = WindowState.INVALID
+    self._density = None
 
 
   @property
@@ -56,6 +32,14 @@ class Cluster(object):
   @property
   def indexes(self):
     return self._indexes
+
+  @property
+  def density(self):
+    return self._density
+
+  @density.setter
+  def density(self, value):
+    self._density = value
 
   def merge(self, cluster):
     self._indexes.extend(cluster.indexes)
