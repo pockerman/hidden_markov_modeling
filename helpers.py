@@ -11,6 +11,7 @@ from exceptions import Error
 
 DUMMY_ID = -1
 INFO="INFO:"
+WARNING="WARNING:"
 
 class HMMCallback(object):
 

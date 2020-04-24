@@ -7,7 +7,7 @@ import logging
 from collections import Counter
 from helpers import Window, Observation, DUMMY_ID
 from helpers import add_window_observation
-from helpers import INFO
+from helpers import INFO, WARNING
 from exceptions import FullWindowException
 from exceptions import Error
 
@@ -87,20 +87,30 @@ def bam_strip(chromosome, file, start, stop, **kwargs):
     adjusted = 0
     bam_out = []
 
+    quality_threshold = kwargs.get("quality_theshold", None)
+
+    if quality_threshold is not None:
+      print("{0} Using quality threshold {1}".format(INFO, quality_threshold))
+    else:
+      print("{0} Not using quality threshold".format(INFO))
+
+
     # move column-wise
     for pileupcolumn in file.pileup(chromosome, start, stop,
-                                        truncate=True, ignore_orphans=False):
+                                    truncate=True, ignore_orphans=False):
 
 
-            if kwargs.get("quality_theshold", None) is not None:
-              pileupcolumn.set_min_base_quality(min_base_quality=kwargs.get("quality_theshold", None))
+            # if there is a quality threshold then use it
+            if quality_threshold is not None:
+              pileupcolumn.set_min_base_quality(quality_threshold)
+
 
             bam_out, adjusted_tmp, errors_tmp = \
                 get_query_sequences(pileupcolumn=pileupcolumn,
                                     bam_out=bam_out,
                                     use_indels=True,
                                     do_not_use_indels_on_error=True,
-                                    quality_theshold=kwargs.get("quality_theshold", None),
+                                    quality_theshold=quality_threshold,
                                     fastadata=kwargs.get("fastadata", None))
 
             adjusted += adjusted_tmp
@@ -129,6 +139,9 @@ def create_windows(bamlist, indel_dict, fastdata,
 
     if not fastdata:
         raise Error("No reference sequence is provided")
+
+    print("{0} Estimated number"
+          " of windows: {1} ".format(INFO, len(bamlist)//windowcapacity))
 
     # the returned list of windows
     windows = []
@@ -165,9 +178,11 @@ def create_windows(bamlist, indel_dict, fastdata,
                 # on the size of the gap.
 
                 # fill in the missing info from the
-                # reference file
-                window_gaps = _get_missing_gap_info(start=int(previous_observation.position)+1,
-                                                    end=int(observation.position)-1,
+                # reference file positions are adjusted
+                # in _get_missing_gap_info to start +1, end +1
+                # to access the referece section
+                window_gaps = _get_missing_gap_info(start=int(previous_observation.position),
+                                                    end=int(observation.position),
                                                     fastdata=fastdata)
 
                 # after getting the missing info we try to add it
@@ -207,11 +222,18 @@ def create_windows(bamlist, indel_dict, fastdata,
     # we fill in the missing data if that was requested
     if len(window) != window.capacity():
 
+      print("{0} Window size {1} is not equal capacity {2} ".format(WARNING, len(window), window.capacity()))
+
       # fill in missing data if this is requested
       if kwargs.get("fill_missing_window_data", False):
+
+        miss_factor =kwargs["fill_missing_window_data_factor"]
+        print("{0} Window size {1} is not \
+              equal capacity {2} ".format(WARNING, miss_factor))
+
         while window.has_capacity():
           window.add(observation=Observation(position=DUMMY_ID,
-                                  read_depth=kwargs["fill_missing_window_data_factor"],
+                                  read_depth=miss_factor,
                                   base= [DUMMY_BASE]))
 
       windows.append(window)
@@ -281,6 +303,7 @@ def get_query_sequences(pileupcolumn, bam_out,
           # append bases only if the quality of the read
           # satisfies our threshold
 
+          # if
           query_sequences = pileupcolumn.get_query_sequences(add_indels=use_indels)
 
           if len(query_sequences) != len(quality):
@@ -293,10 +316,13 @@ def get_query_sequences(pileupcolumn, bam_out,
                                 if q >= quality_threshold]
 
 
-              # we have reads  pileupcolumn.nsegments ignores
-              # the applied quality filter. Assume that the
+              # From the pysam documentation:
+              # pileupcolumn.nsegments
+              # ignores the base quality filter
+              # Assume that the
               # number of segments is always larger
-              nsegments = pileupcolumn.nsegments - len(filtered_bases)
+              # and subtract the
+              nsegments = pileupcolumn.nsegments #- len(filtered_bases)
               temp.append(nsegments)
               temp.append(filtered_bases)
             else:
@@ -320,7 +346,7 @@ def get_query_sequences(pileupcolumn, bam_out,
                        filtered_bases = [ query_sequences[i] for i, q in enumerate(quality)
                                          if q >= quality_threshold]
 
-                       nsegments = pileupcolumn.nsegments - len(filtered_bases)
+                       nsegments = pileupcolumn.nsegments #- len(filtered_bases)
                        temp.append(nsegments)
                        temp.append(filtered_bases)
                     else:
@@ -392,6 +418,7 @@ def common_bases(bamdata, fastadata):
 
         try:
             # the bamdata should be [ref_pos, count, [bases]]
+            # TODO:
             if x[1] == 1 and len(x) < 3:
                 # appending the corresponding base for
                 # this position from hg38 ref fasta
@@ -399,31 +426,48 @@ def common_bases(bamdata, fastadata):
                 logging.error(" Bam item does not have the correct format")
             elif x[1] != 0  and x[2] == '':
                 logging.warning("An entry of the form {0} found. Turnd RD to zero".format(str(x)))
-                #x[1] = 0
+
+                #  we miss a base so set the RD to zero
+                x[1] = 0
+
+                # and consult the refernce
+                # (plus 1 since fasta is zero based  )
+                x[2] = [fastadata[x[0] + 1]]
             else:
                 # provides the element which reaches the
                 # highest occurrence first.
                 common_count = Counter(x[2]).most_common(1)
-
-                # delete from the original bam entry what is present
-                # from the entry position 2 and backwards
-
 
                 try:
                     # when the most common mapped base to the position is an
                     # indel then all elements of the string are appended
                     # to the list (see screenshot on windows staff account).
                   if len(common_count) != 0:
+
+                    # we will use the most common
+                    del (x[2:])
+                    indel = common_count[0][0]
+                    x.extend([indel[0]])
+
+                    """
                     if len(common_count[0][0]) > 1:
                       del (x[2:])
                       indel = common_count[0][0]
                       x.extend([indel[0]])
-                    else: #len(common_count[0][0]) == 0:
+                    else:
 
                       del (x[2:])
                       # extend adds the new elements into the list,
                       # not into the list as a separate list.
                       x.extend([common_count[0][0]])
+                    """
+                  elif x[1] != 0 and x[2] == []:
+
+                      logging.warning(" Found a delete marking it")
+                      logging.warning(" x looked at is {0}".format(x))
+                      # this is a delete mark is as such
+                      x[2] = ["-"]
+
                   else:
                       logging.warning(" No common bases found don't know what to do")
                       logging.warning(" x looked at is {0}".format(x))
@@ -435,6 +479,8 @@ def common_bases(bamdata, fastadata):
         except Exception as e:
             raise Error("An error occurred whilst extracting\
                         common_bases {0}".format(str(e)))
+
+    return bamdata
 
 
 def _get_insertions_and_deletions_from_indel(indel, insertions, deletions):
@@ -459,34 +505,10 @@ def _get_insertions_and_deletions_from_indel(indel, insertions, deletions):
             deletions.append(base)
 
 
-def _uniquefy_insertions_and_deletions(insertions, deletions):
-
-    insertions_set = set(insertions)
-    deletions_set = set(deletions)
-
-    # grab the third character in the string, which is he number of inserted/deleted bases.
-    unique_insertions = [int(x[2]) for x in insertions_set]
-    unique_deletions = [int(x[2]) for x in deletions_set]
-    return unique_insertions, unique_deletions
-
-
-def _get_insertion_deletion_difference(unique_insertions, unique_deletions):
-        """
-        Returns the absolute difference
-        between the two given lists
-        :param unique_insertions:
-        :param unique_deletions:
-        :return:
-        """
-        sum_unique_insert = sum(unique_insertions)
-        sum_unique_delete = sum(unique_deletions)
-        net_indel = math.fabs(sum_unique_delete - sum_unique_insert)
-        return net_indel
-
-
 def _get_missing_gap_info(start, end, fastdata):
 
-    fastdata_range = fastdata[start:end]
+    # plus 1 as this fasta is one based
+    fastdata_range = fastdata[start + 1: end + 1 ]
 
     # the position of the skipped element.
     skipped_pos = start
@@ -501,5 +523,8 @@ def _get_missing_gap_info(start, end, fastdata):
         skipped_temp.append(0)
         skipped_temp.append(base)
         window_gaps.append(skipped_temp)
+
+        # increase by one the reference position
+        skipped_pos += 1
 
     return window_gaps

@@ -18,7 +18,7 @@
   "delete_rd":0,
   "insert_rd":2,
   "window_size":100,
-  "fill_missing_window_data":true,
+  "fill_missing_window_data":false,
   "fill_missing_window_data_factor":0,
   "quality_theshold":20,
   "chromosome": "chr1",
