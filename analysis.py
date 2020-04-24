@@ -23,6 +23,7 @@ from bam_helpers import extract_windows
 from cluster import Cluster
 from cluster_utils import clusters_statistics
 from cluster_utils import build_cluster_densities
+from cluster_utils import save_clusters_desnity
 from hypothesis_testing import SignificanceTestLabeler
 from preprocess_utils import fit_distribution
 from preprocess_utils import compute_statistic
@@ -180,10 +181,19 @@ def create_clusters(windows, configuration):
 
 
 def fit_clusters_distribution(clusters, windows, configuration):
+
   kwargs = configuration["cluster_distribution"]
+  print("{0} Fitting clusters densities...".format(INFO) )
   build_cluster_densities(clusters=clusters,
                           windows=windows,
                           **kwargs)
+  print("{0} Done...".format(INFO))
+
+  # lets's save the cluster densities
+  print("{0} Saving clusters densities...".format(INFO) )
+  save_clusters_desnity(clusters=clusters, windows=windows,
+                        **kwargs)
+  print("{0} Done...".format(INFO))
 
 
 def init_hmm(clusters, windows, configuration):
