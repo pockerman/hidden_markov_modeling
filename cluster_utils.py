@@ -37,8 +37,7 @@ def build_cluster_densities(clusters, windows, **kwargs):
                           bandwidth=kwargs["config"]["bandwidth"])
       kde.fit(arr)
       cluster.density = kde
-
-
+    return clusters
 
   raise Error("Invalid cluster distribution method")
 
