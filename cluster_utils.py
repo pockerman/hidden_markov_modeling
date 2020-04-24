@@ -20,7 +20,7 @@ def build_cluster_densities(clusters, windows, **kwargs):
   None.
 
   """
-  if kwargs["cluster_distribution"]["name"] == "kde":
+  if kwargs["name"] == "kde":
 
     for cluster in clusters:
 
