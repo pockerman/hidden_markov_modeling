@@ -428,7 +428,7 @@ class Window(object):
     def get_gc_percent(self):
       gc_count = 0
 
-      for observation is self._observations:
+      for observation in self._observations:
          if observation.base[0].upper() == "C" \
                     or observation.base[0].upper() == "G":
                 gc_count += 1
