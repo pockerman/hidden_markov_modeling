@@ -205,15 +205,10 @@ def init_hmm(clusters, windows, configuration):
 
   state_to_dist = {}
   states = []
-  for cluster in clusters:
-    state_to_dist[cluster.state.name] = \
-    fit_distribution(data=cluster.get_data_from_windows(windows=windows),
-                     dist_name=configuration["fit_states_dist"][cluster.state.name])
-    states.append(State(state_to_dist[cluster.state.name], name=cluster.state.name))
-
-    print("For cluster: {0}".format(cluster.state.name))
-    print("Distribution:")
-    print(state_to_dist[cluster.state.name])
+  for cluster, name in zip(clusters, configuration["states"]):
+    states.append(State(IndependentComponentsDistributions([cluster.wga_density,
+                                                            cluster.no_wga_density]),
+                        naame=name))
 
 
   # add the states to the model
@@ -226,14 +221,10 @@ def init_hmm(clusters, windows, configuration):
   # we fit the model. All states have an equal
   # probability to be the starting state or we could
 
-  if len(clusters) == 1:
-    hmm_model.add_transition(hmm_model.start, states[0], 1.0)
-  else:
-
-    for i, cluster in enumerate(clusters):
+  for state in states:
       hmm_model.add_transition(hmm_model.start,
-                             states[i],
-                              configuration["HMM"]["start_prob"][cluster.state.name])
+                             state,
+                             configuration["HMM"]["start_prob"][state.name])
 
   for i in states:
     for j in states:
@@ -264,6 +255,7 @@ def hmm_train(clusters, windows, configuration):
   #                                      configuration=configuration,
   #                                      as_on_seq=False)]
 
+  """
   flatwindows = flat_windows(windows=windows)
 
   #print("Flatwindows are: ", flatwindows)
@@ -303,8 +295,7 @@ def hmm_train(clusters, windows, configuration):
   save_hmm(hmm_model=hmm_model,
                    configuration=configuration,
                    win_interval_length=0)
-
-
+  """
 
 
 def main():
@@ -340,11 +331,12 @@ def main():
                               windows=mixed_windows,
                               configuration=configuration)
     print("{0} Done...".format(INFO))
+    print("{0} Starting HMM training...".format(INFO))
+    hmm_train(clusters=wga_clusters.values(),
+              windows=mixed_windows,
+              configuration=configuration)
 
-    #hmm_train(clusters=wga_clusters.values(),
-    #          windows=wga_windows,
-    #          configuration=configuration)
-
+    print("{0} Done...".format(INFO))
     print("{0} Finished analysis".format(INFO))
 
 
