@@ -53,30 +53,32 @@ def build_cluster_densities(clusters, windows, **kwargs):
       indeces = cluster.indexes
 
       wga_data = np.empty((1,0), float)
-      comp2_data = np.empty((1,0), float)
+      no_wga_data = np.empty((1,0), float)
 
       for idx in indeces:
         window = windows[idx]
         mu1, mu2 = window.get_rd_stats(statistics="mean", name="both")
-        wga_data = np.appned(wga_data, np.array(mu1))
-        comp2_data = np.appned(comp2_data,
+        wga_data = np.append(wga_data, np.array(mu1))
+        no_wga_data = np.append(no_wga_data,
                                np.array(mu2))
 
       # collected the data create the GMM for each
       # component in the cluster
       wga_gmm = \
-        GeneralMixtureModel.from_samples(_get_distributions_list_from_names,
-                                         n_components=len(wga_dist),
-                                         weights=wga_weights,
-                                         X=wga_data)
+        GeneralMixtureModel.from_samples(
+          _get_distributions_list_from_names(wga_dist),
+          n_components=len(wga_dist),
+          weights=wga_weights, X=wga_data)
+
       cluster.wga_density = wga_gmm
 
-      non_wga_dist = \
-        GeneralMixtureModel.from_samples(_get_distributions_list_from_names,
-                                         n_components=len(wga_dist),
-                                         weights=no_wga_weights,
-                                         X=wga_data)
-      cluster.no_wga_density = non_wga_dist
+      non_wga_density = \
+        GeneralMixtureModel.from_samples(
+          _get_distributions_list_from_names(non_wga_dist),
+          n_components=len(non_wga_dist),
+          weights=no_wga_weights, X=no_wga_data)
+
+      cluster.no_wga_density = non_wga_density
 
   else:
     raise Error("Invalid cluster distribution method")
@@ -122,7 +124,7 @@ def clusters_statistics(clusters, windows):
   return statistics
 
 
-def save_cluster_density(cluster, windows, filename, kwargs):
+def save_cluster_density(cluster, windows, filename, **kwargs):
 
 
     if kwargs["name"] == "kde":
