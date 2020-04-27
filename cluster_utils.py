@@ -156,7 +156,7 @@ def _get_distributions_list_from_names(dists_name):
 
   for name in dists_name:
     if name == "normal":
-      dists.appned(NormalDistribution)
+      dists.append(NormalDistribution)
     elif name == "poisson":
       dists.append(PoissonDistribution)
     elif name == "uniform":
