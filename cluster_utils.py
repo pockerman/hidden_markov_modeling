@@ -69,17 +69,19 @@ def build_cluster_densities(clusters, windows, **kwargs):
       # component in the cluster
       wga_gmm = \
         GeneralMixtureModel.from_samples(
-          _get_distributions_list_from_names(wga_dist),
+          distributions=_get_distributions_list_from_names(wga_dist),
           n_components=len(wga_dist),
-          weights=wga_weights, X=wga_data)
+          X=wga_data,
+          weights=wga_weights)
 
       cluster.wga_density = wga_gmm
 
       non_wga_density = \
         GeneralMixtureModel.from_samples(
-          _get_distributions_list_from_names(non_wga_dist),
+          distributions=_get_distributions_list_from_names(non_wga_dist),
           n_components=len(non_wga_dist),
-          weights=no_wga_weights, X=no_wga_data)
+          X=no_wga_data,
+          weights=no_wga_weights )
 
       cluster.no_wga_density = non_wga_density
 
