@@ -254,7 +254,7 @@ def hmm_train(clusters, windows, configuration):
   observations = []
 
   for window in windows:
-    observations.append(list(window.get_bases(windowtype="both")))
+    observations.append(window.get_bases(windowtype="both"))
 
   print("{0} Done...".format(INFO))
   print("{0} Fit HMM...".format(INFO))
