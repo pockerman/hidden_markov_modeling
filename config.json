@@ -67,7 +67,8 @@
       "NORMAL": 0.95,
       "DELETE": 0.0166,
       "INSERT": 0.0166,
-      "DOUBLE_DEL": 0.0166
+      "DOUBLE_DEL": 0.0166,
+      "TUF":0.0
     }
   },
   "logger_file":"tuf.log",

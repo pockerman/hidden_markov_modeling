@@ -206,9 +206,9 @@ def init_hmm(clusters, windows, configuration):
   state_to_dist = {}
   states = []
   for cluster, name in zip(clusters, configuration["states"]):
-    states.append(State(IndependentComponentsDistributions([cluster.wga_density,
-                                                            cluster.no_wga_density]),
-                        naame=name))
+    states.append(State(IndependentComponentsDistribution([cluster.wga_density,
+                                                           cluster.no_wga_density]),
+                        name=name))
 
 
   # add the states to the model
@@ -332,7 +332,7 @@ def main():
                               configuration=configuration)
     print("{0} Done...".format(INFO))
     print("{0} Starting HMM training...".format(INFO))
-    hmm_train(clusters=wga_clusters.values(),
+    hmm_train(clusters=clusters,
               windows=mixed_windows,
               configuration=configuration)
 
