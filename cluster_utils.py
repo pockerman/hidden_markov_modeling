@@ -128,7 +128,7 @@ def save_cluster_density(cluster, windows, filename, kwargs):
     if kwargs["name"] == "kde":
 
       arr = _form_cluster_2d_array(cluster=cluster, windows=windows)
-      log_probs = cluster.density.score_logs(arr)
+      log_probs = cluster.density.score_samples(arr)
 
       with open(filename, 'w') as file:
         file.write(str(log_probs))
