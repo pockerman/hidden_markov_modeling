@@ -190,10 +190,10 @@ def fit_clusters_distribution(clusters, windows, configuration):
   print("{0} Done...".format(INFO))
 
   # lets's save the cluster densities
-  print("{0} Saving clusters densities...".format(INFO) )
-  save_clusters_desnity(clusters=clusters, windows=windows,
-                        **kwargs)
-  print("{0} Done...".format(INFO))
+  #print("{0} Saving clusters densities...".format(INFO) )
+  #save_clusters_desnity(clusters=clusters, windows=windows,
+  #                      **kwargs)
+  #print("{0} Done...".format(INFO))
 
 
 def init_hmm(clusters, windows, configuration):

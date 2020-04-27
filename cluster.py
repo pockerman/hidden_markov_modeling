@@ -14,7 +14,8 @@ class Cluster(object):
     self._id = id_
     self._indexes = indexes
     self._state = WindowState.INVALID
-    self._density = None
+    self._wga_density = None
+    self._no_wga_density = None
 
 
   @property
@@ -34,12 +35,20 @@ class Cluster(object):
     return self._indexes
 
   @property
-  def density(self):
-    return self._density
+  def wga_density(self):
+    return self._wga_density
 
-  @density.setter
-  def density(self, value):
-    self._density = value
+  @wga_density.setter
+  def wga_density(self, value):
+    self._wga_density = value
+
+  @property
+  def no_wga_density(self):
+    return self._no_wga_density
+
+  @no_wga_density.setter
+  def no_wga_density(self, value):
+    self._no_wga_density = value
 
   def merge(self, cluster):
     self._indexes.extend(cluster.indexes)

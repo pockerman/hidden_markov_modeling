@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.neighbors import KernelDensity
+from pomegranate import *
 from helpers import Error
 from helpers import INFO
 
@@ -35,9 +36,54 @@ def build_cluster_densities(clusters, windows, **kwargs):
                           bandwidth=kwargs["config"]["bandwidth"])
       kde.fit(arr)
       cluster.density = kde
-    return clusters
+  elif kwargs["name"] == "gmm":
 
-  raise Error("Invalid cluster distribution method")
+    # distributions for the first component
+    wga_dist = kwargs["config"]["wga_dist"]
+    wga_weights = kwargs["config"]["wga_weights"]
+
+    print("{0} Distributions for WGA {1} ".format(INFO, wga_dist))
+
+    non_wga_dist = kwargs["config"]["no_wga_dist"]
+    no_wga_weights = kwargs["config"]["no_wga_dist_weights"]
+
+    print("{0} Distributions for NON WGA {1} ".format(INFO, wga_dist))
+
+    for cluster in clusters:
+      indeces = cluster.indexes
+
+      wga_data = np.empty((1,0), float)
+      comp2_data = np.empty((1,0), float)
+
+      for idx in indeces:
+        window = windows[idx]
+        mu1, mu2 = window.get_rd_stats(statistics="mean", name="both")
+        wga_data = np.appned(wga_data, np.array(mu1))
+        comp2_data = np.appned(comp2_data,
+                               np.array(mu2))
+
+      # collected the data create the GMM for each
+      # component in the cluster
+      wga_gmm = \
+        GeneralMixtureModel.from_samples(_get_distributions_list_from_names,
+                                         n_components=len(wga_dist),
+                                         weights=wga_weights,
+                                         X=wga_data)
+      cluster.wga_density = wga_gmm
+
+      non_wga_dist = \
+        GeneralMixtureModel.from_samples(_get_distributions_list_from_names,
+                                         n_components=len(wga_dist),
+                                         weights=no_wga_weights,
+                                         X=wga_data)
+      cluster.no_wga_density = non_wga_dist
+
+  else:
+    raise Error("Invalid cluster distribution method")
+
+  return clusters
+
+
 
 
 def save_clusters_desnity(clusters, windows, **kwargs):
@@ -101,4 +147,19 @@ def _form_cluster_2d_array(cluster, windows):
     arr = np.append(arr, np.array([[mu1, mu2]]), axis=0)
   return arr
 
+
+def _get_distributions_list_from_names(dists_name):
+
+  dists = []
+
+  for name in dists_name:
+    if name == "normal":
+      dists.appned(NormalDistribution)
+    elif name == "poisson":
+      dists.append(PoissonDistribution)
+    elif name == "uniform":
+      dists.append(UniformDistribution)
+    else:
+      raise Error("Name {0} is an unknown distribution ".format(name))
+  return dists
 

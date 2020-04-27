@@ -49,10 +49,12 @@
     }
   },
   "cluster_distribution":{
-    "name": "kde",
+    "name": "gmm",
     "config":{
-      "kernel":"gaussian",
-      "bandwidth": 0.2
+      "wga_dist":["normal", "uniform"],
+      "wga_weights": null,
+      "no_wga_dist":["normal", "uniform"],
+      "no_wga_dist_weights":null
     }
   },
   "states":["NORMAL", "DELETE", "INSERT", "TUF","DOUBLE_DEL"],
