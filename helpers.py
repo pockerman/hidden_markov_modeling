@@ -425,6 +425,20 @@ class Window(object):
       return seq.strip()
 
 
+    def get_gc_percent(self):
+      gc_count = 0
+
+      for observation is self._observations:
+         if observation.base[0].upper() == "C" \
+                    or observation.base[0].upper() == "G":
+                gc_count += 1
+
+      if gc_count == 0:
+        return 0
+
+      return gc_count / len(self._observations)
+
+
     def get_gc_count(self):
         """
         Returns the GC count for the window
@@ -630,7 +644,14 @@ class MixedWindowView(object):
   def get_sequence(self, windowtype="both"):
 
     if windowtype == "both":
-      return self._windows["wga_w"].get_sequence(), self._windows["n_wga_w"].get_sequence()
+      return self._windows["wga_w"].get_sequence(),\
+        self._windows["n_wga_w"].get_sequence()
+
+  def get_gc_percent(self, windowtype="both"):
+    if windowtype == "both":
+      return self._windows["wga_w"].get_gc_percent(),\
+        self._windows["n_wga_w"].get_gc_percent()
+
 
 
 

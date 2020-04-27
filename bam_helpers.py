@@ -152,6 +152,9 @@ def create_windows(bamlist, indel_dict, fastdata,
 
     for idx, item in enumerate(bamlist):
 
+        for base in item[2]:
+          base.upper()
+
         # create an observation
         observation = Observation(position=item[0],
                                   read_depth=item[1],
