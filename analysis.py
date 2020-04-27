@@ -243,12 +243,31 @@ def init_hmm(clusters, windows, configuration):
 
 def hmm_train(clusters, windows, configuration):
 
-  print("Start HMM training....")
+  print("{0} HMM initialization...".format(INFO))
 
-  # initialize the model
   hmm_model = init_hmm(clusters=clusters,
                        windows=windows,
                        configuration=configuration)
+  print("{0} Done...".format(INFO))
+  print("{0} Get observations from clusters...".format(INFO))
+
+  observations = []
+
+  for window in windows:
+    observations.append(window.get_bases(windows=windows, windowtype="both"))
+
+  print("{0} Done...".format(INFO))
+  print("{0} Fit HMM...".format(INFO))
+  hmm_model, history = \
+    hmm_model.fit(sequences=observations,
+                  algorithm=configuration["HMM"]["train_solver"],
+                  return_history=True,
+                  verbose=True,
+                  lr_decay=0.6,
+                  callbacks=[HMMCallback(callback=print_logs_callback)],
+                  inertia=0.01)
+  print("{0} Done...".format(INFO))
+
 
 
   #flatwindows = [flat_windows_from_state(windows=windows,

@@ -408,6 +408,15 @@ class Window(object):
         rd_data = [item.read_depth for item in self._observations]
         return rd_data
 
+    def get_bases(self):
+
+      bases = []
+
+      for observation in self._observations:
+        bases.append(observation.base[0])
+
+      return bases
+
     def get_gc_count(self):
         """
         Returns the GC count for the window
@@ -600,6 +609,15 @@ class MixedWindowView(object):
           return self._windows["n_wga_w"].get_rd_stats(statistics=statistics)
         else:
           raise Error("Name {0} is invalid ".format(name))
+
+  def get_bases(self, windowtype="both"):
+
+    if windowtype == "both":
+      wga_w = self._windows["wga_w"]
+      n_wga_w = self._windows["n_wga_w"]
+
+      pairs = zip(wga_w.get_bases(), n_wga_w.get_bases())
+      return pairs
 
 
 

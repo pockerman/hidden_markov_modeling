@@ -74,3 +74,11 @@ class Cluster(object):
         statistics.append(window.get_rd_stats(statistics=statistic))
     return statistics
 
+  def get_bases(self, windows, windowtype="both"):
+
+    bases = []
+    for idx in self.indexes:
+      window = windows[idx]
+      bases.append(window.get_bases(windowtype=windowtype))
+    return bases
+
