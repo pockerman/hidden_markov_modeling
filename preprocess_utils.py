@@ -122,7 +122,7 @@ def build_clusterer(data, nclusters, method, **kwargs):
   argumens are expected in the kwargs dict.
   """
 
-  features = kwargs["clusterer"]["config"]["features"]
+  features = kwargs["config"]["features"]
   windows = []
 
   print("{0} cluster features used {1}".format(INFO, features))
@@ -150,18 +150,18 @@ def build_clusterer(data, nclusters, method, **kwargs):
     from pyclustering.utils.metric import type_metric
     from pyclustering.utils.metric import  distance_metric
 
-    if kwargs["clusterer"]["config"]["metric"] == "MANHATAN":
+    if kwargs["config"]["metric"] == "MANHATAN":
       t_metric= type_metric.MANHATTAN
-    elif kwargs["clusterer"]["config"]["metric"] == "EUCLIDEAN":
+    elif kwargs["config"]["metric"] == "EUCLIDEAN":
       t_metric = type_metric.EUCLIDEAN
     else:
-      raise Error("Invalid metric specified %s"%kwargs["clusterer"]["config"]["metric"])
+      raise Error("Invalid metric specified %s"%kwargs["config"]["metric"])
 
     metric = distance_metric(metric_type=t_metric)
 
 
     initial_index_medoids=[]
-    if kwargs["clusterer"]["config"]["init_cluster_idx"] == "random_from_data":
+    if kwargs["config"]["init_cluster_idx"] == "random_from_data":
       import random
 
       for c in range(nclusters):
@@ -182,7 +182,7 @@ def build_clusterer(data, nclusters, method, **kwargs):
         else:
           initial_index_medoids.append(idx)
     else:
-        initial_index_medoids=kwargs["clusterer"]["config"]["init_cluster_idx"]
+        initial_index_medoids=kwargs["config"]["init_cluster_idx"]
 
 
     clusterer  = kmedoids(data=windows,

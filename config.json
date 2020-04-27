@@ -1,18 +1,18 @@
 {
   "reference_file":{
     "filename": "/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
-    "start_idx" :0,
-    "end_idx": 1000000
+    "start_idx" :100001,
+    "end_idx": 1400001
   },
   "no_wga_file": {
      "filename": "/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam",
-     "start_idx": 0,
-     "end_idx": 1000000
+     "start_idx": 100001,
+     "end_idx": 1400001
   },
   "test_file":{
     "filename": "/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam",
-    "start_idx": 0,
-    "end_idx": 1000000
+    "start_idx": 100001,
+    "end_idx": 1400001
   },
   "normal_rd":1,
   "delete_rd":0,
@@ -48,7 +48,14 @@
     "features":["mean"]
     }
   },
-  "states":["NORMAL", "DELETE", "INSERT", "TUF"],
+  "cluster_distribution":{
+    "name": "kde",
+    "config":{
+      "kernel":"gaussian",
+      "bandwidth": 0.2
+    }
+  },
+  "states":["NORMAL", "DELETE", "INSERT", "TUF","DOUBLE_DEL"],
   "HMM": {
     "name":"HMM_Model",
     "train_solver": "baum-welch",
