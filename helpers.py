@@ -417,6 +417,14 @@ class Window(object):
 
       return bases
 
+    def get_sequence(self):
+
+      seq = ""
+      for observaion in self._observations:
+        seq += observaion.base[0]
+      return seq.strip()
+
+
     def get_gc_count(self):
         """
         Returns the GC count for the window
@@ -618,6 +626,11 @@ class MixedWindowView(object):
 
       pairs = zip(wga_w.get_bases(), n_wga_w.get_bases())
       return pairs
+
+  def get_sequence(self, windowtype="both"):
+
+    if windowtype == "both":
+      return self._windows["wga_w"].get_sequence(), self._windows["n_wga_w"].get_sequence()
 
 
 
