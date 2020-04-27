@@ -62,6 +62,9 @@ def build_cluster_densities(clusters, windows, **kwargs):
         no_wga_data = np.append(no_wga_data,
                                np.array(mu2))
 
+      wga_data = wga_data.T
+      no_wga_data = no_wga_data.T
+
       # collected the data create the GMM for each
       # component in the cluster
       wga_gmm = \
