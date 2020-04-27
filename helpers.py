@@ -651,6 +651,10 @@ class MixedWindowView(object):
     if windowtype == "both":
       return self._windows["wga_w"].get_gc_percent(),\
         self._windows["n_wga_w"].get_gc_percent()
+    elif windowtype == "wga_w":
+      return self._windows["wga_w"].get_gc_percent()
+    elif windowtype == "n_wga_w":
+      return self._windows["n_wga_w"].get_gc_percent()
 
 
 
