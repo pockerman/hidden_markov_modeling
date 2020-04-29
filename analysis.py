@@ -284,7 +284,7 @@ def hmm_train(clusters, windows, configuration):
   observations = []
 
   for window in windows:
-    observations.append(window.get_gc_percent(windowtype="n_wga_w"))
+    observations.append([window.get_gc_percent(windowtype="n_wga_w")])
 
   print("{0} Done...".format(INFO))
   print("{0} Fit HMM...".format(INFO))
