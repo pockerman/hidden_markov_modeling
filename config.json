@@ -17,7 +17,7 @@
   "window_size":100,
   "fill_missing_window_data":false,
   "fill_missing_window_data_factor":0,
-  "quality_theshold":20,
+  "quality_threshold":null,
   "chromosome": "chr1",
   "save_windows":false,
   "remove_windows_with_N":true,

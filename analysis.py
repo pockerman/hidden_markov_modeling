@@ -83,15 +83,18 @@ def make_windows(configuration):
           args["quality_theshold"] = configuration["quality_theshold"]
 
         # exrtact the non-wga windows
-        non_wga_windows = extract_windows(chromosome=chromosome,
-                                          ref_filename=configuration["reference_file"]["filename"],
-                                          test_filename=configuration["no_wga_file"]["filename"],
-                                          **args)
+        non_wga_windows = \
+          extract_windows(chromosome=chromosome,
+                          ref_filename=configuration["reference_file"]["filename"],
+                          test_filename=configuration["no_wga_file"]["filename"],
+                          **args)
 
         if len(non_wga_windows) == 0:
             raise Error("Non-WGA windows have not  been created")
         else:
-            print("{0} Number of non-wga windows: {1}".format(INFO, len(non_wga_windows)))
+            print("{0} Number of non-wga"
+                  " windows: {1}".format(INFO,
+                                         len(non_wga_windows)))
 
 
         # filter the windows for N's
@@ -107,10 +110,18 @@ def make_windows(configuration):
 
             wga_windows  = wga_filter_windows
             no_wga_windows = no_wga_filter_windows
+
+            print("{0} Number of wga windows"
+                  " after filtering: {1}".format(INFO,
+                                                 len(wga_windows)))
+            print("{0} Number of non-wga windows"
+                  " after filtering: {1}".format(INFO,
+                                                 len(non_wga_windows)))
             print("{0} Done...".format(INFO))
 
         else:
-            print("{0} No filtering windows for Ns requested...".format(INFO))
+            print("{0} No filtering windows"
+                  " for Ns requested...".format(INFO))
 
 
         # zip mixed windows the smallest length

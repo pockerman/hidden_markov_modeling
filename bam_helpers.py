@@ -27,7 +27,7 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
     windowcapacity = args["windowsize"]
     start_idx = args["start_idx"]
     end_idx = args["end_idx"]
-    quality_theshold = args.get("quality_theshold", None)
+    quality_threshold = args.get("quality_threshold", None)
 
     with pysam.FastaFile(ref_filename) as ref_file:
 
@@ -40,11 +40,12 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
 
                 ref_list = ref_file.fetch(chromosome, 0, )
 
-                bam_out, errors, adjusted = bam_strip(chromosome=chromosome,
-                                                      file=test_file,
-                                                      start=start_idx, stop=end_idx,
-                                                      quality_theshold=quality_theshold,
-                                                      fastadata=ref_list)
+                bam_out, errors, adjusted =\
+                  bam_strip(chromosome=chromosome,
+                            file=test_file,
+                            start=start_idx, stop=end_idx,
+                            quality_threshold=quality_threshold,
+                            fastadata=ref_list)
 
                 print("{0} Number of errors: {1}".format(INFO, errors))
                 print("{0} Number of adjusted: {1}".format(INFO, adjusted))
@@ -87,7 +88,7 @@ def bam_strip(chromosome, file, start, stop, **kwargs):
     adjusted = 0
     bam_out = []
 
-    quality_threshold = kwargs.get("quality_theshold", None)
+    quality_threshold = kwargs.get("quality_threshold", None)
 
     if quality_threshold is not None:
       print("{0} Using quality threshold {1}".format(INFO, quality_threshold))
@@ -110,7 +111,7 @@ def bam_strip(chromosome, file, start, stop, **kwargs):
                                     bam_out=bam_out,
                                     use_indels=True,
                                     do_not_use_indels_on_error=True,
-                                    quality_theshold=quality_threshold,
+                                    quality_threshold=quality_threshold,
                                     fastadata=kwargs.get("fastadata", None))
 
             adjusted += adjusted_tmp
@@ -167,10 +168,11 @@ def create_windows(bamlist, indel_dict, fastdata,
 
                 # yes it is...nice add it to the window
                 # and update the observation
-                window = add_window_observation(window=window,
-                                                windows=windows,
-                                                observation=observation,
-                                                windowcapacity=windowcapacity)
+                window = \
+                  add_window_observation(window=window,
+                                         windows=windows,
+                                         observation=observation,
+                                         windowcapacity=windowcapacity)
 
                 previous_observation = observation
             else:
@@ -184,9 +186,10 @@ def create_windows(bamlist, indel_dict, fastdata,
                 # reference file positions are adjusted
                 # in _get_missing_gap_info to start +1, end +1
                 # to access the referece section
-                window_gaps = _get_missing_gap_info(start=int(previous_observation.position),
-                                                    end=int(observation.position),
-                                                    fastdata=fastdata)
+                window_gaps = \
+                  _get_missing_gap_info(start=int(previous_observation.position),
+                                        end=int(observation.position),
+                                        fastdata=fastdata)
 
                 # after getting the missing info we try to add it
                 # to the window. we may have accumulated so much info that
@@ -307,7 +310,8 @@ def get_query_sequences(pileupcolumn, bam_out,
           # satisfies our threshold
 
           # if
-          query_sequences = pileupcolumn.get_query_sequences(add_indels=use_indels)
+          query_sequences = \
+            pileupcolumn.get_query_sequences(add_indels=use_indels)
 
           if len(query_sequences) != len(quality):
             logging.error("len(query_sequences) not equal\
@@ -346,7 +350,8 @@ def get_query_sequences(pileupcolumn, bam_out,
                   else:
 
                     if quality_threshold:
-                       filtered_bases = [ query_sequences[i] for i, q in enumerate(quality)
+                       filtered_bases = [ query_sequences[i]
+                                         for i, q in enumerate(quality)
                                          if q >= quality_threshold]
 
                        nsegments = pileupcolumn.nsegments #- len(filtered_bases)
