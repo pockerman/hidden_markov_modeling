@@ -105,11 +105,11 @@ def make_windows(configuration):
             wga_filter_windows = [window for window in wga_windows
                                   if not window.has_base("N")]
 
-            no_wga_filter_windows = [window for window in no_wga_windows
+            no_wga_filter_windows = [window for window in non_wga_windows
                                   if not window.has_base("N")]
 
             wga_windows  = wga_filter_windows
-            no_wga_windows = no_wga_filter_windows
+            non_wga_windows = no_wga_filter_windows
 
             print("{0} Number of wga windows"
                   " after filtering: {1}".format(INFO,
