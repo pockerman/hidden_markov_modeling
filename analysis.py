@@ -213,7 +213,7 @@ def create_clusters(windows, configuration):
 def label_clusters(clusters, windows, configuration):
 
   labeler = SignificanceTestLabeler(clusters=clusters, windows=windows)
-  return labeler.label(test_config=configuration)
+  return labeler.label(test_config=configuration["labeler"])
 
 
 def fit_clusters_distribution(clusters, windows, configuration):
@@ -382,7 +382,7 @@ def main():
     print("{0} Done...".format(INFO))
 
     print("{0} Labelling clusters...".format(INFO))
-    clusters = label_clusters(clusters=clusters, windows=windows,
+    clusters = label_clusters(clusters=clusters, windows=mixed_windows,
                               configuration=configuration)
     print("{0} Done...".format(INFO))
 

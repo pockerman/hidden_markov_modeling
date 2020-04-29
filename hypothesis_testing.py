@@ -172,9 +172,9 @@ class SignificanceTestLabeler(object):
     for cluster in self._clusters:
 
         print("{0} Testing cluster {1}".format(INFO, cluster.cidx))
-        print("{0} Testing FULL DELETE")
+        print("{0} Testing FULL DELETE".format(INFO))
 
-        windows = [window.get_window(window_type)
+        windows = [window.get_window(wtype="wga_w")
                      for window in self._windows]
 
         cluster_data = cluster.get_data_from_windows(windows=windows)
