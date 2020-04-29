@@ -206,8 +206,14 @@ def create_clusters(windows, configuration):
 
   print("{0} Saving cluster indices".format(INFO))
   save_clusters(clusters=clusters, windows=windows, statistic="mean")
-
+  print("{0} Done...".format(INFO))
   return clusters
+
+
+def label_clusters(clusters, windows, configuration):
+
+  labeler = SignificanceTestLabeler(clusters=clusters, windows=windows)
+  return labeler.label(test_config=configuration)
 
 
 def fit_clusters_distribution(clusters, windows, configuration):
@@ -219,11 +225,11 @@ def fit_clusters_distribution(clusters, windows, configuration):
                           **kwargs)
   print("{0} Done...".format(INFO))
 
-  # lets's save the cluster densities
-  #print("{0} Saving clusters densities...".format(INFO) )
-  #save_clusters_desnity(clusters=clusters, windows=windows,
-  #                      **kwargs)
-  #print("{0} Done...".format(INFO))
+  if configuration["save_cluster_densities"]:
+    print("{0} Saving clusters densities...".format(INFO) )
+    save_clusters_desnity(clusters=clusters, windows=windows,
+                          **kwargs)
+    print("{0} Done...".format(INFO))
 
 
 def init_hmm(clusters, windows, configuration):
@@ -245,17 +251,17 @@ def init_hmm(clusters, windows, configuration):
   hmm_model.add_states(states)
 
   # construct the transition matrix.
-  # We create a dense HMM with equal
-  # transition probabilities between each state
-  # this will be used for initialization when
-  # we fit the model. All states have an equal
-  # probability to be the starting state or we could
+  # We create a dense HMM. The probability
+  # starting at a state is given in
+  # configuration["HMM"]["start_prob"][state.name]
 
   for state in states:
       hmm_model.add_transition(hmm_model.start,
                              state,
                              configuration["HMM"]["start_prob"][state.name])
 
+  # add transitions for every state
+  # to another this will create a dense HMM
   for i in states:
     for j in states:
 
@@ -373,6 +379,11 @@ def main():
     print("{0} Start clustering....".format(INFO))
     clusters = create_clusters(windows=mixed_windows,
                                configuration=configuration)
+    print("{0} Done...".format(INFO))
+
+    print("{0} Labelling clusters...".format(INFO))
+    clusters = label_clusters(clusters=clusters, windows=windows,
+                              configuration=configuration)
     print("{0} Done...".format(INFO))
 
     print("{0} Fitting clusters distributions...".format(INFO))

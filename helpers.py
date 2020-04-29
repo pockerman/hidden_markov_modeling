@@ -163,17 +163,6 @@ def flat_windows_rd_from_indexes(indexes, windows):
       rd_observations.extend(windows[widx].get_rd_observations())
   return rd_observations
 
-"""
-def windows_rd_statistics(windows, statistic="all"):
-
-  rd_observations = []
-
-  for window in windows:
-    rd_observations.extend(window.get_rd_observations())
-
-  return compute_statistic(data=rd_observations, statistsics=statistic)
-"""
-
 
 def windows_to_json(windows):
   """
@@ -291,11 +280,12 @@ def add_window_observation(window, windows,
 
 class WindowState(Enum):
   DELETE = 0
-  NORMAL = 1
-  INSERT = 2
-  TUF = 3
-  NOT_NORMAL = 4
-  INVALID = 5
+  ONE_COPY_DELETE = 1
+  NORMAL = 2
+  INSERT = 3
+  TUF = 4
+  NOT_NORMAL = 5
+  INVALID = 6
 
 
 class WindowIterator(object):
@@ -610,6 +600,9 @@ class MixedWindowView(object):
   @state.setter
   def state(self, value):
     self._state = value
+
+  def get_window(self, wtype):
+    return self._windows[wtype]
 
   def get_rd_counts(self, name):
 

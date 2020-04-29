@@ -30,7 +30,6 @@
     }
   },
   "labeler":{
-
     "name":"hypothesis_testing",
     "significance": 0.05,
     "statistic_cal":"zscore",
@@ -55,6 +54,7 @@
       "no_wga_dist_weights":null
     }
   },
+  "save_cluster_densities":false,
   "states":["NORMAL", "DELETE", "INSERT", "TUF","DOUBLE_DEL"],
   "HMM": {
     "name":"HMM_Model",
@@ -67,6 +67,10 @@
       "INSERT": 0.0166,
       "DOUBLE_DEL": 0.0166,
       "TUF":0.0
+    },
+
+    "transition_probs":{
+
     }
   },
   "logger_file":"tuf.log",
