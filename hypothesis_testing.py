@@ -220,6 +220,7 @@ class SignificanceTestLabeler(object):
                                 data=cluster_data[cluster.cidx],
                                 statistic_calculator=zscore_statistic)
 
+          test.test()
           if h0.accepted:
             print("{0} Cluster {1} is  labeled as ONE COPY DELETE".format(INFO, cluster.cidx))
             cluster.state = WindowState.ONE_COPY_DELETE
@@ -240,7 +241,7 @@ class SignificanceTestLabeler(object):
                                   data=cluster_data[cluster.cidx],
                                   statistic_calculator=zscore_statistic)
 
-
+            test.test()
             if h0.accepted:
               print("{0} Cluster {1} is  labeled as NORMAL".format(INFO, cluster.cidx))
               cluster.state = WindowState.NORMAL
@@ -261,15 +262,17 @@ class SignificanceTestLabeler(object):
                                       alpha=test_config["significance"],
                                       data=cluster_data[cluster.cidx],
                                       statistic_calculator=zscore_statistic)
-            if h0.accepted:
-              print("{0} Cluster {1} is  labeled as DUPLICATION".format(INFO, cluster.cidx))
-              cluster.state = WindowState.INSERT
-            else:
-              # if we reach here then this means that statistically
-              # mu is not 10 is not 20 is not 0 and it is
-              # less than 20 we classify this cluster as TUF
-              print("{0} Cluster {1} is  labeled as TUF".format(INFO, cluster.cidx))
-              cluster.state = WindowState.TUF
+
+              test.test()
+              if h0.accepted:
+                print("{0} Cluster {1} is  labeled as DUPLICATION".format(INFO, cluster.cidx))
+                cluster.state = WindowState.INSERT
+              else:
+                # if we reach here then this means that statistically
+                # mu is not 10 is not 20 is not 0 and it is
+                # less than 20 we classify this cluster as TUF
+                print("{0} Cluster {1} is  labeled as TUF".format(INFO, cluster.cidx))
+                cluster.state = WindowState.TUF
 
 
     print("{0} Done...".format(INFO))
