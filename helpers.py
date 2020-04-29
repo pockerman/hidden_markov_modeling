@@ -425,6 +425,14 @@ class Window(object):
       return seq.strip()
 
 
+    def has_base(self, string):
+      for observaion in self._observations:
+        if observaion.base[0].upper() == string.upper():
+          return True
+      return False
+
+
+
     def get_gc_percent(self):
       gc_count = 0
 

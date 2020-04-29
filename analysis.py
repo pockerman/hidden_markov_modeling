@@ -94,6 +94,25 @@ def make_windows(configuration):
             print("{0} Number of non-wga windows: {1}".format(INFO, len(non_wga_windows)))
 
 
+        # filter the windows for N's
+        if "remove_windows_with_N" in configuration and\
+          configuration["remove_windows_with_N"]:
+
+            print("{0} Filtering windows for Ns...".format(INFO))
+            wga_filter_windows = [window for window in wga_windows
+                                  if not window.has_base("N")]
+
+            no_wga_filter_windows = [window for window in no_wga_windows
+                                  if not window.has_base("N")]
+
+            wga_windows  = wga_filter_windows
+            no_wga_windows = no_wga_filter_windows
+            print("{0} Done...".format(INFO))
+
+        else:
+            print("{0} No filtering windows for Ns requested...".format(INFO))
+
+
         # zip mixed windows the smallest length
         # prevails
         mixed_windows = []

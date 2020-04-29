@@ -14,15 +14,13 @@
     "start_idx": 100001,
     "end_idx": 1400001
   },
-  "normal_rd":1,
-  "delete_rd":0,
-  "insert_rd":2,
   "window_size":100,
   "fill_missing_window_data":false,
   "fill_missing_window_data_factor":0,
   "quality_theshold":20,
   "chromosome": "chr1",
   "save_windows":false,
+  "remove_windows_with_N":true,
   "windows_filename":"hmm_windows.json",
   "outlier_remove":{
 
