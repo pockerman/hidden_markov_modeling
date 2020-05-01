@@ -304,6 +304,12 @@ def hmm_train(clusters, windows, configuration):
                   inertia=0.01)
   print("{0} Done...".format(INFO))
 
+  if configuration["HMM"]["save_model"]:
+    print("{0} Saving HMM...".format(INFO))
+    save_hmm(hmm_model=hmm_model,
+                   configuration=configuration,
+                   win_interval_length=0)
+    print("{0} Done...".format(INFO))
 
 
   #flatwindows = [flat_windows_from_state(windows=windows,

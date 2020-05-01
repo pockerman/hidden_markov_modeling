@@ -54,10 +54,9 @@ def save_windows(windows, configuration, win_interval_length):
 
 def save_hmm(hmm_model, configuration, win_interval_length):
 
-  if configuration["HMM"]["save_model"]:
-    json_str = hmm_model.to_json()
-    import json
-    with open(configuration["HMM"]["save_hmm_filename"]+
+  json_str = hmm_model.to_json()
+  import json
+  with open(configuration["HMM"]["save_hmm_filename"]+
               "_"+str(win_interval_length)+".json", 'w') as jsonfile:
       json.dump(json_str, jsonfile)
 
