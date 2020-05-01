@@ -132,9 +132,9 @@ class HypothesisTest(object):
 
     print("Hypothesis test: ")
     if self._p_value < self._alpha :
-      print("\tH0: " + self._null.description)
-      print("\tvs")
-      print("\tH1: " + self._alternative.description)
+      print("\tH0: " + self._null.description +
+            "vs" + "H1: " + self._alternative.description)
+
       print("\trejected H0 with a="+str(self._alpha) +
             " p-value="+str(self._p_value))
       print("\tstatistic computed: " +str(statistic))
@@ -143,9 +143,8 @@ class HypothesisTest(object):
       self._alternative.accepted=True
     else:
 
-      print("\tH0: " + self._null.description)
-      print("\tvs")
-      print("\tH1: " + self._alternative.description)
+      print("\tH0: " + self._null.description +
+            "vs" + "H1: " + self._alternative.description)
       print("\tcannot reject H0 with a="+str(self._alpha) +
             " p-value="+str(self._p_value))
 
