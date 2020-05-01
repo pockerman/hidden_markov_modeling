@@ -624,13 +624,16 @@ class MixedWindowView(object):
         """
 
         if name == "both":
-          return (self._windows["wga_w"].get_rd_stats(statistics=statistics), self._windows["n_wga_w"].get_rd_stats(statistics=statistics))
+          return (self._windows["wga_w"].get_rd_stats(statistics=statistics),
+                  self._windows["n_wga_w"].get_rd_stats(statistics=statistics))
         elif name == 'wga_w':
           return self._windows["wga_w"].get_rd_stats(statistics=statistics)
         elif name == 'n_wga_w':
           return self._windows["n_wga_w"].get_rd_stats(statistics=statistics)
-        else:
-          raise Error("Name {0} is invalid ".format(name))
+
+        raise Error("Windowtype {0} not in {1}".format(name, ["both",
+                                                                "wga_w",
+                                                                "n_wga_w"]))
 
   def get_bases(self, windowtype="both"):
 
@@ -646,6 +649,15 @@ class MixedWindowView(object):
     if windowtype == "both":
       return self._windows["wga_w"].get_sequence(),\
         self._windows["n_wga_w"].get_sequence()
+    elif windowtype == "wga_w":
+      return self._windows["wga_w"].get_sequence()
+    elif windowtype == "n_wga_w":
+      return self._windows["n_wga_w"].get_sequence()
+
+
+    raise Error("Windowtype {0} not in {1}".format(windowtype, ["both",
+                                                                "wga_w",
+                                                                "n_wga_w"]))
 
   def get_gc_percent(self, windowtype="both"):
     if windowtype == "both":
@@ -655,6 +667,10 @@ class MixedWindowView(object):
       return self._windows["wga_w"].get_gc_percent()
     elif windowtype == "n_wga_w":
       return self._windows["n_wga_w"].get_gc_percent()
+
+    raise Error("Windowtype {0} not in {1}".format(windowtype, ["both",
+                                                                "wga_w",
+                                                                "n_wga_w"]))
 
 
 
