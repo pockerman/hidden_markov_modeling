@@ -130,7 +130,7 @@ class HypothesisTest(object):
                                  null = self._null,
                                  alternative = self._alternative)
 
-    print("Hypothesis test: ")
+    print("{0} Hypothesis test: ".format(INFO))
     if self._p_value < self._alpha :
       print("\tH0: " + self._null.description +
             "vs" + "H1: " + self._alternative.description)
