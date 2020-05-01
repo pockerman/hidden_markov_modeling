@@ -289,14 +289,16 @@ def hmm_train(clusters, windows, configuration):
 
   observations = []
 
-  windowtype = "n_wga_w"
+  windowtype = "both"
 
   for window in windows:
 
     if windowtype == "both":
-      observations.append(window.get_rd_stats(windowtype=windowtype))
+      observations.append(window.get_rd_stats(statistics="mean",
+                                              name=windowtype))
     else:
-      observations.append([window.get_rd_stats(windowtype=windowtype)])
+      observations.append([window.get_rd_stats(statistics="mean",
+                                               name=windowtype)])
 
   print("{0} Done...".format(INFO))
   print("{0} Fit HMM...".format(INFO))
