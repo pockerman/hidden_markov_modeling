@@ -312,6 +312,9 @@ def hmm_train(clusters, windows, configuration):
     print("{0} Done...".format(INFO))
 
 
+  # form a sequence of observations
+
+
   #flatwindows = [flat_windows_from_state(windows=windows,
   #                                      configuration=configuration,
   #                                      as_on_seq=False)]
