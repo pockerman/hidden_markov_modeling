@@ -328,9 +328,9 @@ def hmm_train(clusters, windows, configuration):
                   algorithm=configuration["HMM"]["train_solver"],
                   return_history=True,
                   verbose=True,
-                  lr_decay=0.6,
+                  lr_decay=0.7,
                   callbacks=[HMMCallback(callback=print_logs_callback)],
-                  inertia=0.01)
+                  inertia=None)
   print("{0} Done...".format(INFO))
 
   print("{0} HMM transition matrix (after fit): ".format(INFO))
