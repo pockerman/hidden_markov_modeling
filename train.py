@@ -318,6 +318,10 @@ def hmm_train(clusters, windows, configuration):
                                                name=windowtype)])
 
   print("{0} Done...".format(INFO))
+
+  print("{0} HMM transition matrix (before fit): ".format(INFO))
+  print(hmm_model.dense_transition_matrix())
+
   print("{0} Fit HMM...".format(INFO))
   hmm_model, history = \
     hmm_model.fit(sequences=observations,
@@ -329,7 +333,7 @@ def hmm_train(clusters, windows, configuration):
                   inertia=0.01)
   print("{0} Done...".format(INFO))
 
-  print("{0} HMM transition matrix: ".format(INFO))
+  print("{0} HMM transition matrix (after fit): ".format(INFO))
   print(hmm_model.dense_transition_matrix())
 
   if configuration["HMM"]["save_model"]:
