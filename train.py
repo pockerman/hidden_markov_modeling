@@ -329,6 +329,9 @@ def hmm_train(clusters, windows, configuration):
                   inertia=0.01)
   print("{0} Done...".format(INFO))
 
+  print("{0} HMM transition matrix: ".format(INFO))
+  print(hmm_model.dense_transition_matrix())
+
   if configuration["HMM"]["save_model"]:
     print("{0} Saving HMM...".format(INFO))
     save_hmm(hmm_model=hmm_model,
