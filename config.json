@@ -29,6 +29,7 @@
       "sigma_factor":2
     }
   },
+  "label_clusters": false,
   "labeler":{
     "name":"hypothesis_testing",
     "significance": 0.05,
@@ -55,23 +56,19 @@
     }
   },
   "save_cluster_densities":false,
-  "states":["NORMAL", "DELETE", "INSERT", "TUF","DOUBLE_DEL"],
+  "states":["STATE_1", "STATE_2", "STATE_3", "STATE_4","STATE_5"],
   "HMM": {
     "name":"HMM_Model",
     "train_solver": "baum-welch",
     "save_model":true,
     "save_hmm_filename":"HMM_Model",
     "start_prob":{
-      "NORMAL": 0.95,
-      "DELETE": 0.0166,
-      "INSERT": 0.0166,
-      "DOUBLE_DEL": 0.0166,
-      "TUF":0.0
+      "STATE_1": 0.95,
+      "STATE_2": 0.0166,
+      "STATE_3": 0.0166,
+      "STATE_4": 0.0166,
+      "STATE_5":0.0
     },
-
-    "transition_probs":{
-
-    }
   },
   "logger_file":"tuf.log",
   "logger_level": "INFO"

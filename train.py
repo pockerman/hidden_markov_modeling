@@ -265,7 +265,7 @@ def init_hmm(clusters, windows, configuration):
   for i in states:
     for j in states:
 
-      if i == j:
+      if i.name == j.name:
         # high probabiity for self-transitioning
         hmm_model.add_transition(i, j, 0.95)
       else:
@@ -288,7 +288,6 @@ def hmm_train(clusters, windows, configuration):
   print("{0} Get observations from clusters...".format(INFO))
 
   observations = []
-
   windowtype = "both"
 
   for window in windows:
@@ -320,59 +319,9 @@ def hmm_train(clusters, windows, configuration):
     print("{0} Done...".format(INFO))
 
 
-  # form a sequence of observations
-
-
-  #flatwindows = [flat_windows_from_state(windows=windows,
-  #                                      configuration=configuration,
-  #                                      as_on_seq=False)]
-
-  """
-  flatwindows = flat_windows(windows=windows)
-
-  #print("Flatwindows are: ", flatwindows)
-
-
-  # fit the model
-  hmm_model, history = hmm_model.fit(sequences=flatwindows,
-                                           #min_iterations=,
-                                           algorithm=configuration["HMM"]["train_solver"],
-                                           return_history=True,
-                                           verbose=True,
-                                           lr_decay=0.6,
-                                           callbacks=[HMMCallback(callback=print_logs_callback)],
-                                           inertia=0.01)
-
-  print("Done training HMM")
-  hmm_model.bake()
-
-  p_d_given_m = hmm_model.log_probability(sequence=flatwindows[0])
-  print("P(D|M): ", p_d_given_m)
-  print(hmm_model.predict_proba(flatwindows[0]))
-  viterbi_path=hmm_model.viterbi(flatwindows[0])
-  trans, ems = hmm_model.forward_backward( flatwindows[0] )
-
-  print("Tansition matrix")
-  print(trans)
-
-  print("Emission matrix")
-  print(ems)
-
-  # plot the model
-  #plt.figure( figsize=(10,6) )
-  #hmm_model.plot()
-  #plt.show()
-
-
-  save_hmm(hmm_model=hmm_model,
-                   configuration=configuration,
-                   win_interval_length=0)
-  """
-
-
 def main():
 
-    print("{0} Starting analysis".format(INFO))
+    print("{0} Starting training".format(INFO))
     description = "Check the README file for information on how to use the script"
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('--config', type=str, default='config.json',
@@ -398,10 +347,11 @@ def main():
                                configuration=configuration)
     print("{0} Done...".format(INFO))
 
-    print("{0} Labelling clusters...".format(INFO))
-    clusters = label_clusters(clusters=clusters, windows=mixed_windows,
-                              configuration=configuration)
-    print("{0} Done...".format(INFO))
+    if configuration["label_clusters"]:
+      print("{0} Labelling clusters...".format(INFO))
+      clusters = label_clusters(clusters=clusters, windows=mixed_windows,
+                                configuration=configuration)
+      print("{0} Done...".format(INFO))
 
     print("{0} Fitting clusters distributions...".format(INFO))
     fit_clusters_distribution(clusters=clusters,
@@ -414,7 +364,7 @@ def main():
               configuration=configuration)
 
     print("{0} Done...".format(INFO))
-    print("{0} Finished analysis".format(INFO))
+    print("{0} Finished training".format(INFO))
 
 
 if __name__ == '__main__':

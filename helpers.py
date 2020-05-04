@@ -60,6 +60,7 @@ def save_hmm(hmm_model, configuration, win_interval_length):
               "_"+str(win_interval_length)+".json", 'w') as jsonfile:
       json.dump(json_str, jsonfile)
 
+
 def listify_dicts_property(list_dict_vals, property_name):
   """
   given a list of dictionaries return a list with the
