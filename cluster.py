@@ -59,11 +59,22 @@ class Cluster(object):
 
   def get_statistics(self, windows, statistic, window_type, **kwargs):
 
-      wga_windows = [window.get_window(window_type)
-                     for window in windows]
 
-      window_data = self.get_data_from_windows(windows=wga_windows)
-      return compute_statistic(data=window_data,statistics=statistic)
+      if window_type == "both":
+
+        for index in self._indexes:
+          window = windows[index]
+
+          statistic1, statistic2 = \
+            window.get_rd_stats(statistics=statistic)
+          return statistic1, statistic2
+      else:
+
+        wga_windows = [window.get_window(window_type)
+                       for window in windows]
+
+        window_data = self.get_data_from_windows(windows=wga_windows)
+        return compute_statistic(data=window_data,statistics=statistic)
 
   def get_window_statistics(self, windows, statistic, **kwargs):
     statistics = []

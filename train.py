@@ -210,6 +210,24 @@ def create_clusters(windows, configuration):
   return clusters
 
 
+def find_tuf_in_clusters(clusters, windows, configuration):
+
+  diff_rd = 0.0;
+  tuf_cluster = None
+
+  for cluster in clusters:
+    mu1, mu2 = cluster.get_statistics(windows=windows,
+                                      statistic="mean",
+                                      window_type="both")
+
+    if np.abs(mu1 - mu2) > diff_rd:
+      diff_rd = np.abs(mu1 - mu2)
+      tuf_cluster = cluster
+
+
+  return diff_rd, tuf_cluster
+
+
 def label_clusters(clusters, windows, configuration):
 
   labeler = SignificanceTestLabeler(clusters=clusters, windows=windows)
@@ -346,6 +364,16 @@ def main():
     clusters = create_clusters(windows=mixed_windows,
                                configuration=configuration)
     print("{0} Done...".format(INFO))
+
+    print("{0} Compute max mean difference in clusters...".format(INFO))
+    mean_diff, cluster = find_tuf_in_clusters(clusters=clusters,
+                                              windows=mixed_windows,
+                                              configuration=configuration)
+    print("{0} Done...".format(INFO))
+    print("{0} Max mean difference: {1} for cluster: {2} ".format(INFO,
+                                                                  mean_diff,
+                                                                  cluster.cidx))
+
 
     if configuration["label_clusters"]:
       print("{0} Labelling clusters...".format(INFO))
