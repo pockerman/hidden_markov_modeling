@@ -68,7 +68,7 @@
       "STATE_3": 0.0166,
       "STATE_4": 0.0166,
       "STATE_5":0.0
-    },
+    }
   },
   "logger_file":"tuf.log",
   "logger_level": "INFO"
