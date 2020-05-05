@@ -278,6 +278,10 @@ def add_window_observation(window, windows,
     return window
 
 
+class WindowType(Enum):
+  WGA = 0
+  NO_WGA = 1
+
 class WindowState(Enum):
   DELETE = 0
   ONE_COPY_DELETE = 1
@@ -672,6 +676,9 @@ class MixedWindowView(object):
     raise Error("Windowtype {0} not in {1}".format(windowtype, ["both",
                                                                 "wga_w",
                                                                 "n_wga_w"]))
+
+
+
 
 
 

@@ -15,7 +15,9 @@ from helpers import HMMCallback
 from helpers import print_logs_callback
 from helpers import flat_windows_rd_from_indexes
 from helpers import MixedWindowView
+from helpers import WindowType
 from helpers import INFO
+from region import Region
 from analysis_helpers import save_clusters
 from analysis_helpers import save_windows_statistic
 
@@ -33,106 +35,107 @@ from exceptions import Error
 
 def make_windows(configuration):
 
-    wga_start_idx = configuration["test_file"]["start_idx"]
-    wga_end_idx = configuration["test_file"]["end_idx"]
-
-    if wga_end_idx == "none":
-      wga_end_idx = None
-    else:
-      wga_end_idx = int(wga_end_idx)
-
     windowsize = configuration["window_size"]
     chromosome = configuration["chromosome"]
 
-    print("{0} Start index: {1}".format(INFO, wga_start_idx))
-    print("{0} End index:   {1}".format(INFO,wga_end_idx))
     print("{0} Window size: {1}".format(INFO, windowsize))
     print("{0} Chromosome:  {1}".format(INFO, chromosome))
 
-    args = {"start_idx": int(wga_start_idx),
-            "end_idx": wga_end_idx,
-            "windowsize": int(windowsize)}
+    regions = configuration["regions"]
+    print("{0} Regions used {1}".format(INFO, regions))
 
-    if "quality_theshold" in configuration:
-      args["quality_theshold"] = configuration["quality_theshold"]
+    regions_list = []
 
-    try:
+    counter=0
+    for r in regions:
 
-        print("{0} Creating WGA Windows...".format(INFO))
-        # extract the windows for the WGA treated file
-        wga_windows = extract_windows(chromosome=chromosome,
-                                      ref_filename=configuration["reference_file"]["filename"],
-                                      test_filename=configuration["test_file"]["filename"],
-                                      **args)
+        start_idx = r[0]
+        end_idx = r[1]
 
-        if len(wga_windows) == 0:
-            raise Error("WGA windows have not been created")
-        else:
-            print("{0} Number of WGA windows: {1}".format(INFO, len(wga_windows)))
+        print("{0} Start index: {1}".format(INFO, start_idx))
+        print("{0} End index:   {1}".format(INFO, end_idx))
 
+        region = Region(idx=counter,
+                        start=start_idx,
+                        end=end_idx,
+                        window_size=windowsize)
 
-        print("{0} Creating No WGA Windows...".format(INFO))
-        non_wga_start_idx = configuration["no_wga_file"]["start_idx"]
-        non_wga_end_idx = configuration["no_wga_file"]["end_idx"]
-
-        args = {"start_idx": int(non_wga_start_idx),
-                "end_idx": (non_wga_end_idx),
-                "windowsize": int(windowsize)}
+        kwargs = {}
 
         if "quality_theshold" in configuration:
-          args["quality_theshold"] = configuration["quality_theshold"]
+          kwargs["quality_theshold"] = configuration["quality_theshold"]
 
-        # exrtact the non-wga windows
-        non_wga_windows = \
-          extract_windows(chromosome=chromosome,
-                          ref_filename=configuration["reference_file"]["filename"],
-                          test_filename=configuration["no_wga_file"]["filename"],
-                          **args)
+        print("{0} Creating WGA Windows...".format(INFO))
+        region.make_wga_windows(chromosome=chromosome,
+                                ref_filename=configuration["reference_file"]["filename"],
+                                test_filename=configuration["test_file"]["filename"],
+                                **kwargs)
 
-        if len(non_wga_windows) == 0:
+        if region.get_n_windows(type_=WindowType.WGA) == 0:
+            raise Error("WGA windows have not been created")
+        else:
+            print("{0} Number of WGA windows: {1}".format(INFO,
+                                                          region.get_n_windows(type_=WindowType.WGA)))
+
+        print("{0} Creating No WGA Windows...".format(INFO))
+        region.make_no_wga_windows(chromosome=chromosome,
+                                   ref_filename=configuration["reference_file"]["filename"],
+                                   test_filename=configuration["no_wga_file"]["filename"],
+                                   **kwargs)
+
+        if region.get_n_windows(type_=WindowType.NO_WGA) == 0:
             raise Error("Non-WGA windows have not  been created")
         else:
             print("{0} Number of non-wga"
                   " windows: {1}".format(INFO,
-                                         len(non_wga_windows)))
+                                         region.get_n_windows(type_=WindowType.NO_WGA)))
 
 
-        # filter the windows for N's
+         # filter the windows for N's
         if "remove_windows_with_N" in configuration and\
           configuration["remove_windows_with_N"]:
-
             print("{0} Filtering windows for Ns...".format(INFO))
-            wga_filter_windows = [window for window in wga_windows
-                                  if not window.has_base("N")]
 
-            no_wga_filter_windows = [window for window in non_wga_windows
-                                  if not window.has_base("N")]
-
-            wga_windows  = wga_filter_windows
-            non_wga_windows = no_wga_filter_windows
+            region.remove_windows_with_ns()
 
             print("{0} Number of wga windows"
                   " after filtering: {1}".format(INFO,
-                                                 len(wga_windows)))
+                                                 region.get_n_windows(type_=WindowType.WGA)))
             print("{0} Number of non-wga windows"
                   " after filtering: {1}".format(INFO,
-                                                 len(non_wga_windows)))
+                                                 region.get_n_windows(type_=WindowType.NO_WGA)))
             print("{0} Done...".format(INFO))
 
         else:
             print("{0} No filtering windows"
                   " for Ns requested...".format(INFO))
 
+        # compute the mixed windows for the region
+        region.get_mixed_windows()
 
-        # zip mixed windows the smallest length
-        # prevails
-        mixed_windows = []
+        print("{0} Number of mixed windows: {1}".format(INFO,
+                                                        region.get_n_mixed_windows()))
 
-        for win1, win2 in zip(wga_windows, non_wga_windows):
-          mixed_windows.append(MixedWindowView(wga_w=win1,
-                                               n_wga_w=win2))
 
-        print("{0} Number of mixed windows: {1}".format(INFO,len(mixed_windows)))
+        if "outlier_remove" in configuration and\
+          configuration["outlier_remove"]:
+
+            region.remove_outliers(config=configuration)
+            print("{0} Number of windows after outlier removal: {1}".format(INFO,
+                                                                        region.get_n_mixed_windows()))
+        else:
+          print("{0} No outlier removal performed".format(INFO))
+
+
+        regions_list.append(region)
+        counter += 1
+
+    return regions_list
+
+
+    """
+    try:
+
 
         # compute the global statistics of the windows
         wga_rds = []
@@ -151,23 +154,7 @@ def make_windows(configuration):
         save_windows_statistic(windows=mixed_windows, statistic="mean")
 
 
-        # do the outlier removal
 
-        if "outlier_remove" in configuration and\
-          configuration["outlier_remove"]:
-
-          config = configuration["outlier_remove"]["config"]
-          config["statistics"] = {"n_wga_w": no_wga_statistics,
-                                  "wga_w":wga_statistics}
-
-          mixed_windows = remove_outliers(windows=mixed_windows,
-                          removemethod=configuration["outlier_remove"]["name"],
-                          config=config)
-
-          print("{0} Number of windows after outlier removal: {1}".format(INFO,
-                                                                          len(mixed_windows)))
-        else:
-          print("{0} No outlier removal performed".format(INFO))
 
 
         return mixed_windows
@@ -181,6 +168,7 @@ def make_windows(configuration):
     except Exception as e:
         logging.error("Unknown exception occured: " + str(e))
         raise
+    """
 
 
 def create_clusters(windows, configuration):
@@ -331,6 +319,9 @@ def hmm_train(clusters, windows, configuration):
                   lr_decay=0.7,
                   callbacks=[HMMCallback(callback=print_logs_callback)],
                   inertia=None)
+
+  #finalize the model
+  hmm_model.bake()
   print("{0} Done...".format(INFO))
 
   print("{0} HMM transition matrix (after fit): ".format(INFO))
