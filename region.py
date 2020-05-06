@@ -162,8 +162,7 @@ class Region(object):
     if size < len(self._mixed_windows):
         counter = 0
         for window in self._mixed_windows:
-          sequence.append(window.get_rd_stats(statistics="mean"),
-                          name=window_type)
+          sequence.append(window.get_rd_stats(statistics="mean", name=window_type))
           counter +=1
 
           if counter == size:
@@ -172,8 +171,7 @@ class Region(object):
 
       print("{0} Region size is less than {1}".format(WARNING, size))
       for window in self._mixed_windows:
-          sequence.append(window.get_rd_stats(statistics="mean"),
-                          name=window_type)
+          sequence.append(window.get_rd_stats(statistics="mean",name=window_type))
 
     return sequence
 

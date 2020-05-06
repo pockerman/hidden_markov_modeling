@@ -179,7 +179,7 @@ def find_tuf_in_clusters(clusters, configuration):
 
   for cluster in clusters:
     mu1, mu2 = cluster.get_statistics(statistic="mean",
-                                      window_type="both")
+                                      window_type=WindowType.BOTH)
 
     if np.abs(mu1 - mu2) > diff_rd:
       diff_rd = np.abs(mu1 - mu2)
@@ -286,7 +286,7 @@ def hmm_train(clusters, regions, configuration):
   print(hmm_model.dense_transition_matrix())
 
   print("{0} Fit HMM...".format(INFO))
-  print("{0} Number of training sequences {1}".format(len(observations)))
+  print("{0} Number of training sequences {1}".format(INFO,len(observations)))
   hmm_model, history = \
     hmm_model.fit(sequences=observations,
                   algorithm=configuration["HMM"]["train_solver"],
