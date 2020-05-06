@@ -121,7 +121,7 @@ def make_window_regions(configuration):
         if "outlier_remove" in configuration and\
           configuration["outlier_remove"]:
 
-            region.remove_outliers(config=configuration)
+            region.remove_outliers(configuration=configuration)
             print("{0} Number of windows after outlier removal: {1}".format(INFO,
                                                                         region.get_n_mixed_windows()))
         else:
