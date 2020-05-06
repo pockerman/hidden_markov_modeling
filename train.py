@@ -47,8 +47,11 @@ def make_window_regions(configuration):
     regions_list = [ (start, end) for start, end
                     in zip(regions["start"], regions["end"])]
 
+    regions_created = []
+
     counter=0
     for r in regions_list:
+
 
         start_idx = r[0]
         end_idx = r[1]
@@ -130,10 +133,10 @@ def make_window_regions(configuration):
 
         # save the region statistics
         region.save_mixed_windows_statistic(statistic="mean")
-        regions_list.append(region)
+        regions_created.append(region)
         counter += 1
 
-    return regions_list
+    return regions_created
 
 def create_clusters(regions, configuration):
 
