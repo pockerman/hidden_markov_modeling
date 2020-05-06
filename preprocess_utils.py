@@ -10,6 +10,7 @@ from exceptions import Error
 
 from helpers import listify_dicts_property
 from helpers import WindowState
+from helpers import WindowType
 from helpers import flat_windows
 from helpers import INFO
 
@@ -82,14 +83,15 @@ def zscore_outlier_removal(windows, config):
 
   newwindows = []
 
+  statistics = config["statistics"]
+  sigma_wga = np.sqrt(statistics[WindowType.WGA]["var"])
+  sigma_no_wga = np.sqrt(statistics[WindowType.NO_WGA]["var"])
   for window in windows:
     mu = window.get_rd_stats(statistics="mean", name="both")
 
-    sigma_wga = np.sqrt(config["statistics"]["wga_w"]["var"])
-    zscore_wga = (mu[0] - config["statistics"]["wga_w"]["mean"])/sigma_wga
 
-    sigma_no_wga = np.sqrt(config["statistics"]["n_wga_w"]["var"])
-    zscore_no_wga = (mu[1] - config["statistics"]["n_wga_w"]["mean"])/sigma_no_wga
+    zscore_wga = (mu[0] - statistics[WindowType.WGA]["mean"])/sigma_wga
+    zscore_no_wga = (mu[1] - statistics[WindowType.NO_WGA]["mean"])/sigma_no_wga
 
 
     if zscore_wga < - config["sigma_factor"] or\

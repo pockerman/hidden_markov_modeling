@@ -2,7 +2,33 @@ from helpers import WindowType
 from helpers import MixedWindowView
 from exceptions import Error
 from preprocess_utils import remove_outliers
+from preprocess_utils import compute_statistic
+from analysis_helpers import save_windows_statistic
 from bam_helpers import extract_windows
+
+
+class RegionIterator(object):
+
+    """
+    Helper class to allow iteration over the window
+    elements
+    """
+
+    def __init__(self, data):
+
+        # data over which to iterate
+        self._data = data
+
+        # current index
+        self._counter = 0
+
+    def __next__(self):
+        if self._counter < len(self._data):
+            tmp = self._data[self._counter]
+            self._counter += 1
+            return tmp
+
+        raise StopIteration
 
 class Region(object):
   """
@@ -82,18 +108,78 @@ class Region(object):
     return self._mixed_windows
 
   def remove_windows_with_ns(self):
-    raise Error("Not implemented")
+
+     # filter the windows for N's
+     wga_filter_windows = [window for window in self._windows[WindowType.WGA]
+                                  if not window.has_base("N")]
+
+     no_wga_filter_windows = [window for window in self._windows[WindowType.NO_WGA]
+                                  if not window.has_base("N")]
+
+     self._windows[WindowType.WGA] = wga_filter_windows
+     self._windows[WindowType.NO_WGA] = no_wga_filter_windows
 
   def save_mixed_windows_statistic(self, statistic):
-    raise Error("Not implemented")
+
+    if self._mixed_windows is None:
+      raise Error("Mixed windows have not been computed")
+
+    save_windows_statistic(windows=self._mixed_windows,
+                           statistic="mean", region_id=self._idx)
 
   def remove_outliers(self, configuration):
+
+    if self._mixed_windows is None:
+      raise Error("Mixed windows have not been computed")
+
+    # compute the statistis
+
+    wga_rds = []
+    no_wga_rds = []
+
+    for window in self._mixed_windows:
+          wga_rds.extend(window.get_rd_counts(name=WindowType.WGA))
+          no_wga_rds.extend(window.get_rd_counts(name=WindowType.NO_WGA))
+
+    wga_statistics = compute_statistic(data=wga_rds, statistics="all")
+    no_wga_statistics = compute_statistic(data=no_wga_rds, statistics="all")
+
     config = configuration["outlier_remove"]["config"]
-    config["statistics"] = {"n_wga_w": no_wga_statistics,
-                                  "wga_w":wga_statistics}
+    config["statistics"] = {WindowType.NO_WGA: no_wga_statistics,
+                            WindowType.WGA:wga_statistics}
 
     self._mixed_windows = remove_outliers(windows=self._mixed_windows,
                                           removemethod=configuration["outlier_remove"]["name"],
                                           config=config)
+
+
+
+  def __len__(self):
+        return self.get_n_mixed_windows()
+
+  def __iter__(self):
+        """
+        Produce an iterator to iterate over the accumulated
+        window observations
+        :return:
+        """
+        return RegionIterator(data=self._mixed_windows)
+
+  def __getitem__(self, item):
+        """
+        Returns the item-th observation
+        :param item: int the index of the observation to access
+        :return: Observation instance
+        """
+        return self._mixed_windows[item]
+
+    def __setitem__(self, o, value):
+        """
+        Set the o-th observation to value
+        :param o:
+        :param value:
+        :return:
+        """
+        self._mixed_windows[o] = value
 
 

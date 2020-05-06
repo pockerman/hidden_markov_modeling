@@ -590,8 +590,8 @@ class MixedWindowView(object):
   """
 
   def __init__(self, wga_w, n_wga_w):
-    self._windows={"wga_w": wga_w,
-                   "n_wga_w": n_wga_w}
+    self._windows={WindowType.WGA: wga_w,
+                   WindowType.NO_WGA: n_wga_w}
 
     # the state of the window
     self._state = WindowState.INVALID
@@ -611,13 +611,14 @@ class MixedWindowView(object):
   def get_rd_counts(self, name):
 
      if name == "both":
-          return (self._windows["wga_w"].get_rd_observations(), self._windows["n_wga_w"].get_rd_observations())
-     elif name == 'wga_w':
-          return self._windows["wga_w"].get_rd_observations()
-     elif name == 'n_wga_w':
-          return self._windows["n_wga_w"].get_rd_observations()
-     else:
-          raise Error("Name {0} is invalid ".format(name))
+          return (self._windows[WindowType.WGA].get_rd_observations(),
+                  self._windows[WindowType.NO_WGA].get_rd_observations())
+     elif name == WindowType.WGA:
+          return self._windows[WindowType.WGA].get_rd_observations()
+     elif name == WindowType.NO_WGA:
+          return self._windows[WindowType.NO_WGA].get_rd_observations()
+
+     raise Error("Name {0} is invalid ".format(name))
 
 
   def get_rd_stats(self, statistics="all", name="both"):
@@ -630,21 +631,21 @@ class MixedWindowView(object):
 
         if name == "both":
           return (self._windows["wga_w"].get_rd_stats(statistics=statistics),
-                  self._windows["n_wga_w"].get_rd_stats(statistics=statistics))
-        elif name == 'wga_w':
-          return self._windows["wga_w"].get_rd_stats(statistics=statistics)
-        elif name == 'n_wga_w':
-          return self._windows["n_wga_w"].get_rd_stats(statistics=statistics)
+                  self._windows[WindowType.NO_WGA].get_rd_stats(statistics=statistics))
+        elif name == WindowType.WGA:
+          return self._windows[WindowType.WGA].get_rd_stats(statistics=statistics)
+        elif name == WindowType.NO_WGA:
+          return self._windows[WindowType.NO_WGA].get_rd_stats(statistics=statistics)
 
         raise Error("Windowtype {0} not in {1}".format(name, ["both",
-                                                                "wga_w",
-                                                                "n_wga_w"]))
+                                                                WindowType.WGA.name,
+                                                                WindowType.NO_WGA.name]))
 
   def get_bases(self, windowtype="both"):
 
     if windowtype == "both":
-      wga_w = self._windows["wga_w"]
-      n_wga_w = self._windows["n_wga_w"]
+      wga_w = self._windows[WindowType.WGA]
+      n_wga_w = self._windows[WindowType.NO_WGA]
 
       pairs = zip(wga_w.get_bases(), n_wga_w.get_bases())
       return pairs
@@ -652,30 +653,30 @@ class MixedWindowView(object):
   def get_sequence(self, windowtype="both"):
 
     if windowtype == "both":
-      return self._windows["wga_w"].get_sequence(),\
-        self._windows["n_wga_w"].get_sequence()
-    elif windowtype == "wga_w":
-      return self._windows["wga_w"].get_sequence()
-    elif windowtype == "n_wga_w":
-      return self._windows["n_wga_w"].get_sequence()
+      return (self._windows[WindowType.WGA].get_sequence(),
+              self._windows[WindowType.NO_WGA].get_sequence())
+    elif windowtype == WindowType.WGA:
+      return self._windows[WindowType.WGA].get_sequence()
+    elif windowtype == WindowType.NO_WGA:
+      return self._windows[WindowType.NO_WGA].get_sequence()
 
 
     raise Error("Windowtype {0} not in {1}".format(windowtype, ["both",
-                                                                "wga_w",
-                                                                "n_wga_w"]))
+                                                                WindowType.WGA.name,
+                                                                WindowType.NO_WGA.name]))
 
   def get_gc_percent(self, windowtype="both"):
     if windowtype == "both":
-      return self._windows["wga_w"].get_gc_percent(),\
-        self._windows["n_wga_w"].get_gc_percent()
-    elif windowtype == "wga_w":
-      return self._windows["wga_w"].get_gc_percent()
-    elif windowtype == "n_wga_w":
-      return self._windows["n_wga_w"].get_gc_percent()
+      return self._windows[WindowType.WGA].get_gc_percent(),\
+        self._windows[WindowType.NO_WGA].get_gc_percent()
+    elif windowtype == WindowType.WGA:
+      return self._windows[WindowType.WGA].get_gc_percent()
+    elif windowtype == WindowType.NO_WGA:
+      return self._windows[WindowType.NO_WGA].get_gc_percent()
 
     raise Error("Windowtype {0} not in {1}".format(windowtype, ["both",
-                                                                "wga_w",
-                                                                "n_wga_w"]))
+                                                                WindowType.WGA.name,
+                                                                WindowType.NO_WGA.name]))
 
 
 

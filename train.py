@@ -33,7 +33,7 @@ from preprocess_utils import build_clusterer
 from preprocess_utils import remove_outliers
 from exceptions import Error
 
-def make_windows(configuration):
+def make_window_regions(configuration):
 
     windowsize = configuration["window_size"]
     chromosome = configuration["chromosome"]
@@ -127,53 +127,22 @@ def make_windows(configuration):
           print("{0} No outlier removal performed".format(INFO))
 
 
+        # save the region statistics
+        region.save_mixed_windows_statistic(statistic="mean")
         regions_list.append(region)
         counter += 1
 
     return regions_list
 
-
-    """
-    try:
-
-
-        # compute the global statistics of the windows
-        wga_rds = []
-        no_wga_rds = []
-
-        for window in mixed_windows:
-          wga_rds.extend(window.get_rd_counts(name="wga_w"))
-          no_wga_rds.extend(window.get_rd_counts(name="n_wga_w"))
-
-        wga_statistics = compute_statistic(data=wga_rds, statistics="all")
-        no_wga_statistics = compute_statistic(data=no_wga_rds, statistics="all")
-
-        print("{0} WGA stats: {1}".format(INFO, wga_statistics))
-        print("{0} No WGA stats: {1}".format(INFO, no_wga_statistics))
-
-        save_windows_statistic(windows=mixed_windows, statistic="mean")
-
-
-
-
-
-        return mixed_windows
-
-    except KeyError as e:
-        logging.error("Key: {0} does not exit".format(str(e)))
-        raise
-    except Error as e:
-        logging.error(str(e))
-        raise
-    except Exception as e:
-        logging.error("Unknown exception occured: " + str(e))
-        raise
-    """
-
-
-def create_clusters(windows, configuration):
+def create_clusters(regions, configuration):
 
   kwargs = configuration["clusterer"]
+
+  # assemble all the windows
+  windows = []
+  for region in regions:
+    for window in region:
+      windows.append(window)
 
   # create the clusters
   clusterer, initial_index_medoids = \
@@ -190,7 +159,8 @@ def create_clusters(windows, configuration):
 
   for i in range(len(clusters_indexes)):
     clusters.append(Cluster(id_ = i,
-                            indexes=clusters_indexes[i]))
+                            indexes=clusters_indexes[i],
+                            windows=windows))
 
   print("{0} Saving cluster indices".format(INFO))
   save_clusters(clusters=clusters, windows=windows, statistic="mean")
@@ -198,14 +168,13 @@ def create_clusters(windows, configuration):
   return clusters
 
 
-def find_tuf_in_clusters(clusters, windows, configuration):
+def find_tuf_in_clusters(clusters, configuration):
 
   diff_rd = 0.0;
   tuf_cluster = None
 
   for cluster in clusters:
-    mu1, mu2 = cluster.get_statistics(windows=windows,
-                                      statistic="mean",
+    mu1, mu2 = cluster.get_statistics(statistic="mean",
                                       window_type="both")
 
     if np.abs(mu1 - mu2) > diff_rd:
@@ -216,29 +185,26 @@ def find_tuf_in_clusters(clusters, windows, configuration):
   return diff_rd, tuf_cluster
 
 
-def label_clusters(clusters, windows, configuration):
+def label_clusters(clusters, configuration):
 
   labeler = SignificanceTestLabeler(clusters=clusters, windows=windows)
   return labeler.label(test_config=configuration["labeler"])
 
 
-def fit_clusters_distribution(clusters, windows, configuration):
+def fit_clusters_distribution(clusters, configuration):
 
   kwargs = configuration["cluster_distribution"]
   print("{0} Fitting clusters densities...".format(INFO) )
-  build_cluster_densities(clusters=clusters,
-                          windows=windows,
-                          **kwargs)
+  build_cluster_densities(clusters=clusters, **kwargs)
   print("{0} Done...".format(INFO))
 
   if configuration["save_cluster_densities"]:
     print("{0} Saving clusters densities...".format(INFO) )
-    save_clusters_desnity(clusters=clusters, windows=windows,
-                          **kwargs)
+    save_clusters_desnity(clusters=clusters, **kwargs)
     print("{0} Done...".format(INFO))
 
 
-def init_hmm(clusters, windows, configuration):
+def init_hmm(clusters, configuration):
 
   # create the HMM
   hmm_model = HiddenMarkovModel(name=configuration["HMM"]["name"],
@@ -288,7 +254,6 @@ def hmm_train(clusters, windows, configuration):
   print("{0} HMM initialization...".format(INFO))
 
   hmm_model = init_hmm(clusters=clusters,
-                       windows=windows,
                        configuration=configuration)
   print("{0} Done...".format(INFO))
   print("{0} Get observations from clusters...".format(INFO))
@@ -355,17 +320,16 @@ def main():
     print("{0} Done...".format(INFO))
 
     print("{0} Creating windows...".format(INFO))
-    mixed_windows = make_windows(configuration=configuration)
+    regions = make_window_regions(configuration=configuration)
     print("{0} Done...".format(INFO))
 
     print("{0} Start clustering....".format(INFO))
-    clusters = create_clusters(windows=mixed_windows,
+    clusters = create_clusters(regions=regions,
                                configuration=configuration)
     print("{0} Done...".format(INFO))
 
     print("{0} Compute max mean difference in clusters...".format(INFO))
     mean_diff, cluster = find_tuf_in_clusters(clusters=clusters,
-                                              windows=mixed_windows,
                                               configuration=configuration)
     print("{0} Done...".format(INFO))
     print("{0} Max mean difference: {1} for cluster: {2} ".format(INFO,
@@ -381,12 +345,10 @@ def main():
 
     print("{0} Fitting clusters distributions...".format(INFO))
     fit_clusters_distribution(clusters=clusters,
-                              windows=mixed_windows,
                               configuration=configuration)
     print("{0} Done...".format(INFO))
     print("{0} Starting HMM training...".format(INFO))
     hmm_train(clusters=clusters,
-              windows=mixed_windows,
               configuration=configuration)
 
     print("{0} Done...".format(INFO))
