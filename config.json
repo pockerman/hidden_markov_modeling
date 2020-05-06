@@ -6,19 +6,13 @@
   },
   "chromosome": "chr1",
   "reference_file":{
-    "filename": "/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
-    "start_idx" :180001,
-    "end_idx": 2400001
+    "filename": "/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
   },
   "no_wga_file": {
-     "filename": "/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam",
-     "start_idx": 180001,
-     "end_idx": 2400001
+     "filename": "/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam"
   },
   "test_file":{
-    "filename": "/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam",
-    "start_idx": 180001,
-    "end_idx": 2400001
+    "filename": "/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam"
   },
   "window_size":100,
   "fill_missing_window_data":false,
@@ -65,6 +59,9 @@
   "HMM": {
     "name":"HMM_Model",
     "train_solver": "baum-welch",
+    "lr_decay":0.7,
+    "inertia":null,
+    "verbose":true,
     "save_model":true,
     "save_hmm_filename":"HMM_Model",
     "start_prob":{
@@ -72,7 +69,10 @@
       "STATE_1": 0.0166,
       "STATE_2": 0.0166,
       "STATE_3": 0.0166
-    }
+    },
+    "train_sequence_size": 100,
+    "train_sequence_source": "region",
+    "windowtype":"both"
   },
   "logger_file":"tuf.log",
   "logger_level": "INFO"

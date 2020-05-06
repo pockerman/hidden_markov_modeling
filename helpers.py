@@ -281,6 +281,21 @@ def add_window_observation(window, windows,
 class WindowType(Enum):
   WGA = 0
   NO_WGA = 1
+  BOTH = 2
+
+  @staticmethod
+  def from_string(string):
+    if string.upper() == "WGA":
+      return WindowType.WGA
+    elif string.upper() == "NO_WGA":
+      return WindowType.NO_WGA
+    elif string.upper() == "BOTH":
+      return WindowType.BOTH
+
+    raise Error("Invalid WindowType. Type {0} not in {1}".format(string,
+                                                                 ["WGA",
+                                                                  "NO_WGA",
+                                                                  "BOTH"]))
 
 class WindowState(Enum):
   DELETE = 0
@@ -610,7 +625,7 @@ class MixedWindowView(object):
 
   def get_rd_counts(self, name):
 
-     if name == "both":
+     if name == WindowType.BOTH:
           return (self._windows[WindowType.WGA].get_rd_observations(),
                   self._windows[WindowType.NO_WGA].get_rd_observations())
      elif name == WindowType.WGA:
@@ -621,7 +636,7 @@ class MixedWindowView(object):
      raise Error("Name {0} is invalid ".format(name))
 
 
-  def get_rd_stats(self, statistics="all", name="both"):
+  def get_rd_stats(self, statistics="all", name=WindowType.BOTH):
         """
         Returns a statistical summary as a dictionary
         of the read depth variable in the window
@@ -629,7 +644,7 @@ class MixedWindowView(object):
         :return:
         """
 
-        if name == "both":
+        if name == WindowType.BOTH:
           return (self._windows[WindowType.WGA].get_rd_stats(statistics=statistics),
                   self._windows[WindowType.NO_WGA].get_rd_stats(statistics=statistics))
         elif name == WindowType.WGA:
@@ -637,7 +652,7 @@ class MixedWindowView(object):
         elif name == WindowType.NO_WGA:
           return self._windows[WindowType.NO_WGA].get_rd_stats(statistics=statistics)
 
-        raise Error("Windowtype {0} not in {1}".format(name, ["both",
+        raise Error("Windowtype {0} not in {1}".format(name, [WindowType.BOTH.name,
                                                                 WindowType.WGA.name,
                                                                 WindowType.NO_WGA.name]))
 

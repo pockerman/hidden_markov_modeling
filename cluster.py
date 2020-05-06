@@ -4,6 +4,8 @@ Cluster: A collection of windows
 from helpers import WindowState
 from helpers import flat_windows_rd_from_indexes
 from helpers import MixedWindowView
+from helpers import WindowType
+from helpers import WARNING
 from preprocess_utils import compute_statistic
 
 
@@ -62,10 +64,34 @@ class Cluster(object):
     return flat_windows_rd_from_indexes(indexes=self._indexes,
                                         windows=self._windows)
 
+  def get_sequence(self, size, window_type):
+
+    sequence =[]
+
+    if size < len(self._indexes):
+        counter = 0
+        for idx in self._indexes:
+          window = self._windows[idx]
+          sequence.append(window.get_rd_stats(statistics="mean"),
+                          name=window_type)
+          counter +=1
+
+          if counter == size:
+            break
+    else:
+
+      print("{0} Cluster size is less than {1}".format(WARNING, size))
+      for idx in self._indexes:
+          window = self._windows[idx]
+          sequence.append(window.get_rd_stats(statistics="mean"),
+                          name=window_type)
+
+    return sequence
+
   def get_statistics(self, statistic, window_type, **kwargs):
 
 
-      if window_type == "both":
+      if window_type == WindowType.BOTH:
 
         for index in self._indexes:
           window = self._windows[index]
@@ -93,12 +119,3 @@ class Cluster(object):
       else:
         statistics.append(window.get_rd_stats(statistics=statistic))
     return statistics
-
-  def get_bases(self, windowtype="both"):
-
-    bases = []
-    for idx in self.indexes:
-      window = self._windows[idx]
-      bases.append(window.get_bases(windowtype=windowtype))
-    return bases
-

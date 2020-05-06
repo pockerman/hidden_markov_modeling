@@ -1,8 +1,9 @@
 import numpy as np
 from sklearn.neighbors import KernelDensity
 from pomegranate import *
-from helpers import Error
+from exceptions import Error
 from helpers import INFO
+from helpers import WindowType
 
 
 def build_cluster_densities(clusters, **kwargs):
@@ -58,7 +59,9 @@ def build_cluster_densities(clusters, **kwargs):
 
       for idx in indeces:
         window = windows[idx]
-        mu1, mu2 = window.get_rd_stats(statistics="mean", name="both")
+        mu1, mu2 = window.get_rd_stats(statistics="mean",
+                                       name=WindowType.BOTH)
+
         wga_data = np.append(wga_data, np.array(mu1))
         no_wga_data = np.append(no_wga_data,
                                np.array(mu2))
@@ -70,7 +73,8 @@ def build_cluster_densities(clusters, **kwargs):
              "std": np.std(wga_data),
              "std_factor" : 3}
       wga_gmm = \
-        GeneralMixtureModel(_get_distributions_list_from_names(wga_dist, params),
+        GeneralMixtureModel(_get_distributions_list_from_names(wga_dist,
+                                                               params),
                             weights=wga_weights)
 
       cluster.wga_density = wga_gmm
@@ -80,7 +84,8 @@ def build_cluster_densities(clusters, **kwargs):
              "std_factor" : 3}
 
       non_wga_density = \
-        GeneralMixtureModel(_get_distributions_list_from_names(non_wga_dist,params),
+        GeneralMixtureModel(_get_distributions_list_from_names(non_wga_dist,
+                                                               params),
                             weights=no_wga_weights )
 
       cluster.no_wga_density = non_wga_density

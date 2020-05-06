@@ -1,5 +1,6 @@
 from helpers import WindowType
 from helpers import MixedWindowView
+from helpers import WARNING
 from exceptions import Error
 from preprocess_utils import remove_outliers
 from preprocess_utils import compute_statistic
@@ -152,6 +153,29 @@ class Region(object):
                                           removemethod=configuration["outlier_remove"]["name"],
                                           config=config)
 
+
+  def get_sequence(self, size, window_type):
+
+
+    sequence =[]
+
+    if size < len(self._mixed_windows):
+        counter = 0
+        for window in self._mixed_windows:
+          sequence.append(window.get_rd_stats(statistics="mean"),
+                          name=window_type)
+          counter +=1
+
+          if counter == size:
+            break
+    else:
+
+      print("{0} Region size is less than {1}".format(WARNING, size))
+      for window in self._mixed_windows:
+          sequence.append(window.get_rd_stats(statistics="mean"),
+                          name=window_type)
+
+    return sequence
 
 
   def __len__(self):

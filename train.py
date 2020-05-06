@@ -253,26 +253,32 @@ def init_hmm(clusters, configuration):
   hmm_model.bake(verbose=True)
   return hmm_model
 
-def hmm_train(clusters, windows, configuration):
+def hmm_train(clusters, regions, configuration):
 
   print("{0} HMM initialization...".format(INFO))
 
   hmm_model = init_hmm(clusters=clusters,
                        configuration=configuration)
   print("{0} Done...".format(INFO))
-  print("{0} Get observations from clusters...".format(INFO))
+  print("{0} Creating training sequence...".format(INFO))
 
-  observations = []
-  windowtype = "both"
+  if configuration["HMM"]["train_sequence_source"] == "region":
 
-  for window in windows:
+    observations = []
+    for region in regions:
+      observations.append(region.get_sequence(size=configuration["HMM"]["train_sequence_size"],
+                                             window_type=WindowType.from_string(configuration["HMM"]["windowtype"])))
 
-    if windowtype == "both":
-      observations.append(window.get_rd_stats(statistics="mean",
-                                              name=windowtype))
-    else:
-      observations.append([window.get_rd_stats(statistics="mean",
-                                               name=windowtype)])
+  elif configuration["HMM"]["train_sequence_source"] == "cluster":
+
+    observations = []
+    for cluster in clusters:
+      observations.append(cluster.get_sequence(size=configuration["HMM"]["train_sequence_size"],
+                                               window_type=WindowType.from_string(configuration["HMM"]["windowtype"])))
+
+  else:
+    raise Error("Training sequence type has not been specified")
+
 
   print("{0} Done...".format(INFO))
 
@@ -280,14 +286,15 @@ def hmm_train(clusters, windows, configuration):
   print(hmm_model.dense_transition_matrix())
 
   print("{0} Fit HMM...".format(INFO))
+  print("{0} Number of training sequences {1}".format(len(observations)))
   hmm_model, history = \
     hmm_model.fit(sequences=observations,
                   algorithm=configuration["HMM"]["train_solver"],
                   return_history=True,
-                  verbose=True,
-                  lr_decay=0.7,
+                  verbose=configuration["HMM"]["verbose"],
+                  lr_decay=configuration["HMM"]["lr_decay"],
                   callbacks=[HMMCallback(callback=print_logs_callback)],
-                  inertia=None)
+                  inertia=configuration["HMM"]["inertia"])
 
   #finalize the model
   hmm_model.bake()
@@ -340,7 +347,6 @@ def main():
                                                                   mean_diff,
                                                                   cluster.cidx))
 
-
     if configuration["label_clusters"]:
       print("{0} Labelling clusters...".format(INFO))
       clusters = label_clusters(clusters=clusters, windows=mixed_windows,
@@ -353,6 +359,7 @@ def main():
     print("{0} Done...".format(INFO))
     print("{0} Starting HMM training...".format(INFO))
     hmm_train(clusters=clusters,
+              regions=regions,
               configuration=configuration)
 
     print("{0} Done...".format(INFO))
