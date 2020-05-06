@@ -16,10 +16,10 @@ def save_clusters(clusters, windows, statistic):
   for cluster in clusters:
     wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + ".txt"
     save_cluster(filename=wga_file, cluster=cluster,
-                 windows=windows, statistic=statistic, wtype='wga_w')
+                 windows=windows, statistic=statistic, wtype=WindowType.WGA)
     no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic + ".txt"
     save_cluster(filename=no_wga_file, cluster=cluster,
-                 windows=windows, statistic=statistic, wtype='n_wga_w')
+                 windows=windows, statistic=statistic, wtype=WindowType.NO_WGA)
 
 def save_windows_statistic(windows, statistic, region_id=None):
 

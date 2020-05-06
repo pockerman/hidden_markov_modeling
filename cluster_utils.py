@@ -5,7 +5,7 @@ from helpers import Error
 from helpers import INFO
 
 
-def build_cluster_densities(clusters, windows, **kwargs):
+def build_cluster_densities(clusters, **kwargs):
   """
   Establish the probability destributions underlying
   the data for each cluster
@@ -54,7 +54,7 @@ def build_cluster_densities(clusters, windows, **kwargs):
 
       wga_data = np.empty((1,0), float)
       no_wga_data = np.empty((1,0), float)
-      windows = clusterwindows
+      windows = cluster.windows
 
       for idx in indeces:
         window = windows[idx]
@@ -80,7 +80,7 @@ def build_cluster_densities(clusters, windows, **kwargs):
              "std_factor" : 3}
 
       non_wga_density = \
-        GeneralMixtureModel(_get_distributions_list_from_names(non_wga_dist),
+        GeneralMixtureModel(_get_distributions_list_from_names(non_wga_dist,params),
                             weights=no_wga_weights )
 
       cluster.no_wga_density = non_wga_density

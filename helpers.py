@@ -630,7 +630,7 @@ class MixedWindowView(object):
         """
 
         if name == "both":
-          return (self._windows["wga_w"].get_rd_stats(statistics=statistics),
+          return (self._windows[WindowType.WGA].get_rd_stats(statistics=statistics),
                   self._windows[WindowType.NO_WGA].get_rd_stats(statistics=statistics))
         elif name == WindowType.WGA:
           return self._windows[WindowType.WGA].get_rd_stats(statistics=statistics)
