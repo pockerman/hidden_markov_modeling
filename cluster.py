@@ -88,6 +88,23 @@ class Cluster(object):
 
     return sequence
 
+  def get_region_as_sequences(self, size, window_type, n_seqs):
+
+    sequences = []
+    sequence_local=[]
+    for idx in self._indexes:
+      window = self._windows[idx]
+      sequence_local.append(window.get_rd_stats(statistics="mean", name=window_type))
+
+      if len(sequence_local) == size:
+        sequences.append(sequence_local)
+        sequence_local=[]
+
+      if n_seqs is not None and len(sequences) == n_seqs:
+        break
+
+    return sequences
+
   def get_statistics(self, statistic, window_type, **kwargs):
 
 

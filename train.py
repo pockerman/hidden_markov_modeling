@@ -266,15 +266,26 @@ def hmm_train(clusters, regions, configuration):
 
     observations = []
     for region in regions:
-      observations.append(region.get_sequence(size=configuration["HMM"]["train_sequence_size"],
-                                             window_type=WindowType.from_string(configuration["HMM"]["windowtype"])))
+
+      region_sequences = \
+        region.get_region_as_sequences(size=configuration["HMM"]["train_sequence_size"],
+                                       window_type=WindowType.from_string(configuration["HMM"]["windowtype"]),
+                                       n_seqs=configuration["HMM"]["train_n_sequences_per_source"])
+
+      for seq in region_sequences:
+        observations.append(seq)
 
   elif configuration["HMM"]["train_sequence_source"] == "cluster":
 
     observations = []
     for cluster in clusters:
-      observations.append(cluster.get_sequence(size=configuration["HMM"]["train_sequence_size"],
-                                               window_type=WindowType.from_string(configuration["HMM"]["windowtype"])))
+      cluster_sequences = \
+        cluster.get_sequence(size=configuration["HMM"]["train_sequence_size"],
+                             window_type=WindowType.from_string(configuration["HMM"]["windowtype"]),
+                             n_seqs=configuration["HMM"]["train_n_sequences_per_source"])
+
+      for seq in cluster_sequences:
+        observations.append(seq)
 
   else:
     raise Error("Training sequence type has not been specified")
