@@ -1,4 +1,8 @@
 {
+
+  "regions":[(10000,600000),(600001, 1200000),
+             (1200001, 1800000),(1800001,2400000)],
+  "chromosome": "chr1",
   "reference_file":{
     "filename": "/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
     "start_idx" :180001,
@@ -18,7 +22,6 @@
   "fill_missing_window_data":false,
   "fill_missing_window_data_factor":0,
   "quality_threshold":null,
-  "chromosome": "chr1",
   "save_windows":false,
   "remove_windows_with_N":true,
   "windows_filename":"hmm_windows.json",

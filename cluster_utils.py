@@ -31,7 +31,7 @@ def build_cluster_densities(clusters, windows, **kwargs):
 
     for cluster in clusters:
 
-      arr = _form_cluster_2d_array(cluster=cluster, windows=windows)
+      arr = _form_cluster_2d_array(cluster=cluster)
       kde = KernelDensity(kernel=kwargs["config"]["kernel"],
                           bandwidth=kwargs["config"]["bandwidth"])
       kde.fit(arr)
@@ -54,6 +54,7 @@ def build_cluster_densities(clusters, windows, **kwargs):
 
       wga_data = np.empty((1,0), float)
       no_wga_data = np.empty((1,0), float)
+      windows = clusterwindows
 
       for idx in indeces:
         window = windows[idx]
@@ -62,26 +63,25 @@ def build_cluster_densities(clusters, windows, **kwargs):
         no_wga_data = np.append(no_wga_data,
                                np.array(mu2))
 
-      wga_data = numpy.array([wga_data]).T
-      no_wga_data = numpy.array([no_wga_data]).T
 
       # collected the data create the GMM for each
       # component in the cluster
+      params={"mean": np.mean(wga_data),
+             "std": np.std(wga_data),
+             "std_factor" : 3}
       wga_gmm = \
-        GeneralMixtureModel.from_samples(
-          distributions=_get_distributions_list_from_names(wga_dist),
-          n_components=len(wga_dist),
-          X=wga_data,
-          weights=wga_weights)
+        GeneralMixtureModel(_get_distributions_list_from_names(wga_dist, params),
+                            weights=wga_weights)
 
       cluster.wga_density = wga_gmm
 
+      params={"mean": np.mean(no_wga_data),
+             "std": np.std(no_wga_data),
+             "std_factor" : 3}
+
       non_wga_density = \
-        GeneralMixtureModel.from_samples(
-          distributions=_get_distributions_list_from_names(non_wga_dist),
-          n_components=len(non_wga_dist),
-          X=no_wga_data,
-          weights=no_wga_weights )
+        GeneralMixtureModel(_get_distributions_list_from_names(non_wga_dist),
+                            weights=no_wga_weights )
 
       cluster.no_wga_density = non_wga_density
 
@@ -91,17 +91,14 @@ def build_cluster_densities(clusters, windows, **kwargs):
   return clusters
 
 
-
-
-def save_clusters_desnity(clusters, windows, **kwargs):
+def save_clusters_desnity(clusters, **kwargs):
 
   for cluster in clusters:
     filename = "cluster_" + str(cluster.cidx) + "_density.txt"
-    save_cluster_density(cluster=cluster, windows=windows,
-                         filename=filename, **kwargs)
+    save_cluster_density(cluster=cluster, filename=filename, **kwargs)
 
 
-def clusters_statistics(clusters, windows):
+def clusters_statistics(clusters):
   """
   Claculate various statistics for the windows
   clustered in clusters
@@ -125,16 +122,16 @@ def clusters_statistics(clusters, windows):
 
   for c in range(len(clusters)):
 
-    statistics[c] = clusters[c].get_statistics(windows=windows, statistic="all")
+    statistics[c] = clusters[c].get_statistics(statistic="all")
   return statistics
 
 
-def save_cluster_density(cluster, windows, filename, **kwargs):
+def save_cluster_density(cluster, filename, **kwargs):
 
 
     if kwargs["name"] == "kde":
 
-      arr = _form_cluster_2d_array(cluster=cluster, windows=windows)
+      arr = _form_cluster_2d_array(cluster=cluster)
       log_probs = cluster.density.score_samples(arr)
 
       with open(filename, 'w') as file:
@@ -144,10 +141,10 @@ def save_cluster_density(cluster, windows, filename, **kwargs):
     raise Error("Invalid cluster distribution method")
 
 
-def _form_cluster_2d_array(cluster, windows):
+def _form_cluster_2d_array(cluster):
   indeces = cluster.indexes
   arr = np.empty((0, 2), float)
-
+  windows = cluster.windows
   for idx in indeces:
     window = windows[idx]
     mu1, mu2 = window.get_rd_stats(statistics="mean", name="both")
@@ -155,17 +152,18 @@ def _form_cluster_2d_array(cluster, windows):
   return arr
 
 
-def _get_distributions_list_from_names(dists_name):
+def _get_distributions_list_from_names(dists_name, params):
 
   dists = []
 
   for name in dists_name:
     if name == "normal":
-      dists.append(NormalDistribution)
+      dists.append(NormalDistribution(params["mean"], params["std"]))
     elif name == "poisson":
-      dists.append(PoissonDistribution)
+      dists.append(PoissonDistribution(params["mean"]))
     elif name == "uniform":
-      dists.append(UniformDistribution)
+      dists.append(UniformDistribution(params["mean"] - params["std_factor"]*params["std"],
+                                       params["mean"] + params["std_factor"]*params["std"]))
     else:
       raise Error("Name {0} is an unknown distribution ".format(name))
   return dists
