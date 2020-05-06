@@ -44,10 +44,11 @@ def make_window_regions(configuration):
     regions = configuration["regions"]
     print("{0} Regions used {1}".format(INFO, regions))
 
-    regions_list = []
+    regions_list = [ (start, end) for start, end
+                    in zip(regions["start"], regions["end"])]
 
     counter=0
-    for r in regions:
+    for r in regions_list:
 
         start_idx = r[0]
         end_idx = r[1]

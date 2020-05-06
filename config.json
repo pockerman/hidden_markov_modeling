@@ -1,7 +1,9 @@
 {
 
-  "regions":[(10000,600000),(600001, 1200000),
-             (1200001, 1800000),(1800001,2400000)],
+  "regions":{
+      "start":[10000, 600001, 1200001, 1800001],
+      "end":[1200000,1800000,2400000]
+  },
   "chromosome": "chr1",
   "reference_file":{
     "filename": "/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna",
