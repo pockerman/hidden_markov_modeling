@@ -173,7 +173,7 @@ class Region(object):
         """
         return self._mixed_windows[item]
 
-    def __setitem__(self, o, value):
+  def __setitem__(self, o, value):
         """
         Set the o-th observation to value
         :param o:
