@@ -4,7 +4,7 @@ Various helpers to be used in the analysis module
 
 from helpers import WindowType
 
-def save_cluster(filename, cluster, windows, statistic, wtype):
+def save_cluster(filename, cluster, statistic, wtype):
 
   with open(filename, 'w') as file:
     file.write(str(cluster.get_window_statistics(statistic=statistic,
