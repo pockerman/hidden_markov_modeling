@@ -32,10 +32,10 @@ def build_hmm(hmm_file):
 
     # reade in the states
     states = hmm_json_map["states"]
-
+    distribution_ties = hmm_json_map.get("distribution ties",None)
     hmm, hmm_states = build_states(hmm=hmm,
                                    states=states,
-                                   distribution_ties=hmm_json_map["distribution ties"])
+                                   distribution_ties=distribution_ties)#hmm_json_map["distribution ties"])
 
     hmm.start = hmm_states[hmm_json_map['start_index']]
     hmm.end = hmm_states[hmm_json_map['end_index']]
@@ -45,33 +45,6 @@ def build_hmm(hmm_file):
       hmm.add_transition(hmm_states[start], hmm_states[end], probability,
                          pseudocount, group)
 
-    """
-    start_prob = {
-      "NORMAL": 0.95,
-      "DELETE": 0.0166,
-      "INSERT": 0.0166,
-      "DOUBLE_DEL": 0.0166,
-      "TUF":0.0
-    }
-
-    for state in hmm_states:
-      name = state.name
-      hmm.add_transition(hmm.start,
-                               state, start_prob[name])
-
-
-    # now we need to add the transitions
-    for i in hmm_states:
-      for j in hmm_states:
-        if i.name == j.name:
-          # high probabiity for self-transitioning
-          hmm.add_transition(i, j, 0.95)
-      else:
-
-        #low probability for change state transition
-        hmm.add_transition(i, j, 0.05)
-
-    """
     hmm.bake(verbose=True)
     return hmm
 
@@ -84,16 +57,19 @@ def build_states(hmm, states, distribution_ties):
   state_objs = []
   for state in states:
 
+      print("Working with state: ", state["name"])
       #print(state)
       state_obj = build_state(state_map=state)
 
       if state_obj is not None:
         state_objs.append(state_obj)
 
-  for i, j in distribution_ties:
+
+  if distribution_ties is not None:
+    for i, j in distribution_ties:
     # Tie appropriate states together
-    states[i].tie(states[j])
-  hmm.add_states(state_objs)
+      states[i].tie(states[j])
+    hmm.add_states(state_objs)
   return hmm, state_objs
 
 
@@ -136,6 +112,11 @@ def build_state(state_map):
           weights = param["weights"]
           gmm = GeneralMixtureModel(dist_list, weights=weights)
           components.append(gmm)
+        elif param["class"] == "Distribution":
+          distribution = Distribution.from_json(json.dumps(param))
+
+          components.append(distribution)
+
 
       # now that we collected the independent components
       # construct the state
@@ -145,6 +126,4 @@ def build_state(state_map):
 
     #this means that the state has
     return State(None, name=name, weight=weight)
-
-    raise Error("Not known distribution: {0}".format(dist_name))
 
