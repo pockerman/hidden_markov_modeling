@@ -1,8 +1,8 @@
 {
 
   "regions":{
-      "start":[10000, 600001, 1200001, 1800001,2400001],
-      "end":[600000, 1200000,1800000,2400000,3000000]
+      "start":[1000000],
+      "end":[10000000]
   },
   "chromosome": "chr1",
   "reference_file":{
@@ -19,7 +19,9 @@
   "fill_missing_window_data_factor":0,
   "quality_threshold":null,
   "save_windows":false,
-  "remove_windows_with_N":true,
+  "remove_windows_with_N":false,
+  "mark_N_windows":true,
+  "mark_for_N_windows":-999,
   "windows_filename":"hmm_windows.json",
   "outlier_remove":{
 
@@ -72,11 +74,9 @@
     },
     "train_sequence_size": 100,
     "train_sequence_source": "region",
-    "train_n_sequences_per_source":10,
+    "train_n_sequences_per_source":10000,
     "windowtype":"both"
   },
   "logger_file":"tuf.log",
   "logger_level": "INFO"
-
-
 }

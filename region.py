@@ -38,6 +38,11 @@ class Region(object):
   """
 
   def __init__(self, idx, start, end, window_size):
+
+    if end <= start:
+      raise Error("Invalid start/end points. "
+                  "End cannot be less than or equal to start")
+
     self._idx = idx
     self._start = start
     self._end = end
@@ -47,6 +52,9 @@ class Region(object):
 
     self._mixed_windows = None
 
+
+  def size(self):
+    return self._end - self._start
 
   def get_n_windows(self,type_):
     return len(self._windows[type_])
@@ -95,6 +103,7 @@ class Region(object):
     self._windows[WindowType.NO_WGA] = windows
 
 
+
   def get_mixed_windows(self):
 
     if self._mixed_windows is not None:
@@ -111,10 +120,12 @@ class Region(object):
   def remove_windows_with_ns(self):
 
      # filter the windows for N's
-     wga_filter_windows = [window for window in self._windows[WindowType.WGA]
+     wga_filter_windows = [window
+                           for window in self._windows[WindowType.WGA]
                                   if not window.has_base("N")]
 
-     no_wga_filter_windows = [window for window in self._windows[WindowType.NO_WGA]
+     no_wga_filter_windows = [window
+                              for window in self._windows[WindowType.NO_WGA]
                                   if not window.has_base("N")]
 
      self._windows[WindowType.WGA] = wga_filter_windows
@@ -139,20 +150,35 @@ class Region(object):
     no_wga_rds = []
 
     for window in self._mixed_windows:
-          wga_rds.extend(window.get_rd_counts(name=WindowType.WGA))
-          no_wga_rds.extend(window.get_rd_counts(name=WindowType.NO_WGA))
+          if not window.is_n_window():
+            wga_rds.extend(window.get_rd_counts(name=WindowType.WGA))
+            no_wga_rds.extend(window.get_rd_counts(name=WindowType.NO_WGA))
 
-    wga_statistics = compute_statistic(data=wga_rds, statistics="all")
-    no_wga_statistics = compute_statistic(data=no_wga_rds, statistics="all")
+    wga_statistics = compute_statistic(data=wga_rds,
+                                       statistics="all")
+    no_wga_statistics = compute_statistic(data=no_wga_rds,
+                                          statistics="all")
 
     config = configuration["outlier_remove"]["config"]
     config["statistics"] = {WindowType.NO_WGA: no_wga_statistics,
                             WindowType.WGA:wga_statistics}
 
-    self._mixed_windows = remove_outliers(windows=self._mixed_windows,
-                                          removemethod=configuration["outlier_remove"]["name"],
-                                          config=config)
+    self._mixed_windows = \
+      remove_outliers(windows=self._mixed_windows,
+                      removemethod=configuration["outlier_remove"]["name"],
+                      config=config)
 
+  def mark_windows_with_ns(self, n_mark):
+
+    for window in self._windows[WindowType.WGA]:
+      if window.has_base("N"):
+        window.set_window_rd_mark(n_mark)
+        window.state = WindowType.N_WIN
+
+    for window in self._windows[WindowType.NO_WGA]:
+      if window.has_base("N"):
+        window.set_window_rd_mark(n_mark)
+        window.state = WindowType.N_WIN
 
   def get_sequence(self, size, window_type):
 
@@ -180,7 +206,8 @@ class Region(object):
     sequences = []
     sequence_local=[]
     for window in self._mixed_windows:
-      sequence_local.append(window.get_rd_stats(statistics="mean", name=window_type))
+      sequence_local.append(window.get_rd_stats(statistics="mean",
+                                                name=window_type))
 
       if len(sequence_local) == size:
         sequences.append(sequence_local)
@@ -190,8 +217,6 @@ class Region(object):
         break
 
     return sequences
-
-
 
   def __len__(self):
         return self.get_n_mixed_windows()

@@ -1,36 +1,24 @@
 import argparse
 import logging
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
-import csv
 from pomegranate import*
 
 from helpers import read_configuration_file
 from helpers import set_up_logger
 from helpers import save_hmm
-from helpers import flat_windows
-from helpers import flat_windows_from_state
 from helpers import HMMCallback
 from helpers import print_logs_callback
-from helpers import flat_windows_rd_from_indexes
-from helpers import MixedWindowView
 from helpers import WindowType
 from helpers import INFO
 from region import Region
 from analysis_helpers import save_clusters
 from analysis_helpers import save_windows_statistic
 
-from bam_helpers import extract_windows
 from cluster import Cluster
-from cluster_utils import clusters_statistics
 from cluster_utils import build_cluster_densities
 from cluster_utils import save_clusters_desnity
 from hypothesis_testing import SignificanceTestLabeler
-from preprocess_utils import fit_distribution
-from preprocess_utils import compute_statistic
 from preprocess_utils import build_clusterer
-from preprocess_utils import remove_outliers
 from exceptions import Error
 
 def make_window_regions(configuration):
@@ -109,6 +97,13 @@ def make_window_regions(configuration):
                   " after filtering: {1}".format(INFO,
                                                  region.get_n_windows(type_=WindowType.NO_WGA)))
             print("{0} Done...".format(INFO))
+        elif "mark_N_windows" in configuration and\
+          configuration["mark_N_windows"]:
+
+            print("{0} Marking N "
+                  " windows with: {1}".format(INFO,
+                                              configuration["mark_for_N_windows"]))
+            region.mark_windows_with_ns(configuration["mark_for_N_windows"])
 
         else:
             print("{0} No filtering windows"
@@ -117,18 +112,21 @@ def make_window_regions(configuration):
         # compute the mixed windows for the region
         region.get_mixed_windows()
 
-        print("{0} Number of mixed windows: {1}".format(INFO,
-                                                        region.get_n_mixed_windows()))
+        print("{0} Number of mixed "
+              "windows: {1}".format(INFO,
+                                    region.get_n_mixed_windows()))
 
 
         if "outlier_remove" in configuration and\
           configuration["outlier_remove"]:
 
             region.remove_outliers(configuration=configuration)
-            print("{0} Number of windows after outlier removal: {1}".format(INFO,
-                                                                        region.get_n_mixed_windows()))
+            print("{0} Number of windows "
+                  "after outlier removal: {1}".format(INFO,
+                                                      region.get_n_mixed_windows()))
         else:
-          print("{0} No outlier removal performed".format(INFO))
+          print("{0} No outlier "
+                "removal performed".format(INFO))
 
 
         # save the region statistics
@@ -146,7 +144,8 @@ def create_clusters(regions, configuration):
   windows = []
   for region in regions:
     for window in region:
-      windows.append(window)
+      if not window.is_n_window():
+        windows.append(window)
 
   # create the clusters
   clusterer, initial_index_medoids = \
@@ -167,7 +166,7 @@ def create_clusters(regions, configuration):
                             windows=windows))
 
   print("{0} Saving cluster indices".format(INFO))
-  save_clusters(clusters=clusters, windows=windows, statistic="mean")
+  save_clusters(clusters=clusters, statistic="mean")
   print("{0} Done...".format(INFO))
   return clusters
 
@@ -210,6 +209,20 @@ def fit_clusters_distribution(clusters, configuration):
 
 def init_hmm(clusters, configuration):
 
+
+  n_state = None
+
+  if "mark_N_windows" in configuration and\
+    configuration["mark_N_windows"]:
+
+      # uniform distribution for gaps
+      # so that E[X] = -999 and PDF = 1.0
+      n_state = \
+        State(
+          IndependentComponentsDistribution(
+            [UniformDistribution(-999.5, -998.5),
+             UniformDistribution(-999.5, -998.5)]), name="GAP_STATE")
+
   # create the HMM
   hmm_model = HiddenMarkovModel(name=configuration["HMM"]["name"],
                                 start=None, end=None)
@@ -223,6 +236,9 @@ def init_hmm(clusters, configuration):
                         name=name))
 
 
+  if n_state is not None:
+    states.append(n_state)
+
   # add the states to the model
   hmm_model.add_states(states)
 
@@ -232,6 +248,7 @@ def init_hmm(clusters, configuration):
   # configuration["HMM"]["start_prob"][state.name]
 
   for state in states:
+    if state.name != "GAP_STATE":
       hmm_model.add_transition(hmm_model.start,
                              state,
                              configuration["HMM"]["start_prob"][state.name])
@@ -247,7 +264,20 @@ def init_hmm(clusters, configuration):
       else:
 
         #low probability for change state transition
-        hmm_model.add_transition(i, j, 0.05)
+        if i.name is not "GAP_STATE" and\
+          j.name is not "GAP_STATE":
+            hmm_model.add_transition(i, j, 0.05)
+
+  if n_state is not None:
+    for i in states:
+      if i.name is not "GAP_STATE":
+        hmm_model.add_transition(i,  n_state, 0.01)
+        hmm_model.add_transition(n_state, i, 0.01)
+
+    # the probability transition from GAP_STATE to
+    # model end should be high
+    hmm_model.add_transition(n_state, hmm_model.end, 1.0)
+
 
   # finally we need to bake
   hmm_model.bake(verbose=True)

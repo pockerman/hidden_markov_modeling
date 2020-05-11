@@ -282,6 +282,7 @@ class WindowType(Enum):
   WGA = 0
   NO_WGA = 1
   BOTH = 2
+  N_WIN = 3
 
   @staticmethod
   def from_string(string):
@@ -291,11 +292,14 @@ class WindowType(Enum):
       return WindowType.NO_WGA
     elif string.upper() == "BOTH":
       return WindowType.BOTH
+    elif string.upper() == 'N_WIN':
+      return WindowType.N_WIN
 
-    raise Error("Invalid WindowType. Type {0} not in {1}".format(string,
-                                                                 ["WGA",
-                                                                  "NO_WGA",
-                                                                  "BOTH"]))
+    raise Error("Invalid WindowType. "
+                "Type {0} not in {1}".format(string,
+                                             ["WGA",
+                                              "NO_WGA",
+                                              "BOTH"]))
 
 class WindowState(Enum):
   DELETE = 0
@@ -335,6 +339,9 @@ class Window(object):
     """
     Class representing a window for arranging of the data
     """
+
+    N_WINDOW_MARKER=-999
+
     def __init__(self, idx, capacity):
 
         # the id of the window
@@ -348,20 +355,22 @@ class Window(object):
         # and the second is the non wga_treated
         self._observations = []
 
-        # the total number of insertions/deletions
-        self._net_indels = 0
-
         # the state of the window
         self._state = WindowState.INVALID
 
-    def add(self, observation):
+    @property
+    def idx(self):
+      return self._id
 
-        if len(self._observations) >= self._capacity:
-            raise FullWindowException(self._capacity)
+    @property
+    def state(self):
+      return self._state
 
-        # all the observations accumulated in the window
-        self._observations.append(observation)
+    @state.setter
+    def state(self, value):
+      self._state = value
 
+    @property
     def capacity(self):
         """
         Returns the capacity of the window i.e. the maximum
@@ -401,12 +410,27 @@ class Window(object):
 
         if statistics not in valid_statistics:
             raise Error("Invalid statistsics: '{0}'"
-                        " not in {1}".format(statistics, valid_statistics))
+                        " not in {1}".format(statistics,
+                                             valid_statistics))
 
         # accumulate RD as an array and use numpy
         rd_data = [item.read_depth for item in self._observations]
         from preprocess_utils import compute_statistic
-        return compute_statistic(data=rd_data,statistics=statistics)
+        return compute_statistic(data=rd_data,
+                                 statistics=statistics)
+
+
+    def add(self, observation):
+
+        if len(self._observations) >= self._capacity:
+            raise FullWindowException(self._capacity)
+
+        # all the observations accumulated in the window
+        self._observations.append(observation)
+
+    def set_window_rd_mark(self, mark):
+      for obs in self._observations:
+        obs.read_depth=mark
 
     def get_rd_observations(self):
         """
@@ -414,7 +438,8 @@ class Window(object):
         contained in the window
         :return:
         """
-        rd_data = [item.read_depth for item in self._observations]
+        rd_data = [item.read_depth
+                   for item in self._observations]
         return rd_data
 
     def get_bases(self):
@@ -433,14 +458,11 @@ class Window(object):
         seq += observaion.base[0]
       return seq.strip()
 
-
     def has_base(self, string):
       for observaion in self._observations:
         if observaion.base[0].upper() == string.upper():
           return True
       return False
-
-
 
     def get_gc_percent(self):
       gc_count = 0
@@ -477,14 +499,6 @@ class Window(object):
 
         return gc_count / (gc_count + at_count)
 
-    def set_net_indels(self, net_indels):
-        """
-        Set the net insertion/deletions for the window
-        :param net_indels:
-        :return:
-        """
-        self._net_indels = net_indels
-
     def has_gaps(self):
         """
         Returns true if the window contains gaps. This is done
@@ -504,54 +518,6 @@ class Window(object):
                 previous = pos
         return False
 
-
-    def get_id(self):
-      """
-      Returns the zero based id of the window
-
-      Returns
-      -------
-      self._id
-
-      """
-      return self._id
-
-    def set_state(self, state):
-      """
-      Set the state of the window
-
-      Parameters
-      ----------
-      state : WindowState
-        Enumeration describing the window state
-
-      Returns
-      -------
-      None.
-
-      """
-      self._state = state
-
-    def get_state(self):
-      """
-      the state of the window
-
-      Returns
-      -------
-      WindowState
-
-      """
-      return self._state
-
-    def insert_at(self, pos, data):
-        """
-        Insert the data at the specified position
-        for the current window
-        :param pos:
-        :param data:
-        :return:
-        """
-        self._observations.insert(pos, data)
 
     def to_json(self):
       """
@@ -620,6 +586,19 @@ class MixedWindowView(object):
   def state(self, value):
     self._state = value
 
+
+  def is_n_win(self):
+
+    for w in self._windows[WindowType.WGA]:
+      if w.state == WindowType.N_WIN:
+        return True
+
+    for w in self._windows[WindowType.N_WGA]:
+      if w.state == WindowType.N_WIN:
+        return True
+
+    return False
+
   def get_window(self, wtype):
     return self._windows[wtype]
 
@@ -643,6 +622,11 @@ class MixedWindowView(object):
         :param statistics:
         :return:
         """
+        if self.is_n_win():
+           if name == WindowType.BOTH:
+             return (Window.N_WINDOW_MARKER, Window.N_WINDOW_MARKER)
+           else:
+            return Window.N_WINDOW_MARKER
 
         if name == WindowType.BOTH:
           return (self._windows[WindowType.WGA].get_rd_stats(statistics=statistics),
