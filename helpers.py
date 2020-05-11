@@ -587,7 +587,7 @@ class MixedWindowView(object):
     self._state = value
 
 
-  def is_n_win(self):
+  def is_n_window(self):
 
     for w in self._windows[WindowType.WGA]:
       if w.state == WindowType.N_WIN:
@@ -622,7 +622,7 @@ class MixedWindowView(object):
         :param statistics:
         :return:
         """
-        if self.is_n_win():
+        if self.is_n_window():
            if name == WindowType.BOTH:
              return (Window.N_WINDOW_MARKER, Window.N_WINDOW_MARKER)
            else:
