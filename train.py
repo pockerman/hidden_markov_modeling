@@ -214,6 +214,9 @@ def init_hmm(clusters, configuration):
 
   if "mark_N_windows" in configuration and\
     configuration["mark_N_windows"]:
+
+      # uniform distribution for gaps
+      # so that E[X] = -999 and PDF = 1.0
       n_state = \
         State(
           IndependentComponentsDistribution(
@@ -266,6 +269,13 @@ def init_hmm(clusters, configuration):
             hmm_model.add_transition(i, j, 0.05)
 
   if n_state is not None:
+    for i in states:
+      if i.name is not "GAP_STATE":
+        hmm_model.add_transition(i,  n_state, 0.01)
+        hmm_model.add_transition(n_state, i, 0.01)
+
+    # the probability transition from GAP_STATE to
+    # model end should be high
     hmm_model.add_transition(n_state, hmm_model.end, 1.0)
 
 
