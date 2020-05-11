@@ -2,7 +2,7 @@
 
   "regions":{
       "start":[1000000],
-      "end":[2500000]
+      "end":[10000000]
   },
   "chromosome": "chr1",
   "reference_file":{
@@ -74,7 +74,7 @@
     },
     "train_sequence_size": 100,
     "train_sequence_source": "region",
-    "train_n_sequences_per_source":10,
+    "train_n_sequences_per_source":10000,
     "windowtype":"both"
   },
   "logger_file":"tuf.log",
