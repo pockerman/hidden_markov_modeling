@@ -589,12 +589,8 @@ class MixedWindowView(object):
 
   def is_n_window(self):
 
-    for w in self._windows[WindowType.WGA]:
-      if w.state == WindowType.N_WIN:
-        return True
-
-    for w in self._windows[WindowType.N_WGA]:
-      if w.state == WindowType.N_WIN:
+    if self._windows[WindowType.WGA].state == WindowType.N_WIN or\
+      self._windows[WindowType.N_WGA].state == WindowType.N_WIN:
         return True
 
     return False
@@ -636,9 +632,10 @@ class MixedWindowView(object):
         elif name == WindowType.NO_WGA:
           return self._windows[WindowType.NO_WGA].get_rd_stats(statistics=statistics)
 
-        raise Error("Windowtype {0} not in {1}".format(name, [WindowType.BOTH.name,
-                                                                WindowType.WGA.name,
-                                                                WindowType.NO_WGA.name]))
+        raise Error("Windowtype {0}"
+                    " not in {1}".format(name, [WindowType.BOTH.name,
+                                                WindowType.WGA.name,
+                                                WindowType.NO_WGA.name]))
 
   def get_bases(self, windowtype="both"):
 
@@ -660,9 +657,10 @@ class MixedWindowView(object):
       return self._windows[WindowType.NO_WGA].get_sequence()
 
 
-    raise Error("Windowtype {0} not in {1}".format(windowtype, ["both",
-                                                                WindowType.WGA.name,
-                                                                WindowType.NO_WGA.name]))
+    raise Error("Windowtype {0}"
+                " not in {1}".format(windowtype, ["both",
+                                                  WindowType.WGA.name,
+                                                  WindowType.NO_WGA.name]))
 
   def get_gc_percent(self, windowtype="both"):
     if windowtype == "both":
@@ -673,9 +671,10 @@ class MixedWindowView(object):
     elif windowtype == WindowType.NO_WGA:
       return self._windows[WindowType.NO_WGA].get_gc_percent()
 
-    raise Error("Windowtype {0} not in {1}".format(windowtype, ["both",
-                                                                WindowType.WGA.name,
-                                                                WindowType.NO_WGA.name]))
+    raise Error("Windowtype {0}"
+                " not in {1}".format(windowtype, ["both",
+                                                  WindowType.WGA.name,
+                                                  WindowType.NO_WGA.name]))
 
 
 
