@@ -221,7 +221,39 @@ def windows_from_json(jsonmap):
   return windows
 
 
-Observation = namedtuple("Observation", ["position", "read_depth", "base"])
+#Observation = namedtuple("Observation", ["position", "read_depth", "base"])
+
+class Observation(object):
+  def __init__(self, position, read_depth, base):
+    self._position = position
+    self._read_depth = read_depth
+    self._base = base
+
+
+  @property
+  def position(self):
+    return self._position
+
+  @property.setter
+  def position(self, value):
+    self._position = value
+
+  @property
+  def read_depth(self):
+    return self._read_depth
+
+  @property.setter
+  def read_depth(self, value):
+    self._read_depth = value
+
+  @property
+  def base(self):
+    return self._base
+
+  @property.setter
+  def base(self, value):
+    return self._base
+
 
 def observation_to_json(observation):
   """
