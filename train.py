@@ -103,7 +103,7 @@ def make_window_regions(configuration):
             print("{0} Marking N "
                   " windows with: {1}".format(INFO,
                                               configuration["mark_for_N_windows"]))
-            region.mark_windows_with_ns(configuration["mark_for_N_windows"])
+            region.mark_windows_with_ns(n_mark=configuration["mark_for_N_windows"])
 
         else:
             print("{0} No filtering windows"

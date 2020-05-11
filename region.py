@@ -172,12 +172,12 @@ class Region(object):
 
     for window in self._windows[WindowType.WGA]:
       if window.has_base("N"):
-        window.set_window_rd_mark(n_mark)
+        window.set_window_rd_mark(mark=n_mark)
         window.state = WindowType.N_WIN
 
     for window in self._windows[WindowType.NO_WGA]:
       if window.has_base("N"):
-        window.set_window_rd_mark(n_mark)
+        window.set_window_rd_mark(mark=n_mark)
         window.state = WindowType.N_WIN
 
   def get_sequence(self, size, window_type):
