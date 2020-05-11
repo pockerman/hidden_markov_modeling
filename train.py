@@ -294,13 +294,14 @@ def hmm_train(clusters, regions, configuration):
 
   if configuration["HMM"]["train_sequence_source"] == "region":
 
+    hmm_conf = configuration["HMM"]
     observations = []
     for region in regions:
 
       region_sequences = \
-        region.get_region_as_sequences(size=configuration["HMM"]["train_sequence_size"],
-                                       window_type=WindowType.from_string(configuration["HMM"]["windowtype"]),
-                                       n_seqs=configuration["HMM"]["train_n_sequences_per_source"])
+        region.get_region_as_sequences(size=hmm_conf["train_sequence_size"],
+                                       window_type=WindowType.from_string(hmm_conf["windowtype"]),
+                                       n_seqs=hmm_conf["train_n_sequences_per_source"])
 
       for seq in region_sequences:
         observations.append(seq)

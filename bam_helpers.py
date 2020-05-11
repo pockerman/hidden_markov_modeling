@@ -58,13 +58,13 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
                 common_bases(bamdata=bam_out, fastadata=ref_list)
 
                 # find insertions and deletions
-                indel_dict = create_indels_dictionary(chromosome=chromosome,
-                                                      samfile=test_file,
-                                                      start=start_idx, stop=end_idx)
+                #indel_dict = create_indels_dictionary(chromosome=chromosome,
+                #                                      samfile=test_file,
+                #                                      start=start_idx, stop=end_idx)
 
                 # extract the windows
                 windows = create_windows(bamlist=bam_out,
-                                          indel_dict=indel_dict,
+                                          indel_dict=None,
                                           fastdata=ref_list,
                                           windowcapacity=windowcapacity,
                                           start=start_idx,
