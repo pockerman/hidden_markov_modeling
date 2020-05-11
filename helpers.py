@@ -385,7 +385,7 @@ class Window(object):
         window has not been exhausted
         :return: boolean
         """
-        return (self.capacity() - len(self._observations)) != 0
+        return (self.capacity - len(self._observations)) != 0
 
     def get_range(self, start, end):
         """
