@@ -234,7 +234,7 @@ class Observation(object):
   def position(self):
     return self._position
 
-  @property.setter
+  @position.setter
   def position(self, value):
     self._position = value
 
@@ -242,7 +242,7 @@ class Observation(object):
   def read_depth(self):
     return self._read_depth
 
-  @property.setter
+  @read_depth.setter
   def read_depth(self, value):
     self._read_depth = value
 
@@ -250,7 +250,7 @@ class Observation(object):
   def base(self):
     return self._base
 
-  @property.setter
+  @base.setter
   def base(self, value):
     return self._base
 
