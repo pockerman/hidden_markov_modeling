@@ -271,7 +271,7 @@ def add_window_observation(window, windows,
         window.add(observation=observation)
     else:
         windows.append(window)
-        window = Window(idx=window.get_id()+1,
+        window = Window(idx=window.idx + 1,
                         capacity=windowcapacity)
         window.add(observation=observation)
 
