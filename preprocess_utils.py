@@ -87,19 +87,25 @@ def zscore_outlier_removal(windows, config):
   sigma_wga = np.sqrt(statistics[WindowType.WGA]["var"])
   sigma_no_wga = np.sqrt(statistics[WindowType.NO_WGA]["var"])
   for window in windows:
-    mu = window.get_rd_stats(statistics="mean", name=WindowType.BOTH)
+
+    # we don't want to remove the n_windows
+    # as these mark gaps
+    if not window.is_n_window():
+      mu = window.get_rd_stats(statistics="mean",
+                               name=WindowType.BOTH)
+
+      zscore_wga = (mu[0] - statistics[WindowType.WGA]["mean"])/sigma_wga
+      zscore_no_wga = (mu[1] - statistics[WindowType.NO_WGA]["mean"])/sigma_no_wga
 
 
-    zscore_wga = (mu[0] - statistics[WindowType.WGA]["mean"])/sigma_wga
-    zscore_no_wga = (mu[1] - statistics[WindowType.NO_WGA]["mean"])/sigma_no_wga
-
-
-    if zscore_wga < - config["sigma_factor"] or\
-      zscore_wga > config["sigma_factor"]:
-        continue
-    elif zscore_no_wga < - config["sigma_factor"] or\
-      zscore_no_wga > config["sigma_factor"]:
-        continue
+      if zscore_wga < - config["sigma_factor"] or\
+        zscore_wga > config["sigma_factor"]:
+          continue
+      elif zscore_no_wga < - config["sigma_factor"] or\
+        zscore_no_wga > config["sigma_factor"]:
+          continue
+      else:
+        newwindows.append(window)
     else:
       newwindows.append(window)
 

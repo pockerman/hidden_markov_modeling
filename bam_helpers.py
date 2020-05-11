@@ -201,7 +201,7 @@ def create_windows(bamlist, indel_dict, fastdata,
                 for win_gap_item in window_gaps:
                     dummy_observation = Observation(position=win_gap_item[0],
                                                     read_depth=win_gap_item[1],
-                                                    base= win_gap_item[2])
+                                                    base=win_gap_item[2])
 
                     window = add_window_observation(window=window, windows=windows,
                                                     observation=dummy_observation,
@@ -228,7 +228,9 @@ def create_windows(bamlist, indel_dict, fastdata,
     # we fill in the missing data if that was requested
     if len(window) != window.capacity():
 
-      print("{0} Window size {1} is not equal capacity {2} ".format(WARNING, len(window), window.capacity()))
+      print("{0} Window size {1} is"
+            " not equal capacity {2} ".format(WARNING, len(window),
+                                              window.capacity()))
 
       # fill in missing data if this is requested
       if kwargs.get("fill_missing_window_data", False):

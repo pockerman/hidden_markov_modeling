@@ -7,19 +7,18 @@ from helpers import WindowType
 def save_cluster(filename, cluster, windows, statistic, wtype):
 
   with open(filename, 'w') as file:
-    file.write(str(cluster.get_window_statistics(windows=windows,
-                                                 statistic=statistic,
+    file.write(str(cluster.get_window_statistics(statistic=statistic,
                                                  window_type=wtype)))
 
-def save_clusters(clusters, windows, statistic):
+def save_clusters(clusters, statistic):
 
   for cluster in clusters:
     wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + ".txt"
     save_cluster(filename=wga_file, cluster=cluster,
-                 windows=windows, statistic=statistic, wtype=WindowType.WGA)
+                 statistic=statistic, wtype=WindowType.WGA)
     no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic + ".txt"
     save_cluster(filename=no_wga_file, cluster=cluster,
-                 windows=windows, statistic=statistic, wtype=WindowType.NO_WGA)
+                 statistic=statistic, wtype=WindowType.NO_WGA)
 
 def save_windows_statistic(windows, statistic, region_id=None):
 
