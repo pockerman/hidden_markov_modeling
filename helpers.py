@@ -12,6 +12,7 @@ from exceptions import Error
 DUMMY_ID = -1
 INFO="INFO:"
 WARNING="WARNING:"
+ERROR="ERROR:"
 
 class HMMCallback(object):
 
@@ -299,7 +300,8 @@ class WindowType(Enum):
                 "Type {0} not in {1}".format(string,
                                              ["WGA",
                                               "NO_WGA",
-                                              "BOTH"]))
+                                              "BOTH",
+                                              "N_WIN"]))
 
 class WindowState(Enum):
   DELETE = 0
@@ -429,8 +431,16 @@ class Window(object):
         self._observations.append(observation)
 
     def set_window_rd_mark(self, mark):
-      for obs in self._observations:
-        obs.read_depth=mark
+      try:
+        for obs in self._observations:
+          try:
+            obs.read_depth=mark
+          except Exception as e:
+            print("{0} At observation {1} {2}".format(ERROR, obs, str(e)))
+            raise
+      except Exception as e:
+        print("{0} For window {1} an excpetion {2}".format(ERROR, self.idx, str(e)))
+        raise
 
     def get_rd_observations(self):
         """
