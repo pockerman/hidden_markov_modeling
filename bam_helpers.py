@@ -226,11 +226,11 @@ def create_windows(bamlist, indel_dict, fastdata,
     # window may not be using all its capacity
     # as this depends on the partitioning. Optionally
     # we fill in the missing data if that was requested
-    if len(window) != window.capacity():
+    if len(window) != window.capacity:
 
       print("{0} Window size {1} is"
             " not equal capacity {2} ".format(WARNING, len(window),
-                                              window.capacity()))
+                                              window.capacity))
 
       # fill in missing data if this is requested
       if kwargs.get("fill_missing_window_data", False):
