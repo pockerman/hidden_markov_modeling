@@ -231,12 +231,19 @@ def init_hmm(clusters, configuration):
 
       # uniform distribution for gaps
       # so that E[X] = -999 and PDF = 1.0
-      n_state = \
-        State(
-          IndependentComponentsDistribution(
-            [UniformDistribution(-999.5, -998.5),
-             UniformDistribution(-999.5, -998.5)]),
-          name="GAP_STATE")
+
+      if WindowType.from_string(configuration["train_windowtype"]) ==\
+        WindowType.BOTH:
+
+          n_state = \
+            State(
+              IndependentComponentsDistribution(
+                [UniformDistribution(-999.5, -998.5),
+                 UniformDistribution(-999.5, -998.5)]),
+              name="GAP_STATE")
+      else:
+        n_state = \
+          State(UniformDistribution(-999.5, -998.5), name="GAP_STATE")
 
   # create the HMM
   hmm_model = HiddenMarkovModel(name=configuration["HMM"]["name"],
@@ -246,9 +253,24 @@ def init_hmm(clusters, configuration):
   state_to_dist = {}
   states = []
   for cluster, name in zip(clusters, configuration["states"]):
-    states.append(State(IndependentComponentsDistribution([cluster.wga_density,
+
+    if WindowType.from_string(configuration["train_windowtype"]) ==\
+        WindowType.BOTH:
+          states.append(State(IndependentComponentsDistribution([cluster.wga_density,
                                                            cluster.no_wga_density]),
                         name=name))
+    elif WindowType.from_string(configuration["train_windowtype"]) ==\
+        WindowType.WGA:
+          states.append(State(cluster.wga_density, name=name))
+    elif WindowType.from_string(configuration["train_windowtype"]) ==\
+        WindowType.NO_WGA:
+          states.append(State(cluster.no_wga_density, name=name))
+    else:
+      raise Error("Invalid train_windowtype. "
+                  "{0} not in {1}".format(configuration["train_windowtype"],
+                                          [WindowType.BOTH.name,
+                                           WindowType.WGA.name,
+                                           WindowType.NO_WGA.name]))
 
 
   if n_state is not None:
@@ -315,7 +337,7 @@ def hmm_train(clusters, regions, configuration):
 
       region_sequences = \
         region.get_region_as_sequences(size=hmm_conf["train_sequence_size"],
-                                       window_type=WindowType.from_string(hmm_conf["windowtype"]),
+                                       window_type=WindowType.from_string(hmm_conf["train_windowtype"]),
                                        n_seqs=hmm_conf["train_n_sequences_per_source"])
 
       for seq in region_sequences:
@@ -327,7 +349,7 @@ def hmm_train(clusters, regions, configuration):
     for cluster in clusters:
       cluster_sequences = \
         cluster.get_sequence(size=configuration["HMM"]["train_sequence_size"],
-                             window_type=WindowType.from_string(configuration["HMM"]["windowtype"]),
+                             window_type=WindowType.from_string(configuration["HMM"]["train_windowtype"]),
                              n_seqs=configuration["HMM"]["train_n_sequences_per_source"])
 
       for seq in cluster_sequences:
@@ -346,7 +368,7 @@ def hmm_train(clusters, regions, configuration):
   print("{0} Number of training sequences {1}".format(INFO,len(observations)))
 
   for i, seq in enumerate(observations):
-    if -999 in seq:
+    if -999 or (-999, -999) in seq:
       print("{0} Sequence {1} has -999".format(INFO, i))
 
   hmm_model, history = \
