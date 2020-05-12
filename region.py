@@ -65,6 +65,15 @@ class Region(object):
 
     return len(self._mixed_windows)
 
+  def count_n_windows(self):
+
+    counter = 0
+    for win in self._mixed_windows:
+      if win.is_n_window():
+        counter += 1
+
+    return counter
+
 
   def make_wga_windows(self, chromosome,
                        ref_filename,
