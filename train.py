@@ -221,7 +221,8 @@ def init_hmm(clusters, configuration):
         State(
           IndependentComponentsDistribution(
             [UniformDistribution(-999.5, -998.5),
-             UniformDistribution(-999.5, -998.5)]), name="GAP_STATE")
+             UniformDistribution(-999.5, -998.5)]),
+          name="GAP_STATE")
 
   # create the HMM
   hmm_model = HiddenMarkovModel(name=configuration["HMM"]["name"],
