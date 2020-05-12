@@ -232,7 +232,7 @@ def init_hmm(clusters, configuration):
       # uniform distribution for gaps
       # so that E[X] = -999 and PDF = 1.0
 
-      if WindowType.from_string(configuration["train_windowtype"]) ==\
+      if WindowType.from_string(configuration["HMM"]["train_windowtype"]) ==\
         WindowType.BOTH:
 
           n_state = \
@@ -254,20 +254,20 @@ def init_hmm(clusters, configuration):
   states = []
   for cluster, name in zip(clusters, configuration["states"]):
 
-    if WindowType.from_string(configuration["train_windowtype"]) ==\
+    if WindowType.from_string(configuration["HMM"]["train_windowtype"]) ==\
         WindowType.BOTH:
           states.append(State(IndependentComponentsDistribution([cluster.wga_density,
                                                            cluster.no_wga_density]),
                         name=name))
-    elif WindowType.from_string(configuration["train_windowtype"]) ==\
+    elif WindowType.from_string(configuration["HMM"]["train_windowtype"]) ==\
         WindowType.WGA:
           states.append(State(cluster.wga_density, name=name))
-    elif WindowType.from_string(configuration["train_windowtype"]) ==\
+    elif WindowType.from_string(configuration["HMM"]["train_windowtype"]) ==\
         WindowType.NO_WGA:
           states.append(State(cluster.no_wga_density, name=name))
     else:
       raise Error("Invalid train_windowtype. "
-                  "{0} not in {1}".format(configuration["train_windowtype"],
+                  "{0} not in {1}".format(configuration["HMM"]["train_windowtype"],
                                           [WindowType.BOTH.name,
                                            WindowType.WGA.name,
                                            WindowType.NO_WGA.name]))
