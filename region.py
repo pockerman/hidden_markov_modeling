@@ -170,15 +170,21 @@ class Region(object):
 
   def mark_windows_with_ns(self, n_mark):
 
+    counter_wga = 0
     for window in self._windows[WindowType.WGA]:
       if window.has_base("N"):
         window.set_window_rd_mark(mark=n_mark)
         window.state = WindowType.N_WIN
+        counter_wag +=1
 
+    counter_no_wga = 0
     for window in self._windows[WindowType.NO_WGA]:
       if window.has_base("N"):
         window.set_window_rd_mark(mark=n_mark)
         window.state = WindowType.N_WIN
+        counter_no_wga += 1
+
+    return counter_wga, counter_no_wga
 
   def get_sequence(self, size, window_type):
 
