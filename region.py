@@ -184,7 +184,7 @@ class Region(object):
       if window.has_base("N"):
         window.set_window_rd_mark(mark=n_mark)
         window.state = WindowType.N_WIN
-        counter_wag +=1
+        counter_wga +=1
 
     counter_no_wga = 0
     for window in self._windows[WindowType.NO_WGA]:
