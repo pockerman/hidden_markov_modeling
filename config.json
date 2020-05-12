@@ -75,7 +75,7 @@
     "train_sequence_size": 100,
     "train_sequence_source": "region",
     "train_n_sequences_per_source":10000,
-    "windowtype":"both"
+    "train_windowtype":"both"
   },
   "logger_file":"tuf.log",
   "logger_level": "INFO"
