@@ -330,6 +330,11 @@ def hmm_train(clusters, regions, configuration):
 
   print("{0} Fit HMM...".format(INFO))
   print("{0} Number of training sequences {1}".format(INFO,len(observations)))
+
+  for i, seq in enumerate(observations):
+    if -999 in seq:
+      print("{0} Sequence {1} has -999".format(INFO, i))
+
   hmm_model, history = \
     hmm_model.fit(sequences=observations,
                   algorithm=configuration["HMM"]["train_solver"],
