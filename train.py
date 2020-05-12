@@ -370,6 +370,8 @@ def hmm_train(clusters, regions, configuration):
   for i, seq in enumerate(observations):
     if -999 or (-999, -999) in seq:
       print("{0} Sequence {1} has -999".format(INFO, i))
+      print(seq)
+
 
   hmm_model, history = \
     hmm_model.fit(sequences=observations,
