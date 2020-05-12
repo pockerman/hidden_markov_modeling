@@ -135,7 +135,7 @@ def make_window_regions(configuration):
                                                       region.get_n_mixed_windows()))
 
             print("{0} Number of N windows "
-                  "after outlier removal".format(INFO,
+                  "after outlier removal {1}".format(INFO,
                                                  region.count_n_windows()))
 
         else:
