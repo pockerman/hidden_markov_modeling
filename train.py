@@ -365,7 +365,7 @@ def hmm_train(clusters, regions, configuration):
   print("{0} Number of training sequences {1}".format(INFO,len(observations)))
 
   for i, seq in enumerate(observations):
-    if seq.any(-999) or seq.any((-999, -999)):
+    if -999 in seq or (-999, -999) in seq:
       print("{0} Sequence {1} has -999".format(INFO, i))
       print(seq)
 
