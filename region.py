@@ -179,21 +179,22 @@ class Region(object):
 
   def mark_windows_with_ns(self, n_mark):
 
-    counter_wga = 0
-    for window in self._windows[WindowType.WGA]:
-      if window.has_base("N"):
-        window.set_window_rd_mark(mark=n_mark)
-        window.state = WindowType.N_WIN
-        counter_wga +=1
+    if self._mixed_windows is None:
+      raise Error("Mixed windows have not been computed")
 
-    counter_no_wga = 0
-    for window in self._windows[WindowType.NO_WGA]:
-      if window.has_base("N"):
-        window.set_window_rd_mark(mark=n_mark)
-        window.state = WindowType.N_WIN
-        counter_no_wga += 1
+      counter=0
+      for window in self._mixed_windows:
+        wga_w = window.get_window(wtype=WindowType.WGA)
+        n_wga_w = window.get_window(wtype=WindowType.NO_WGA)
+        if wga_w.has_base("N") or n_wga_w.has_base("N"):
+          wga_w.set_window_rd_mark(mark=n_mark)
+          wga_w.state = WindowType.N_WIN
 
-    return counter_wga, counter_no_wga
+          n_wga_w.set_window_rd_mark(mark=n_mark)
+          n_wga_w.state = WindowType.N_WIN
+          counter += 1
+
+    return counter
 
   def get_sequence(self, size, window_type):
 
