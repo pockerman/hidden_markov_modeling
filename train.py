@@ -1,6 +1,7 @@
 import argparse
 import logging
 import numpy as np
+import json
 from pomegranate import*
 
 from helpers import read_configuration_file
@@ -273,6 +274,15 @@ def init_hmm(clusters, configuration):
 
   if n_state is not None:
     states.append(n_state)
+
+
+  for state in states:
+    print("{0} State: {1}".format(INFO, state.name))
+    state_map = json.loads(str(state))
+    print("{0} Distributions: {1}".format(INFO, state_map))
+    #if hmm_config["train_windowtype"] == WindowType.BOTH:
+    #  print("{0}  Initial Distribution".format(state.name))
+
 
   # add the states to the model
   hmm_model.add_states(states)
