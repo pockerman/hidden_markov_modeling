@@ -115,8 +115,6 @@ def make_window_regions(configuration):
             print("{0} No filtering windows"
                   " for Ns requested...".format(INFO))
 
-
-
         print("{0} Number of mixed "
               "windows: {1}".format(INFO,
                                     region.get_n_mixed_windows()))
@@ -135,7 +133,7 @@ def make_window_regions(configuration):
 
             print("{0} Number of N windows "
                   "after outlier removal {1}".format(INFO,
-                                                 region.count_n_windows()))
+                                                     region.count_n_windows()))
 
         else:
           print("{0} No outlier "
@@ -328,9 +326,9 @@ def hmm_train(clusters, regions, configuration):
   print("{0} Done...".format(INFO))
   print("{0} Creating training sequence...".format(INFO))
 
-  if configuration["HMM"]["train_sequence_source"] == "region":
+  hmm_conf = configuration["HMM"]
+  if hmm_conf["train_sequence_source"] == "region":
 
-    hmm_conf = configuration["HMM"]
     observations = []
     for region in regions:
 
@@ -342,14 +340,14 @@ def hmm_train(clusters, regions, configuration):
       for seq in region_sequences:
         observations.append(seq)
 
-  elif configuration["HMM"]["train_sequence_source"] == "cluster":
+  elif hmm_conf["train_sequence_source"] == "cluster":
 
     observations = []
     for cluster in clusters:
       cluster_sequences = \
-        cluster.get_sequence(size=configuration["HMM"]["train_sequence_size"],
-                             window_type=WindowType.from_string(configuration["HMM"]["train_windowtype"]),
-                             n_seqs=configuration["HMM"]["train_n_sequences_per_source"])
+        cluster.get_sequence(size=hmm_conf["train_sequence_size"],
+                             window_type=WindowType.from_string(hmm_conf["train_windowtype"]),
+                             n_seqs=hmm_conf["train_n_sequences_per_source"])
 
       for seq in cluster_sequences:
         observations.append(seq)
@@ -367,7 +365,7 @@ def hmm_train(clusters, regions, configuration):
   print("{0} Number of training sequences {1}".format(INFO,len(observations)))
 
   for i, seq in enumerate(observations):
-    if -999 in seq or (-999, -999) in seq:
+    if seq.any(-999) or seq.any((-999, -999)):
       print("{0} Sequence {1} has -999".format(INFO, i))
       print(seq)
 
@@ -398,7 +396,7 @@ def hmm_train(clusters, regions, configuration):
 
 def main():
 
-    print("{0} Starting training".format(INFO))
+    print("{0} Starting training...".format(INFO))
     description = "Check the README file for information on how to use the script"
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('--config', type=str, default='config.json',
@@ -424,30 +422,35 @@ def main():
                                configuration=configuration)
     print("{0} Done...".format(INFO))
 
-    print("{0} Compute max mean difference in clusters...".format(INFO))
-    mean_diff, cluster = find_tuf_in_clusters(clusters=clusters,
-                                              configuration=configuration)
+    print("{0} Compute max mean "
+          "difference in clusters...".format(INFO))
+    mean_diff, cluster = \
+      find_tuf_in_clusters(clusters=clusters,
+                           configuration=configuration)
     print("{0} Done...".format(INFO))
-    print("{0} Max mean difference: {1} for cluster: {2} ".format(INFO,
-                                                                  mean_diff,
-                                                                  cluster.cidx))
+    print("{0} Max mean difference: "
+          "{1} for cluster: {2} ".format(INFO,
+                                         mean_diff,
+                                         cluster.cidx))
 
-    if configuration["label_clusters"]:
-      print("{0} Labelling clusters...".format(INFO))
-      clusters = label_clusters(clusters=clusters, windows=mixed_windows,
-                                configuration=configuration)
-      print("{0} Done...".format(INFO))
+    #if configuration["label_clusters"]:
+    #  print("{0} Labelling clusters...".format(INFO))
+    #  clusters = label_clusters(clusters=clusters,
+    #                            windows=mixed_windows,
+    #                            configuration=configuration)
+    #  print("{0} Done...".format(INFO))
 
     print("{0} Fitting clusters distributions...".format(INFO))
     fit_clusters_distribution(clusters=clusters,
                               configuration=configuration)
     print("{0} Done...".format(INFO))
+
     print("{0} Starting HMM training...".format(INFO))
     hmm_train(clusters=clusters,
               regions=regions,
               configuration=configuration)
-
     print("{0} Done...".format(INFO))
+
     print("{0} Finished training".format(INFO))
 
 
