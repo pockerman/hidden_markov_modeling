@@ -81,13 +81,14 @@ def build_state(state_map):
 
   if dist_map is not None:
 
-    dist_name = dist_map["name"]
+    #dist_name = dist_map["name"]
 
     # the state has IndependentComponentsDistribution
     # as a distribution. In this case we have more
     # than one parameters unless we deal with a GMM
     # that wraps the components
-    if dist_name == "IndependentComponentsDistribution":
+    if "name" in dist_map and \
+      dist_name["name"] == "IndependentComponentsDistribution":
       parameters = dist_map["parameters"]
 
       dist_param  = parameters[0]
@@ -122,6 +123,25 @@ def build_state(state_map):
       # construct the state
       return State(IndependentComponentsDistribution(components),
                    name=name, weight=weight )
+    elif "class" in dist_map and \
+      dist_map["class"] == "GeneralMixtureModel":
+
+        # get the distributions list for this  GMM
+        distributions = param["distributions"]
+        dist_list = []
+
+        for dist in distributions:
+            distribution = Distribution.from_json(json.dumps(dist))
+            dist_list.append(distribution)
+
+        weights = param["weights"]
+        gmm = GeneralMixtureModel(dist_list, weights=weights)
+
+        return State(gmm, name=name, weight=weight )
+    elif "class" in dist_map and \
+      dist_map["class"] == "Distribution":
+        distribution = Distribution.from_json(json.dumps(dist))
+        return State(gmm, name=name, weight=weight )
   else:
 
     #this means that the state has
