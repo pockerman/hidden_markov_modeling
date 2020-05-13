@@ -92,17 +92,13 @@ def build_state(state_map):
       parameters = dist_map["parameters"]
 
       dist_param  = parameters[0]
-
       components = []
 
       for param in dist_param:
 
-
         if param["class"] == "GeneralMixtureModel":
-          #json_str = json.dumps(param["distributions"])
 
-          # get the distributions list for this
-          # GMM
+          # get the dists list for the GMM
           distributions = param["distributions"]
           dist_list = []
 
@@ -140,8 +136,8 @@ def build_state(state_map):
         return State(gmm, name=name, weight=weight )
     elif "class" in dist_map and \
       dist_map["class"] == "Distribution":
-        distribution = Distribution.from_json(json.dumps(dist))
-        return State(gmm, name=name, weight=weight )
+        distribution = Distribution.from_json(json.dumps(dist_map))
+        return State(distribution, name=name, weight=weight )
   else:
 
     #this means that the state has
