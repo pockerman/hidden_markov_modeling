@@ -123,14 +123,14 @@ def build_state(state_map):
       dist_map["class"] == "GeneralMixtureModel":
 
         # get the distributions list for this  GMM
-        distributions = param["distributions"]
+        distributions = dist_map["distributions"]
         dist_list = []
 
         for dist in distributions:
             distribution = Distribution.from_json(json.dumps(dist))
             dist_list.append(distribution)
 
-        weights = param["weights"]
+        weights = dist_map["weights"]
         gmm = GeneralMixtureModel(dist_list, weights=weights)
 
         return State(gmm, name=name, weight=weight )
