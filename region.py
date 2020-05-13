@@ -112,6 +112,41 @@ class Region(object):
     self._windows[WindowType.NO_WGA] = windows
 
 
+  def check_windows_sanity(self):
+
+    # check if the rest of the windows
+    # are aligned
+    self.get_mixed_windows()
+
+    if len(self._windows[WindowType.NO_WGA]) > self._windows[WindowType.WGA] :
+      print("{0} Windows size mismatch"
+            " WGA {1} NON_WGA {2}".format(WARNING,
+                                          self._windows[WindowType.WGA],
+                                          len(self._windows[WindowType.NO_WGA])))
+    elif len(self._windows[WindowType.NO_WGA]) < self._windows[WindowType.WGA] :
+        print("{0} Windows size mismatch"
+            " WGA {1} NON_WGA {2}".format(WARNING,
+                                          self._windows[WindowType.WGA],
+                                          len(self._windows[WindowType.NO_WGA])))
+
+
+      for window in self._mixed_windows:
+        start_wga, end_wga = \
+          window.get_window(wtype=WindowType.WGA).get_start_end_pos()
+
+         start_no_wga, end_no_wga = \
+          window.get_window(wtype=WindowType.NO_WGA).get_start_end_pos()
+
+        if (start_wga, end_wga) != (start_no_wga, end_no_wga):
+          raise Error("Invalid window matching "
+                      "window WGA at {0}, {1} "
+                      "matched with NO WGA window at {2}, {3}".format(start_wga,
+                                                                      end_wga,
+                                                                      start_no_wga,
+                                                                      end_no_wga))
+
+
+
 
   def get_mixed_windows(self):
 

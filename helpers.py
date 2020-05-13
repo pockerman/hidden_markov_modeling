@@ -417,6 +417,10 @@ class Window(object):
         """
         return self._capacity
 
+    def get_start_end_pos(self):
+      return (self._observations[0].position,
+              self._observations[len(self._observations)-1].position)
+
     def has_capacity(self):
         """
         Returns True if the caapacity of the
