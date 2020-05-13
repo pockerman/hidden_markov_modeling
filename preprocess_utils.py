@@ -8,7 +8,7 @@ import numpy as np
 
 from exceptions import Error
 
-from helpers import listify_dicts_property
+#from helpers import listify_dicts_property
 from helpers import WindowState
 from helpers import WindowType
 from helpers import flat_windows
