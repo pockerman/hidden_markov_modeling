@@ -40,7 +40,7 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
 
                 ref_list = ref_file.fetch(chromosome, 0, )
 
-                logging.info("Working with test file: {0}".format("test_filename"))
+                logging.info("Working with test file: {0}".format(test_filename))
 
                 bam_out, errors, adjusted =\
                   bam_strip(chromosome=chromosome,
@@ -179,6 +179,15 @@ def create_windows(bamlist, indel_dict, fastdata,
                 previous_observation = observation
             else:
 
+                loggin.info("For observation {0}"
+                            " there is a gap. Next "
+                            "observation is at {1}".format(previous_observation.position,
+                                                           observation.position))
+
+
+                gap_size = int(observation.position) - int(previous_observation.position)
+
+
                 # there is a gap we cannot simply
                 # add the observation as this may have
                 # to be added to the next window depending
@@ -192,6 +201,10 @@ def create_windows(bamlist, indel_dict, fastdata,
                   _get_missing_gap_info(start=int(previous_observation.position),
                                         end=int(observation.position),
                                         fastdata=fastdata)
+
+                if len(window_gaps ) != gap_size:
+                  raise Error("Invalid window_gaps. "
+                              "Size {0} not equal to {1}".format(len(window_gaps ), gap_size))
 
                 # after getting the missing info we try to add it
                 # to the window. we may have accumulated so much info that
