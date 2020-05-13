@@ -83,6 +83,9 @@ def make_window_regions(configuration):
                                          region.get_n_windows(type_=WindowType.NO_WGA)))
 
 
+        # compute the mixed windows for the region
+        region.get_mixed_windows()
+
          # filter the windows for N's
         if "remove_windows_with_N" in configuration and\
           configuration["remove_windows_with_N"]:
@@ -115,8 +118,7 @@ def make_window_regions(configuration):
             print("{0} No filtering windows"
                   " for Ns requested...".format(INFO))
 
-        # compute the mixed windows for the region
-        region.get_mixed_windows()
+
 
         print("{0} Number of mixed "
               "windows: {1}".format(INFO,
