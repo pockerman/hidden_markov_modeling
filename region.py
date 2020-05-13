@@ -186,6 +186,8 @@ class Region(object):
     for window in self._mixed_windows:
       wga_w = window.get_window(wtype=WindowType.WGA)
       n_wga_w = window.get_window(wtype=WindowType.NO_WGA)
+
+      ## Add error if one has N and the other not
       if wga_w.has_base("N") or n_wga_w.has_base("N"):
         wga_w.set_window_rd_mark(mark=n_mark)
         wga_w.state = WindowType.N_WIN
