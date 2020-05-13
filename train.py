@@ -106,13 +106,10 @@ def make_window_regions(configuration):
             print("{0} Marking N "
                   " windows with: {1}".format(INFO,
                                               configuration["mark_for_N_windows"]))
-            counter_wga, counter_no_wga = \
+            counter_ns = \
               region.mark_windows_with_ns(n_mark=configuration["mark_for_N_windows"])
 
-            print("{0} Marked as N {1} WGA "
-                  "Windows and {2} No WGA Windows".format(INFO,
-                                                          counter_wga,
-                                                          counter_no_wga))
+            print("{0} Marked as N {1} Windows".format(INFO, counter_ns))
 
         else:
             print("{0} No filtering windows"
