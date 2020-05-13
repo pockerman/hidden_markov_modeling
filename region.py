@@ -130,14 +130,10 @@ class Region(object):
                                           len(self._windows[WindowType.NO_WGA])))
 
 
-      for window in self._mixed_windows:
-        start_wga, end_wga = \
-          window.get_window(wtype=WindowType.WGA).get_start_end_pos()
-
-         start_no_wga, end_no_wga = \
-          window.get_window(wtype=WindowType.NO_WGA).get_start_end_pos()
-
-        if (start_wga, end_wga) != (start_no_wga, end_no_wga):
+    for window in self._mixed_windows:
+      start_wga, end_wga = window.get_window(wtype=WindowType.WGA).get_start_end_pos()
+      start_no_wga, end_no_wga = window.get_window(wtype=WindowType.NO_WGA).get_start_end_pos()
+      if (start_wga, end_wga) != (start_no_wga, end_no_wga):
           raise Error("Invalid window matching "
                       "window WGA at {0}, {1} "
                       "matched with NO WGA window at {2}, {3}".format(start_wga,
