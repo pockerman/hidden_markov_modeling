@@ -182,17 +182,17 @@ class Region(object):
     if self._mixed_windows is None:
       raise Error("Mixed windows have not been computed")
 
-      counter=0
-      for window in self._mixed_windows:
-        wga_w = window.get_window(wtype=WindowType.WGA)
-        n_wga_w = window.get_window(wtype=WindowType.NO_WGA)
-        if wga_w.has_base("N") or n_wga_w.has_base("N"):
-          wga_w.set_window_rd_mark(mark=n_mark)
-          wga_w.state = WindowType.N_WIN
+    counter=0
+    for window in self._mixed_windows:
+      wga_w = window.get_window(wtype=WindowType.WGA)
+      n_wga_w = window.get_window(wtype=WindowType.NO_WGA)
+      if wga_w.has_base("N") or n_wga_w.has_base("N"):
+        wga_w.set_window_rd_mark(mark=n_mark)
+        wga_w.state = WindowType.N_WIN
 
-          n_wga_w.set_window_rd_mark(mark=n_mark)
-          n_wga_w.state = WindowType.N_WIN
-          counter += 1
+        n_wga_w.set_window_rd_mark(mark=n_mark)
+        n_wga_w.state = WindowType.N_WIN
+        counter += 1
 
     return counter
 
