@@ -179,7 +179,7 @@ def create_windows(bamlist, indel_dict, fastdata,
                 previous_observation = observation
             else:
 
-                loggin.info("For observation {0}"
+                logging.info("For observation {0}"
                             " there is a gap. Next "
                             "observation is at {1}".format(previous_observation.position,
                                                            observation.position))
