@@ -88,7 +88,7 @@ def build_state(state_map):
     # than one parameters unless we deal with a GMM
     # that wraps the components
     if "name" in dist_map and \
-      dist_name["name"] == "IndependentComponentsDistribution":
+      dist_map["name"] == "IndependentComponentsDistribution":
       parameters = dist_map["parameters"]
 
       dist_param  = parameters[0]
