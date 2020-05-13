@@ -59,12 +59,12 @@ def build_cluster_densities(clusters, **kwargs):
 
       for idx in indeces:
         window = windows[idx]
-        mu1, mu2 = window.get_rd_stats(statistics="mean",
-                                       name=WindowType.BOTH)
+        if window.is_n_window() == False:
+          mu1, mu2 = window.get_rd_stats(statistics="mean",
+                                         name=WindowType.BOTH)
 
-        wga_data = np.append(wga_data, np.array(mu1))
-        no_wga_data = np.append(no_wga_data,
-                               np.array(mu2))
+          wga_data = np.append(wga_data, np.array(mu1))
+          no_wga_data = np.append(no_wga_data, np.array(mu2))
 
 
       # collected the data create the GMM for each

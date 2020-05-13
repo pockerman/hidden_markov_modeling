@@ -299,13 +299,13 @@ def init_hmm(clusters, configuration):
       else:
 
         #low probability for change state transition
-        if i.name is not "GAP_STATE" and\
-          j.name is not "GAP_STATE":
+        if i.name != "GAP_STATE" and\
+          j.name != "GAP_STATE":
             hmm_model.add_transition(i, j, 0.05)
 
   if n_state is not None:
     for i in states:
-      if i.name is not "GAP_STATE":
+      if i.name != "GAP_STATE":
         hmm_model.add_transition(i,  n_state, 0.01)
         hmm_model.add_transition(n_state, i, 0.01)
 
