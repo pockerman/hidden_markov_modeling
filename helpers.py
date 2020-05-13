@@ -62,8 +62,9 @@ def save_hmm(hmm_model, configuration, win_interval_length):
       json.dump(json_str, jsonfile)
 
 
+"""
 def listify_dicts_property(list_dict_vals, property_name):
-  """
+
   given a list of dictionaries return a list with the
   values of the property with name property_name
 
@@ -78,7 +79,7 @@ def listify_dicts_property(list_dict_vals, property_name):
   -------
   result : list
 
-  """
+
 
   result = []
 
@@ -87,6 +88,7 @@ def listify_dicts_property(list_dict_vals, property_name):
       result.append(item[property_name])
 
   return result
+"""
 
 
 def set_up_logger(configuration):
@@ -124,12 +126,13 @@ def flat_windows(windows, prop="RD"):
     win.append(window.get_rd_observations())
   return win
 
+"""
 def flat_windows_from_state(windows, configuration, as_on_seq):
 
-  """
+
   Returns a flattened list of windows by their
   prop property observations
-  """
+
 
   win = []
 
@@ -149,8 +152,9 @@ def flat_windows_from_state(windows, configuration, as_on_seq):
       win.append(value)
 
   return win
+"""
 
-
+"""
 def flat_windows_rd_from_indexes(indexes, windows):
   rd_observations = []
 
@@ -163,7 +167,7 @@ def flat_windows_rd_from_indexes(indexes, windows):
     for widx in indexes:
       rd_observations.extend(windows[widx].get_rd_observations())
   return rd_observations
-
+"""
 
 def windows_to_json(windows):
   """

@@ -187,6 +187,17 @@ class Region(object):
       wga_w = window.get_window(wtype=WindowType.WGA)
       n_wga_w = window.get_window(wtype=WindowType.NO_WGA)
 
+      if wga_w.has_base("N") == True and\
+        n_wga_w.has_base("N") == False:
+        raise Error("WGA Window {0} has N "
+                    "but Non WGA Window {1} does not".format(wga_w.idx,
+                                                             n_wga_w.idx))
+      elif wga_w.has_base("N") == False and\
+        n_wga_w.has_base("N") == True:
+        raise Error("WGA Window {0} does not have N "
+                    "but Non WGA Window {1} does".format(wga_w.idx,
+                                                         n_wga_w.idx))
+
       ## Add error if one has N and the other not
       if wga_w.has_base("N") or n_wga_w.has_base("N"):
         wga_w.set_window_rd_mark(mark=n_mark)
