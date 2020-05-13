@@ -6,8 +6,8 @@ from hmm_helpers import build_hmm
 
 def main():
   sample = "sample_1"
-  ffile = "results/11_5_2020/"
-  hmm_file = ffile + sample + "/" + "HMM_Model_0.json"
+  ffile = "../"
+  hmm_file = ffile + "HMM_Model_0.json"
 
 
   #import pdb
