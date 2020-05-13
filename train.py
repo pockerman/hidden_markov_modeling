@@ -84,6 +84,7 @@ def make_window_regions(configuration):
                                          region.get_n_windows(type_=WindowType.NO_WGA)))
 
 
+        region.check_windows_sanity()
         # compute the mixed windows for the region
         region.get_mixed_windows()
 

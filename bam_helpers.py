@@ -243,8 +243,10 @@ def create_windows(bamlist, indel_dict, fastdata,
     # we fill in the missing data if that was requested
     if len(window) != window.capacity:
 
-      print("{0} Window size {1} is"
-            " not equal capacity {2} ".format(WARNING, len(window),
+      print("{0} Window {1} size {2} is"
+            " not equal capacity {3} ".format(WARNING,
+                                              window.idx,
+                                              len(window),
                                               window.capacity))
 
       # fill in missing data if this is requested
