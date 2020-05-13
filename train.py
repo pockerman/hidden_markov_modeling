@@ -221,6 +221,7 @@ def fit_clusters_distribution(clusters, configuration):
 def init_hmm(clusters, configuration):
 
 
+  hmm_config = configuration["HMM"]
   n_state = None
 
   if "mark_N_windows" in configuration and\
@@ -229,7 +230,7 @@ def init_hmm(clusters, configuration):
       # uniform distribution for gaps
       # so that E[X] = -999 and PDF = 1.0
 
-      if WindowType.from_string(configuration["HMM"]["train_windowtype"]) ==\
+      if WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.BOTH:
 
           n_state = \
@@ -243,7 +244,7 @@ def init_hmm(clusters, configuration):
           State(UniformDistribution(-999.5, -998.5), name="GAP_STATE")
 
   # create the HMM
-  hmm_model = HiddenMarkovModel(name=configuration["HMM"]["name"],
+  hmm_model = HiddenMarkovModel(name=hmm_config["name"],
                                 start=None, end=None)
 
 
@@ -251,20 +252,20 @@ def init_hmm(clusters, configuration):
   states = []
   for cluster, name in zip(clusters, configuration["states"]):
 
-    if WindowType.from_string(configuration["HMM"]["train_windowtype"]) ==\
+    if WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.BOTH:
           states.append(State(IndependentComponentsDistribution([cluster.wga_density,
                                                            cluster.no_wga_density]),
                         name=name))
-    elif WindowType.from_string(configuration["HMM"]["train_windowtype"]) ==\
+    elif WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.WGA:
           states.append(State(cluster.wga_density, name=name))
-    elif WindowType.from_string(configuration["HMM"]["train_windowtype"]) ==\
+    elif WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.NO_WGA:
           states.append(State(cluster.no_wga_density, name=name))
     else:
       raise Error("Invalid train_windowtype. "
-                  "{0} not in {1}".format(configuration["HMM"]["train_windowtype"],
+                  "{0} not in {1}".format(hmm_config["train_windowtype"],
                                           [WindowType.BOTH.name,
                                            WindowType.WGA.name,
                                            WindowType.NO_WGA.name]))
@@ -285,7 +286,7 @@ def init_hmm(clusters, configuration):
     if state.name != "GAP_STATE":
       hmm_model.add_transition(hmm_model.start,
                              state,
-                             configuration["HMM"]["start_prob"][state.name])
+                             hmm_config["start_prob"][state.name])
 
   # add transitions for every state
   # to another this will create a dense HMM
