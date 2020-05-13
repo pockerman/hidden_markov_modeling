@@ -154,7 +154,7 @@ def flat_windows_from_state(windows, configuration, as_on_seq):
   return win
 """
 
-"""
+
 def flat_windows_rd_from_indexes(indexes, windows):
   rd_observations = []
 
@@ -167,7 +167,7 @@ def flat_windows_rd_from_indexes(indexes, windows):
     for widx in indexes:
       rd_observations.extend(windows[widx].get_rd_observations())
   return rd_observations
-"""
+
 
 def windows_to_json(windows):
   """

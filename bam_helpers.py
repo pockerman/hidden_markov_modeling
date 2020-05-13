@@ -40,6 +40,8 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
 
                 ref_list = ref_file.fetch(chromosome, 0, )
 
+                logging.info("Working with test file: {0}".format("test_filename"))
+
                 bam_out, errors, adjusted =\
                   bam_strip(chromosome=chromosome,
                             file=test_file,
