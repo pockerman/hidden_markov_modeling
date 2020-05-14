@@ -7,7 +7,7 @@ import logging
 from collections import Counter
 from helpers import Window, Observation, DUMMY_ID
 from helpers import add_window_observation
-from helpers import INFO, WARNING
+from helpers import INFO, WARNING, DEBUG
 from exceptions import FullWindowException
 from exceptions import Error
 
@@ -303,6 +303,13 @@ def get_query_sequences(pileupcolumn, bam_out,
 
     # add the reference position
     temp.append(pileupcolumn.reference_pos)
+
+    if int(pileupcolumn.reference_pos) == 1005897:
+
+      import pdb
+      pdb.set_trace()
+      print("{0} Position {1} has"
+            " been reached ".format(DEBUG, pileupcolumn.reference_pos))
 
     # if the count is zero then we consult the reference
     # at this position if we have a reference file
