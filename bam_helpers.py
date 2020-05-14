@@ -396,12 +396,14 @@ def get_query_sequences(pileupcolumn, bam_out,
                     adjusted += 1
               except:
                   errors += 1
-                  logging.error("An error occured at position {0} whilst \
-                                reading query sequences.".format(pileupcolumn.reference_pos))
+                  logging.error("Error at position {0}"
+                                " at query.".format(pileupcolumn.reference_pos))
+                  return bam_out, adjusted, errors
           else:
               errors += 1
-              logging.error("An error occured at position {0} whilst \
-                            reading query sequences.".format(pileupcolumn.reference_pos))
+              logging.error("Error at position {0}"
+                            " at query.".format(pileupcolumn.reference_pos))
+              return bam_out, adjusted, errors
 
 
     return bam_out, adjusted, errors
