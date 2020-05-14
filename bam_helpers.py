@@ -165,10 +165,16 @@ def create_windows(bamlist, indel_dict, fastdata,
         for base in item[2]:
           base.upper()
 
+
+
         # create an observation
-        observation = Observation(position=item[0],
+        observation = Observation(position=int(item[0]),
                                   read_depth=item[1],
                                   base= item[2])
+
+        if observation.position == 1005863:
+          import pdb
+          pdb.set_trace()
 
         if previous_observation is not None:
 
@@ -186,6 +192,8 @@ def create_windows(bamlist, indel_dict, fastdata,
                 previous_observation = observation
             else:
 
+                import pdb
+                pdb.set_trace()
                 logging.info("For observation {0}"
                             " there is a gap. Next "
                             "observation is at {1}".format(previous_observation.position,
