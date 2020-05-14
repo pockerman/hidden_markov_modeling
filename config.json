@@ -15,7 +15,7 @@
     "filename": "/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam"
   },
   "debug":{
-    "log_bam_for_debug":true,
+    "log_bam_for_debug":true
   },
   "window_size":100,
   "fill_missing_window_data":false,
