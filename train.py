@@ -58,6 +58,9 @@ def make_window_regions(configuration):
         if "quality_theshold" in configuration:
           kwargs["quality_theshold"] = configuration["quality_theshold"]
 
+        if "debug" in configuration:
+          kwargs["debug"] = configuration["debug"]
+
         print("{0} Creating WGA Windows...".format(INFO))
         region.make_wga_windows(chromosome=chromosome,
                                 ref_filename=configuration["reference_file"]["filename"],

@@ -86,6 +86,9 @@ class Region(object):
     if "quality_theshold" in kwargs:
       args["quality_theshold"] = kwargs["quality_theshold"]
 
+    if "debug" in kwargs:
+      args["debug"] = kwargs["debug"]
+
     windows = extract_windows(chromosome=chromosome,
                                   ref_filename=ref_filename,
                                   test_filename=test_filename,
@@ -103,6 +106,9 @@ class Region(object):
 
     if "quality_theshold" in kwargs:
       args["quality_theshold"] = kwargs["quality_theshold"]
+
+    if "debug" in kwargs:
+      args["debug"] = kwargs["debug"]
 
     windows = extract_windows(chromosome=chromosome,
                                   ref_filename=ref_filename,

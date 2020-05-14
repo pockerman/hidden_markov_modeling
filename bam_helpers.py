@@ -53,6 +53,12 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
                 print("{0} Number of adjusted: {1}".format(INFO, adjusted))
                 print("{0} Bam length: {1}".format(INFO, len(bam_out)))
 
+                if "debug" in args:
+                  debug = args["debug"]
+                  if "log_bam_for_debug" in debug and\
+                    debug["log_bam_for_debug"]:
+                      logging.info("Bam sequence: {0}".format(bam_out))
+
                 print("{0} Extracting common bases".format(INFO))
 
                 # get the common bases
@@ -304,13 +310,14 @@ def get_query_sequences(pileupcolumn, bam_out,
     # add the reference position
     temp.append(pileupcolumn.reference_pos)
 
+    """
     if int(pileupcolumn.reference_pos) == 1005897:
 
       import pdb
       pdb.set_trace()
       print("{0} Position {1} has"
             " been reached ".format(DEBUG, pileupcolumn.reference_pos))
-
+    """
     # if the count is zero then we consult the reference
     # at this position if we have a reference file
     if pileupcolumn.nsegments == 0 and "fastadata" in kwargs:
