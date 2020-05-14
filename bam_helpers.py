@@ -63,12 +63,13 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
 
                 # get the common bases
                 # TODO: explain what are we trying to do here
-                common_bases(bamdata=bam_out, fastadata=ref_list)
+                bam_out=common_bases(bamdata=bam_out, fastadata=ref_list)
 
-                # find insertions and deletions
-                #indel_dict = create_indels_dictionary(chromosome=chromosome,
-                #                                      samfile=test_file,
-                #                                      start=start_idx, stop=end_idx)
+                if "debug" in args:
+                  debug = args["debug"]
+                  if "log_bam_for_debug" in debug and\
+                    debug["log_bam_for_debug"]:
+                      logging.info("Bam sequence (after common base): {0}".format(bam_out))
 
                 # extract the windows
                 windows = create_windows(bamlist=bam_out,
