@@ -53,6 +53,15 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
                 print("{0} Number of adjusted: {1}".format(INFO, adjusted))
                 print("{0} Bam length: {1}".format(INFO, len(bam_out)))
 
+                if "debug" in args:
+                  debug = args["debug"]
+                  if "log_bam_for_debug" in debug and\
+                    debug["log_bam_for_debug"]:
+                      logging.info("Bam sequence: {0}".format(bam_out))
+
+
+
+
                 print("{0} Extracting common bases".format(INFO))
 
                 # get the common bases

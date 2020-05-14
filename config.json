@@ -1,8 +1,8 @@
 {
 
   "regions":{
-      "start":[2000000],
-      "end":[3000000]
+      "start":[1005700],
+      "end":[1006000]
   },
   "chromosome": "chr1",
   "reference_file":{
@@ -13,6 +13,9 @@
   },
   "test_file":{
     "filename": "/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam"
+  },
+  "debug":{
+    "log_bam_for_debug":true,
   },
   "window_size":100,
   "fill_missing_window_data":false,
