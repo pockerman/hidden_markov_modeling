@@ -13,6 +13,7 @@ DUMMY_ID = -1
 INFO="INFO:"
 WARNING="WARNING:"
 ERROR="ERROR:"
+DEBUG="DEBUG:"
 
 class HMMCallback(object):
 
