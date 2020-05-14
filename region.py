@@ -118,15 +118,15 @@ class Region(object):
     # are aligned
     self.get_mixed_windows()
 
-    if len(self._windows[WindowType.NO_WGA]) > self._windows[WindowType.WGA] :
+    if len(self._windows[WindowType.NO_WGA]) > len(self._windows[WindowType.WGA]) :
       print("{0} Windows size mismatch"
             " WGA {1} NON_WGA {2}".format(WARNING,
-                                          self._windows[WindowType.WGA],
+                                         len(self._windows[WindowType.WGA]),
                                           len(self._windows[WindowType.NO_WGA])))
-    elif len(self._windows[WindowType.NO_WGA]) < self._windows[WindowType.WGA] :
+    elif len(self._windows[WindowType.NO_WGA]) < len(self._windows[WindowType.WGA]) :
         print("{0} Windows size mismatch"
             " WGA {1} NON_WGA {2}".format(WARNING,
-                                          self._windows[WindowType.WGA],
+                                          len(self._windows[WindowType.WGA]),
                                           len(self._windows[WindowType.NO_WGA])))
 
 
