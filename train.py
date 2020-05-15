@@ -164,7 +164,7 @@ def create_clusters(regions, configuration):
   # create the clusters
   clusterer, initial_index_medoids = \
     build_clusterer(data=windows,
-                    nclusters=kwargs["n_clusters"],
+                    nclusters=kwargs["config"]["n_clusters"],
                     method="kmedoids", **kwargs)
 
   print("{0} Initial medoids indexes: {1}".format(INFO,
@@ -405,9 +405,9 @@ def hmm_train(clusters, regions, configuration):
 
 
 
-          print("{0} Training solver is: {1}".format(INFO,
+      print("{0} Training solver is: {1}".format(INFO,
                                                      configuration["HMM"]["train_solver"]))
-          hmm_model, history = \
+      hmm_model, history = \
         hmm_model.fit(sequences=observations,
                       algorithm=configuration["HMM"]["train_solver"],
                       return_history=True,

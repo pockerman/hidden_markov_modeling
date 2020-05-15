@@ -93,11 +93,9 @@ class Region(object):
                                   ref_filename=ref_filename,
                                   test_filename=test_filename,
                                       **args)
-    
+
     print("{0} Start Window: Start/End idx {1}".format(INFO, windows[0].get_start_end_pos()))
     print("{0} End Window: Start/End idx {1}".format(INFO, windows[-1].get_start_end_pos()))
-
-    print("{0} Start/End idx {1}".format(windows[0].get_start_end_pos()))
 
     self._windows[WindowType.WGA] = windows
 
