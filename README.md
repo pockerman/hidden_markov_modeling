@@ -110,7 +110,6 @@ the properties of the labeler
     }
   },
 ```
--   ```"save_cluster_densities"```: Flag indicating if the cluster data should be saved,
 - ```"HMM"```: Properties for HMM model
 
 ```
