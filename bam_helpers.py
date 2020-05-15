@@ -165,16 +165,17 @@ def create_windows(bamlist, indel_dict, fastdata,
         for base in item[2]:
           base.upper()
 
-
-
         # create an observation
         observation = Observation(position=int(item[0]),
                                   read_depth=item[1],
                                   base= item[2])
+        
+        #print("Id: ",observation.position)
 
-        if observation.position == 1005863:
-          import pdb
-          pdb.set_trace()
+        #if observation.position == 1005881:
+        #    print("Hi....")
+        #  import pdb
+        #  pdb.set_trace()
 
         if previous_observation is not None:
 
@@ -192,15 +193,17 @@ def create_windows(bamlist, indel_dict, fastdata,
                 previous_observation = observation
             else:
 
-                import pdb
-                pdb.set_trace()
+                #import pdb
+                #pdb.set_trace()
                 logging.info("For observation {0}"
                             " there is a gap. Next "
                             "observation is at {1}".format(previous_observation.position,
                                                            observation.position))
 
 
-                gap_size = int(observation.position) - int(previous_observation.position)
+                # minus one at the end because previous position 
+                #has already been added
+                gap_size = int(observation.position) - int(previous_observation.position) -1
 
 
                 # there is a gap we cannot simply
@@ -277,6 +280,16 @@ def create_windows(bamlist, indel_dict, fastdata,
                                   base= [DUMMY_BASE]))
 
       windows.append(window)
+      
+    #sanity check that the last window is in
+    found = False
+    for w in windows:
+        if w.idx == window.idx:
+            found = True
+            break
+        
+    if found == False:
+        windows.append(window)
 
     return windows
 
@@ -559,11 +572,12 @@ def _get_insertions_and_deletions_from_indel(indel, insertions, deletions):
 
 def _get_missing_gap_info(start, end, fastdata):
 
-    # plus 1 as this fasta is one based
-    fastdata_range = fastdata[start + 1: end + 1 ]
+    # plus 2 as start is already in and another
+    # addition becuase fasta is one based
+    fastdata_range = fastdata[start + 2: end + 1 ]
 
     # the position of the skipped element.
-    skipped_pos = start
+    skipped_pos = start + 1 
     window_gaps = []
 
     for base in fastdata_range:

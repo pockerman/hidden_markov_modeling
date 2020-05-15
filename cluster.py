@@ -60,9 +60,13 @@ class Cluster(object):
   def merge(self, cluster):
     self._indexes.extend(cluster.indexes)
 
+  """
   def get_data_from_windows(self):
+      
     return flat_windows_rd_from_indexes(indexes=self._indexes,
                                         windows=self._windows)
+  """
+ 
 
   def get_sequence(self, size, window_type):
 
@@ -121,7 +125,9 @@ class Cluster(object):
         wga_windows = [window.get_window(window_type)
                        for window in self._windows]
 
-        window_data = self.get_data_from_windows(windows=wga_windows)
+        window_data = flat_windows_rd_from_indexes(indexes=self._indexes,
+                                                   windows=wga_windows)
+        
         return compute_statistic(data=window_data,statistics=statistic)
 
   def get_window_statistics(self, statistic, **kwargs):

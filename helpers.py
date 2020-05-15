@@ -63,35 +63,6 @@ def save_hmm(hmm_model, configuration, win_interval_length):
       json.dump(json_str, jsonfile)
 
 
-"""
-def listify_dicts_property(list_dict_vals, property_name):
-
-  given a list of dictionaries return a list with the
-  values of the property with name property_name
-
-  Parameters
-  ----------
-  list_dict_vals : list of dictioanries
-
-  property_name : str
-    The property name to look for
-
-  Returns
-  -------
-  result : list
-
-
-
-  result = []
-
-  for item in list_dict_vals:
-    if item.get(property_name):
-      result.append(item[property_name])
-
-  return result
-"""
-
-
 def set_up_logger(configuration):
     # set up the logger
     logger_file = configuration.get("logger_file", None)
@@ -126,34 +97,6 @@ def flat_windows(windows, prop="RD"):
 
     win.append(window.get_rd_observations())
   return win
-
-"""
-def flat_windows_from_state(windows, configuration, as_on_seq):
-
-
-  Returns a flattened list of windows by their
-  prop property observations
-
-
-  win = []
-
-  for window in windows:
-
-    if not isinstance(window, Window):
-      raise Error("The given window is not an insatnce of Window")
-
-    if window.get_state() == WindowState.NORMAL:
-      value = [configuration["normal_rd"]] if as_on_seq else configuration["normal_rd"]
-      win.append(value)
-    elif window.get_state() == WindowState.DELETE:
-      value = [configuration["delete_rd"]] if as_on_seq else configuration["delete_rd"]
-      win.append(value)
-    elif window.get_state() == WindowState.INSERT:
-      value = [configuration["insert_rd"]] if as_on_seq else configuration["insert_rd"]
-      win.append(value)
-
-  return win
-"""
 
 
 def flat_windows_rd_from_indexes(indexes, windows):
@@ -225,8 +168,6 @@ def windows_from_json(jsonmap):
     windows.append(window)
   return windows
 
-
-#Observation = namedtuple("Observation", ["position", "read_depth", "base"])
 
 class Observation(object):
   def __init__(self, position, read_depth, base):
@@ -347,7 +288,8 @@ class WindowState(Enum):
   INSERT = 3
   TUF = 4
   NOT_NORMAL = 5
-  INVALID = 6
+  OTHER = 6
+  INVALID = 7
 
 
 class WindowIterator(object):

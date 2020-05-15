@@ -16,9 +16,9 @@ from analysis_helpers import save_clusters
 from analysis_helpers import save_windows_statistic
 
 from cluster import Cluster
-from cluster_utils import build_cluster_densities
+from cluster_utils import build_cluster_densities, label_clusters
 from cluster_utils import save_clusters_desnity
-from hypothesis_testing import SignificanceTestLabeler
+#from hypothesis_testing import SignificanceTestLabeler
 from preprocess_utils import build_clusterer
 from exceptions import Error
 
@@ -204,12 +204,6 @@ def find_tuf_in_clusters(clusters, configuration):
   return diff_rd, tuf_cluster
 
 
-def label_clusters(clusters, configuration):
-
-  labeler = SignificanceTestLabeler(clusters=clusters, windows=windows)
-  return labeler.label(test_config=configuration["labeler"])
-
-
 def fit_clusters_distribution(clusters, configuration):
 
   kwargs = configuration["cluster_distribution"]
@@ -255,19 +249,31 @@ def init_hmm(clusters, configuration):
 
   state_to_dist = {}
   states = []
+  i=0
   for cluster, name in zip(clusters, configuration["states"]):
 
+    use_name = name
+    
+    if cluster.state.name == "TUF":
+        use_name = cluster.state.name
+    elif cluster.state.name == "DELETE":
+        use_name = cluster.state.name
+    elif cluster.state.name == "OTHER":
+        use_name = "OTHER_" + str(i)
+        i += 1
+    
     if WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.BOTH:
           states.append(State(IndependentComponentsDistribution([cluster.wga_density,
-                                                           cluster.no_wga_density]),
-                        name=name))
+                                                                 cluster.no_wga_density]),
+                        name=use_name))
+          
     elif WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.WGA:
-          states.append(State(cluster.wga_density, name=name))
+          states.append(State(cluster.wga_density, name=use_name))
     elif WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.NO_WGA:
-          states.append(State(cluster.no_wga_density, name=name))
+          states.append(State(cluster.no_wga_density, name=use_name))
     else:
       raise Error("Invalid train_windowtype. "
                   "{0} not in {1}".format(hmm_config["train_windowtype"],
@@ -283,6 +289,7 @@ def init_hmm(clusters, configuration):
   for state in states:
     print("{0} State: {1}".format(INFO, state.name))
     state_map = json.loads(str(state))
+    #print("{0} Initialization is {1}".format(INFO, state))
     print("{0} Distributions: {1}".format(INFO,
                                           state_map["distribution"]))
     #if hmm_config["train_windowtype"] == WindowType.BOTH:
@@ -296,12 +303,21 @@ def init_hmm(clusters, configuration):
   # We create a dense HMM. The probability
   # starting at a state is given in
   # configuration["HMM"]["start_prob"][state.name]
+  
+  count = 0
+  for state in states:
+      if "OTHER_" in state.name:
+          count += 1
 
   for state in states:
     if state.name != "GAP_STATE":
-      hmm_model.add_transition(hmm_model.start,
-                             state,
-                             hmm_config["start_prob"][state.name])
+        if "OTHER_" in state.name:
+            prob = 0.95/count
+        else:
+            prob = hmm_config["start_prob"][state.name]
+            
+    hmm_model.add_transition(hmm_model.start,
+                             state, prob)
 
   # add transitions for every state
   # to another this will create a dense HMM
@@ -390,7 +406,10 @@ def hmm_train(clusters, regions, configuration):
 
 
 
-  hmm_model, history = \
+  if configuration["HMM"]["train_solver"] is not None:
+      print("{0} Training solver is: {1}".format(INFO,
+                                                 configuration["HMM"]["train_solver"]))
+      hmm_model, history = \
     hmm_model.fit(sequences=observations,
                   algorithm=configuration["HMM"]["train_solver"],
                   return_history=True,
@@ -398,6 +417,8 @@ def hmm_train(clusters, regions, configuration):
                   lr_decay=configuration["HMM"]["lr_decay"],
                   callbacks=[HMMCallback(callback=print_logs_callback)],
                   inertia=configuration["HMM"]["inertia"])
+  else:
+      print("{0} No training performed.".format(INFO))
 
   #finalize the model
   hmm_model.bake()
@@ -416,14 +437,14 @@ def hmm_train(clusters, regions, configuration):
 
 def main():
 
-    print("{0} Starting training...".format(INFO))
+    print("{0} Start training...".format(INFO))
     description = "Check the README file for information on how to use the script"
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('--config', type=str, default='config.json',
                         help='You must specify a json formatted configuration file')
 
 
-    print("{0} Read configuratio file".format(INFO))
+    print("{0} Read configuration file".format(INFO))
     args = parser.parse_args()
     configuration = read_configuration_file(args.config)
     print("{0} Done...".format(INFO))
@@ -453,12 +474,12 @@ def main():
                                          mean_diff,
                                          cluster.cidx))
 
-    #if configuration["label_clusters"]:
-    #  print("{0} Labelling clusters...".format(INFO))
-    #  clusters = label_clusters(clusters=clusters,
-    #                            windows=mixed_windows,
-    #                            configuration=configuration)
-    #  print("{0} Done...".format(INFO))
+    if configuration["label_clusters"]:
+      print("{0} Labelling clusters...".format(INFO))
+      clusters = label_clusters(clusters=clusters,
+                                method=configuration["labeler"]["name"],
+                                **configuration)
+      print("{0} Done...".format(INFO))
 
     print("{0} Fitting clusters distributions...".format(INFO))
     fit_clusters_distribution(clusters=clusters,
