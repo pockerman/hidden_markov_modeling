@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.neighbors import KernelDensity
+#from sklearn.neighbors import KernelDensity
 from pomegranate import *
 from exceptions import Error
 from helpers import INFO
