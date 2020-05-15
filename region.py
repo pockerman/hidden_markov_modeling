@@ -94,6 +94,8 @@ class Region(object):
                                   test_filename=test_filename,
                                       **args)
 
+    print("{0} Start/End idx {1}".format(windows[0].get_start_end_pos()))
+
     self._windows[WindowType.WGA] = windows
 
   def make_no_wga_windows(self, chromosome,
