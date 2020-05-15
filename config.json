@@ -69,7 +69,7 @@
       }
     }
   },
-  "save_cluster_densities":false,
+  "save_cluster_densities":true,
   "states":["DELETE", "OTHER_0", "OTHER_1", "TUF"],
   "HMM": {
     "name":"HMM_Model",
