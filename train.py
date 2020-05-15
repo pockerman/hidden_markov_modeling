@@ -17,8 +17,6 @@ from analysis_helpers import save_windows_statistic
 
 from cluster import Cluster
 from cluster_utils import build_cluster_densities, label_clusters
-from cluster_utils import save_clusters_desnity
-#from hypothesis_testing import SignificanceTestLabeler
 from preprocess_utils import build_clusterer
 from exceptions import Error
 
@@ -211,11 +209,6 @@ def fit_clusters_distribution(clusters, configuration):
   build_cluster_densities(clusters=clusters, **kwargs)
   print("{0} Done...".format(INFO))
 
-  if configuration["save_cluster_densities"]:
-    print("{0} Saving clusters densities...".format(INFO) )
-    save_clusters_desnity(clusters=clusters, **kwargs)
-    print("{0} Done...".format(INFO))
-
 
 def init_hmm(clusters, configuration):
 
@@ -246,14 +239,13 @@ def init_hmm(clusters, configuration):
   hmm_model = HiddenMarkovModel(name=hmm_config["name"],
                                 start=None, end=None)
 
-
   state_to_dist = {}
   states = []
   i=0
   for cluster, name in zip(clusters, configuration["states"]):
 
     use_name = name
-    
+
     if cluster.state.name == "TUF":
         use_name = cluster.state.name
     elif cluster.state.name == "DELETE":
@@ -261,13 +253,13 @@ def init_hmm(clusters, configuration):
     elif cluster.state.name == "OTHER":
         use_name = "OTHER_" + str(i)
         i += 1
-    
+
     if WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.BOTH:
           states.append(State(IndependentComponentsDistribution([cluster.wga_density,
                                                                  cluster.no_wga_density]),
                         name=use_name))
-          
+
     elif WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.WGA:
           states.append(State(cluster.wga_density, name=use_name))
@@ -303,7 +295,7 @@ def init_hmm(clusters, configuration):
   # We create a dense HMM. The probability
   # starting at a state is given in
   # configuration["HMM"]["start_prob"][state.name]
-  
+
   count = 0
   for state in states:
       if "OTHER_" in state.name:
@@ -315,7 +307,7 @@ def init_hmm(clusters, configuration):
             prob = 0.95/count
         else:
             prob = hmm_config["start_prob"][state.name]
-            
+
         hmm_model.add_transition(hmm_model.start,
                                  state, prob)
 
@@ -356,50 +348,50 @@ def hmm_train(clusters, regions, configuration):
   hmm_model = init_hmm(clusters=clusters,
                        configuration=configuration)
   print("{0} Done...".format(INFO))
-  
-  
+
+
   if configuration["HMM"]["train"] == True:
       print("{0} Creating training sequence...".format(INFO))
-    
+
       hmm_conf = configuration["HMM"]
       if hmm_conf["train_sequence_source"] == "region":
-    
+
         observations = []
         for region in regions:
-    
+
           region_sequences = \
             region.get_region_as_sequences(size=hmm_conf["train_sequence_size"],
                                            window_type=WindowType.from_string(hmm_conf["train_windowtype"]),
                                            n_seqs=hmm_conf["train_n_sequences_per_source"])
-    
+
           for seq in region_sequences:
             observations.append(seq)
-    
+
       elif hmm_conf["train_sequence_source"] == "cluster":
-    
+
         observations = []
         for cluster in clusters:
           cluster_sequences = \
             cluster.get_sequence(size=hmm_conf["train_sequence_size"],
                                  window_type=WindowType.from_string(hmm_conf["train_windowtype"]),
                                  n_seqs=hmm_conf["train_n_sequences_per_source"])
-    
+
           for seq in cluster_sequences:
             observations.append(seq)
-    
+
       else:
         raise Error("Training sequence type has not been specified")
-    
-    
+
+
       print("{0} Done...".format(INFO))
-    
+
       print("{0} HMM transition matrix (before fit): ".format(INFO))
       print(hmm_model.dense_transition_matrix())
-    
+
       print("{0} Fit HMM...".format(INFO))
       print("{0} Number of training sequences {1}".format(INFO,
                                                           len(observations)))
-    
+
       for i, seq in enumerate(observations):
         if -999 in seq:
           print("{0} Sequence {1} has -999".format(INFO, i))
@@ -407,10 +399,10 @@ def hmm_train(clusters, regions, configuration):
         elif (-999, -999) in seq:
           print("{0} Sequence {1} has -999".format(INFO, i))
           print(seq)
-    
-    
-    
-      
+
+
+
+
           print("{0} Training solver is: {1}".format(INFO,
                                                      configuration["HMM"]["train_solver"]))
           hmm_model, history = \
