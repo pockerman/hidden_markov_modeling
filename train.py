@@ -307,6 +307,9 @@ def init_hmm(clusters, configuration):
         else:
             prob = 1.0/len(states)
 
+        print("{0} Start prob for "
+              "state {1} set to {2}".format(INFO, state.name, prob))
+
         hmm_model.add_transition(hmm_model.start,
                                  state, prob)
 
