@@ -164,7 +164,7 @@ def create_clusters(regions, configuration):
   # create the clusters
   clusterer, initial_index_medoids = \
     build_clusterer(data=windows,
-                    nclusters=len(configuration["states"]),
+                    nclusters=kwargs["n_clusters"]),
                     method="kmedoids", **kwargs)
 
   print("{0} Initial medoids indexes: {1}".format(INFO,
@@ -242,9 +242,7 @@ def init_hmm(clusters, configuration):
   state_to_dist = {}
   states = []
   i=0
-  for cluster, name in zip(clusters, configuration["states"]):
-
-    use_name = name
+  for cluster in clusters:
 
     if cluster.state.name == "TUF":
         use_name = cluster.state.name
@@ -252,6 +250,9 @@ def init_hmm(clusters, configuration):
         use_name = cluster.state.name
     elif cluster.state.name == "OTHER":
         use_name = "OTHER_" + str(i)
+        i += 1
+    else:
+        use_name="STATE_" + str(i)
         i += 1
 
     if WindowType.from_string(hmm_config["train_windowtype"]) ==\
@@ -281,12 +282,8 @@ def init_hmm(clusters, configuration):
   for state in states:
     print("{0} State: {1}".format(INFO, state.name))
     state_map = json.loads(str(state))
-    #print("{0} Initialization is {1}".format(INFO, state))
     print("{0} Distributions: {1}".format(INFO,
                                           state_map["distribution"]))
-    #if hmm_config["train_windowtype"] == WindowType.BOTH:
-    #  print("{0}  Initial Distribution".format(state.name))
-
 
   # add the states to the model
   hmm_model.add_states(states)

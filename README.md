@@ -66,7 +66,8 @@ in the ```logger_file``` .
     "config":{
     "init_cluster_idx":"random_from_data", or a list of indices
     "metric":"MANHATAN", or "EUCLIDEAN"
-    "features":["mean"]
+    "features":["mean"],
+    "n_clusters":4
     }
   },
 ```
