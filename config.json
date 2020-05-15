@@ -45,7 +45,8 @@
     "config":{
     "init_cluster_idx":"random_from_data",
     "metric":"MANHATAN",
-    "features":["mean"]
+    "features":["mean"],
+    "n_clusters":4
     }
   },
   "cluster_distribution":{
@@ -69,7 +70,7 @@
       }
     }
   },
-  "states":["DELETE", "OTHER_0", "OTHER_1", "TUF"],
+
   "HMM": {
     "name":"HMM_Model",
     "train":false,
