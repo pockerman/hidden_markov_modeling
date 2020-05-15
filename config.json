@@ -1,8 +1,8 @@
 {
 
   "regions":{
-      "start":[1005700],
-      "end":[1006000]
+      "start":[1000000],
+      "end":[10000000]
   },
   "chromosome": "chr1",
   "reference_file":{
@@ -15,7 +15,7 @@
     "filename": "/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam"
   },
   "debug":{
-    "log_bam_for_debug":true
+    "log_bam_for_debug":false
   },
   "window_size":100,
   "fill_missing_window_data":false,
@@ -33,14 +33,12 @@
       "sigma_factor":2
     }
   },
-  "label_clusters": false,
+  "label_clusters": true,
   "labeler":{
-    "name":"hypothesis_testing",
-    "significance": 0.05,
-    "statistic_cal":"zscore",
-    "statistic_parameter":"mean",
-    "statistical_parameter_value": 2.0,
-    "order":["DELETE", "NORMAL", "INSERT"]
+    "name":"mean_diff",
+    "tuf_mean_min": 1.5,
+    "tuf_mean_max": 8.5,
+    "states":["DELETE", "OTHER", "OTHER", "TUF"]
   },
   "clusterer":{
     "name":"kmedoids",
@@ -53,16 +51,29 @@
   "cluster_distribution":{
     "name": "gmm",
     "config":{
-      "wga_dist":["normal", "uniform"],
-      "wga_weights": null,
-      "no_wga_dist":["normal", "uniform"],
-      "no_wga_dist_weights":null
+      "distributions":{
+          "TUF":{
+              "type":"gmm",
+              "dists":["normal", "uniform"],
+              "weights":null,
+              "uniform_params":[2.0, 8.0]
+          },
+          "OTHER":{
+              "type":"distribution",
+              "dists":["normal"]
+          },
+          "DELETE":{
+              "type":"distribution",
+              "dists":["normal"]
+          }
+      }
     }
   },
   "save_cluster_densities":false,
-  "states":["STATE_0", "STATE_1", "STATE_2", "STATE_3"],
+  "states":["DELETE", "OTHER_0", "OTHER_1", "TUF"],
   "HMM": {
     "name":"HMM_Model",
+    "train":false,
     "train_solver": "baum-welch",
     "lr_decay":0.7,
     "inertia":null,
@@ -70,10 +81,10 @@
     "save_model":true,
     "save_hmm_filename":"HMM_Model",
     "start_prob":{
-      "STATE_0": 0.95,
-      "STATE_1": 0.0166,
-      "STATE_2": 0.0166,
-      "STATE_3": 0.0166
+      "OTHER_0": 0.475,
+      "OTHER_1": 0.475,
+      "DELETE": 0.0166,
+      "TUF": 0.0166
     },
     "train_sequence_size": 100,
     "train_sequence_source": "region",

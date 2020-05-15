@@ -1,6 +1,6 @@
 from helpers import WindowType
 from helpers import MixedWindowView
-from helpers import WARNING
+from helpers import WARNING, INFO
 from exceptions import Error
 from preprocess_utils import remove_outliers
 from preprocess_utils import compute_statistic
@@ -93,6 +93,9 @@ class Region(object):
                                   ref_filename=ref_filename,
                                   test_filename=test_filename,
                                       **args)
+    
+    print("{0} Start Window: Start/End idx {1}".format(INFO, windows[0].get_start_end_pos()))
+    print("{0} End Window: Start/End idx {1}".format(INFO, windows[-1].get_start_end_pos()))
 
     print("{0} Start/End idx {1}".format(windows[0].get_start_end_pos()))
 
@@ -113,10 +116,12 @@ class Region(object):
       args["debug"] = kwargs["debug"]
 
     windows = extract_windows(chromosome=chromosome,
-                                  ref_filename=ref_filename,
-                                  test_filename=test_filename,
-                                      **args)
+                              ref_filename=ref_filename,
+                              test_filename=test_filename,
+                              **args)
 
+    print("{0} Start Window: Start/End idx {1}".format(INFO, windows[0].get_start_end_pos()))
+    print("{0} End Window: Start/End idx {1}".format(INFO, windows[-1].get_start_end_pos()))
     self._windows[WindowType.NO_WGA] = windows
 
 
@@ -129,7 +134,7 @@ class Region(object):
     if len(self._windows[WindowType.NO_WGA]) > len(self._windows[WindowType.WGA]) :
       print("{0} Windows size mismatch"
             " WGA {1} NON_WGA {2}".format(WARNING,
-                                          len(self._windows[WindowType.WGA]),
+                                         len(self._windows[WindowType.WGA]),
                                           len(self._windows[WindowType.NO_WGA])))
     elif len(self._windows[WindowType.NO_WGA]) < len(self._windows[WindowType.WGA]) :
         print("{0} Windows size mismatch"
