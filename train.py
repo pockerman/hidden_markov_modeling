@@ -239,7 +239,6 @@ def init_hmm(clusters, configuration):
   hmm_model = HiddenMarkovModel(name=hmm_config["name"],
                                 start=None, end=None)
 
-
   state_to_dist = {}
   states = []
   i=0
@@ -309,8 +308,8 @@ def init_hmm(clusters, configuration):
         else:
             prob = hmm_config["start_prob"][state.name]
 
-    hmm_model.add_transition(hmm_model.start,
-                             state, prob)
+        hmm_model.add_transition(hmm_model.start,
+                                 state, prob)
 
   # add transitions for every state
   # to another this will create a dense HMM
