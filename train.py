@@ -164,7 +164,7 @@ def create_clusters(regions, configuration):
   # create the clusters
   clusterer, initial_index_medoids = \
     build_clusterer(data=windows,
-                    nclusters=kwargs["n_clusters"]),
+                    nclusters=kwargs["n_clusters"],
                     method="kmedoids", **kwargs)
 
   print("{0} Initial medoids indexes: {1}".format(INFO,
@@ -302,8 +302,10 @@ def init_hmm(clusters, configuration):
     if state.name != "GAP_STATE":
         if "OTHER_" in state.name:
             prob = 0.95/count
-        else:
+        elif state.name in hmm_config["start_prob"]:
             prob = hmm_config["start_prob"][state.name]
+        else:
+            prob = 1.0/len(states)
 
         hmm_model.add_transition(hmm_model.start,
                                  state, prob)
