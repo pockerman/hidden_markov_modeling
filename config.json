@@ -55,7 +55,7 @@
           "TUF":{
               "type":"gmm",
               "dists":["normal", "uniform"],
-              "weights":null
+              "weights":null,
               "uniform_params":[2.0, 8.0]
           },
           "OTHER":{
@@ -73,6 +73,7 @@
   "states":["DELETE", "OTHER_0", "OTHER_1", "TUF"],
   "HMM": {
     "name":"HMM_Model",
+    "train":false,
     "train_solver": "baum-welch",
     "lr_decay":0.7,
     "inertia":null,

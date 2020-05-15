@@ -356,67 +356,71 @@ def hmm_train(clusters, regions, configuration):
   hmm_model = init_hmm(clusters=clusters,
                        configuration=configuration)
   print("{0} Done...".format(INFO))
-  print("{0} Creating training sequence...".format(INFO))
-
-  hmm_conf = configuration["HMM"]
-  if hmm_conf["train_sequence_source"] == "region":
-
-    observations = []
-    for region in regions:
-
-      region_sequences = \
-        region.get_region_as_sequences(size=hmm_conf["train_sequence_size"],
-                                       window_type=WindowType.from_string(hmm_conf["train_windowtype"]),
-                                       n_seqs=hmm_conf["train_n_sequences_per_source"])
-
-      for seq in region_sequences:
-        observations.append(seq)
-
-  elif hmm_conf["train_sequence_source"] == "cluster":
-
-    observations = []
-    for cluster in clusters:
-      cluster_sequences = \
-        cluster.get_sequence(size=hmm_conf["train_sequence_size"],
-                             window_type=WindowType.from_string(hmm_conf["train_windowtype"]),
-                             n_seqs=hmm_conf["train_n_sequences_per_source"])
-
-      for seq in cluster_sequences:
-        observations.append(seq)
-
-  else:
-    raise Error("Training sequence type has not been specified")
-
-
-  print("{0} Done...".format(INFO))
-
-  print("{0} HMM transition matrix (before fit): ".format(INFO))
-  print(hmm_model.dense_transition_matrix())
-
-  print("{0} Fit HMM...".format(INFO))
-  print("{0} Number of training sequences {1}".format(INFO,len(observations)))
-
-  for i, seq in enumerate(observations):
-    if -999 in seq:
-      print("{0} Sequence {1} has -999".format(INFO, i))
-      print(seq)
-    elif (-999, -999) in seq:
-      print("{0} Sequence {1} has -999".format(INFO, i))
-      print(seq)
-
-
-
-  if configuration["HMM"]["train_solver"] is not None:
-      print("{0} Training solver is: {1}".format(INFO,
-                                                 configuration["HMM"]["train_solver"]))
-      hmm_model, history = \
-    hmm_model.fit(sequences=observations,
-                  algorithm=configuration["HMM"]["train_solver"],
-                  return_history=True,
-                  verbose=configuration["HMM"]["verbose"],
-                  lr_decay=configuration["HMM"]["lr_decay"],
-                  callbacks=[HMMCallback(callback=print_logs_callback)],
-                  inertia=configuration["HMM"]["inertia"])
+  
+  
+  if configuration["HMM"]["train"] == True:
+      print("{0} Creating training sequence...".format(INFO))
+    
+      hmm_conf = configuration["HMM"]
+      if hmm_conf["train_sequence_source"] == "region":
+    
+        observations = []
+        for region in regions:
+    
+          region_sequences = \
+            region.get_region_as_sequences(size=hmm_conf["train_sequence_size"],
+                                           window_type=WindowType.from_string(hmm_conf["train_windowtype"]),
+                                           n_seqs=hmm_conf["train_n_sequences_per_source"])
+    
+          for seq in region_sequences:
+            observations.append(seq)
+    
+      elif hmm_conf["train_sequence_source"] == "cluster":
+    
+        observations = []
+        for cluster in clusters:
+          cluster_sequences = \
+            cluster.get_sequence(size=hmm_conf["train_sequence_size"],
+                                 window_type=WindowType.from_string(hmm_conf["train_windowtype"]),
+                                 n_seqs=hmm_conf["train_n_sequences_per_source"])
+    
+          for seq in cluster_sequences:
+            observations.append(seq)
+    
+      else:
+        raise Error("Training sequence type has not been specified")
+    
+    
+      print("{0} Done...".format(INFO))
+    
+      print("{0} HMM transition matrix (before fit): ".format(INFO))
+      print(hmm_model.dense_transition_matrix())
+    
+      print("{0} Fit HMM...".format(INFO))
+      print("{0} Number of training sequences {1}".format(INFO,
+                                                          len(observations)))
+    
+      for i, seq in enumerate(observations):
+        if -999 in seq:
+          print("{0} Sequence {1} has -999".format(INFO, i))
+          print(seq)
+        elif (-999, -999) in seq:
+          print("{0} Sequence {1} has -999".format(INFO, i))
+          print(seq)
+    
+    
+    
+      
+          print("{0} Training solver is: {1}".format(INFO,
+                                                     configuration["HMM"]["train_solver"]))
+          hmm_model, history = \
+        hmm_model.fit(sequences=observations,
+                      algorithm=configuration["HMM"]["train_solver"],
+                      return_history=True,
+                      verbose=configuration["HMM"]["verbose"],
+                      lr_decay=configuration["HMM"]["lr_decay"],
+                      callbacks=[HMMCallback(callback=print_logs_callback)],
+                      inertia=configuration["HMM"]["inertia"])
   else:
       print("{0} No training performed.".format(INFO))
 
