@@ -228,12 +228,12 @@ def init_hmm(clusters, configuration):
           n_state = \
             State(
               IndependentComponentsDistribution(
-                [UniformDistribution(-999.5, -998.5),
-                 UniformDistribution(-999.5, -998.5)]),
+                [UniformDistribution(-2.5, -1.0),
+                 UniformDistribution(-2.5, -1.0)]),
               name="GAP_STATE")
       else:
         n_state = \
-          State(UniformDistribution(-999.5, -998.5), name="GAP_STATE")
+          State(UniformDistribution(-2.5, -1.0), name="GAP_STATE")
 
   # create the HMM
   hmm_model = HiddenMarkovModel(name=hmm_config["name"],
@@ -299,7 +299,7 @@ def init_hmm(clusters, configuration):
           count += 1
 
   for state in states:
-    if state.name != "GAP_STATE":
+   # if state.name != "GAP_STATE":
         if "OTHER_" in state.name:
             prob = 0.95/count
         elif state.name in hmm_config["start_prob"]:
@@ -395,11 +395,11 @@ def hmm_train(clusters, regions, configuration):
                                                           len(observations)))
 
       for i, seq in enumerate(observations):
-        if -999 in seq:
-          print("{0} Sequence {1} has -999".format(INFO, i))
+        if -2.0 in seq:
+          print("{0} Sequence {1} has -2.0".format(INFO, i))
           print(seq)
-        elif (-999, -999) in seq:
-          print("{0} Sequence {1} has -999".format(INFO, i))
+        elif (-2.0, -2.0) in seq:
+          print("{0} Sequence {1} has -2.0".format(INFO, i))
           print(seq)
 
 
