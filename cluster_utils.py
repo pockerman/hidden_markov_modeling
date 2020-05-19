@@ -83,8 +83,6 @@ def build_cluster_mean_and_std(clusters, **kwargs):
 
 def build_cluster_densities(clusters, **kwargs):
 
-      config = kwargs["config"]
-
       for cluster in clusters:
 
         name = cluster.state.name
