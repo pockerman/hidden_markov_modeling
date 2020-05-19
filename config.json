@@ -26,6 +26,7 @@
   "mark_N_windows":true,
   "mark_for_N_windows":-999,
   "windows_filename":"hmm_windows.json",
+  "check_windowing_sanity":true,
   "outlier_remove":{
 
     "name":"zscore",
