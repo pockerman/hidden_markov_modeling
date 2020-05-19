@@ -24,7 +24,7 @@
   "save_windows":false,
   "remove_windows_with_N":false,
   "mark_N_windows":true,
-  "mark_for_N_windows":-2.0,
+  "mark_for_N_windows":-999.0,
   "windows_filename":"hmm_windows.json",
   "outlier_remove":{
 
@@ -76,7 +76,7 @@
     "train":true,
     "train_solver": "baum-welch",
     "lr_decay":0.7,
-    "inertia":null,
+    "inertia":0.6,
     "verbose":true,
     "save_model":true,
     "save_hmm_filename":"HMM_Model",

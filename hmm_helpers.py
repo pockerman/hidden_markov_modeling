@@ -5,7 +5,25 @@ Helpers for HMM
 import json
 from pomegranate import*
 
+from helpers import INFO
 from exceptions import Error
+
+class HMMCallback(object):
+
+  def __init__(self, callback):
+    self._callback = callback
+    self.model = None
+
+  def on_epoch_end(self, logs):
+    
+      for key in logs.keys():
+          print("{0} {1}: {2}".format(INFO, key, logs[key]))
+
+  def on_training_begin(self):
+    pass
+
+  def on_training_end(self, logs):
+    pass
 
 def build_hmm(hmm_file):
   """
@@ -35,7 +53,7 @@ def build_hmm(hmm_file):
     distribution_ties = hmm_json_map.get("distribution ties",None)
     hmm, hmm_states = build_states(hmm=hmm,
                                    states=states,
-                                   distribution_ties=distribution_ties)#hmm_json_map["distribution ties"])
+                                   distribution_ties=distribution_ties)
 
     hmm.start = hmm_states[hmm_json_map['start_index']]
     hmm.end = hmm_states[hmm_json_map['end_index']]

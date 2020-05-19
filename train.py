@@ -7,10 +7,13 @@ from pomegranate import*
 from helpers import read_configuration_file
 from helpers import set_up_logger
 from helpers import save_hmm
-from helpers import HMMCallback
+from helpers import Window
 from helpers import print_logs_callback
 from helpers import WindowType
 from helpers import INFO
+
+from hmm_helpers import HMMCallback
+
 from region import Region
 from analysis_helpers import save_clusters
 from analysis_helpers import save_windows_statistic
@@ -215,6 +218,7 @@ def init_hmm(clusters, configuration):
 
   hmm_config = configuration["HMM"]
   n_state = None
+  n_state_dist = None
 
   if "mark_N_windows" in configuration and\
     configuration["mark_N_windows"]:
@@ -225,15 +229,14 @@ def init_hmm(clusters, configuration):
       if WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.BOTH:
 
+          gap_dist = UniformDistribution(Window.N_WINDOW_MARKER-0.5, Window.N_WINDOW_MARKER + 0.5)
+          n_state_dist =  [gap_dist,gap_dist] 
           n_state = \
-            State(
-              IndependentComponentsDistribution(
-                [UniformDistribution(-2.5, -1.0),
-                 UniformDistribution(-2.5, -1.0)]),
-              name="GAP_STATE")
+            State(IndependentComponentsDistribution(n_state_dist), name="GAP_STATE")
       else:
+        n_state_dist = UniformDistribution(Window.N_WINDOW_MARKER-0.5, Window.N_WINDOW_MARKER + 0.5)
         n_state = \
-          State(UniformDistribution(-2.5, -1.0), name="GAP_STATE")
+          State(n_state_dist, name="GAP_STATE")
 
   # create the HMM
   hmm_model = HiddenMarkovModel(name=hmm_config["name"],
@@ -257,8 +260,13 @@ def init_hmm(clusters, configuration):
 
     if WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.BOTH:
-          states.append(State(IndependentComponentsDistribution([cluster.wga_density,
-                                                                 cluster.no_wga_density]),
+            
+          dists = [cluster.wga_density, cluster.no_wga_density]
+          
+          #if n_state_dist is not None:
+          #    dists.append(n_state_dist[0])
+          
+          states.append(State(IndependentComponentsDistribution(dists),
                         name=use_name))
 
     elif WindowType.from_string(hmm_config["train_windowtype"]) ==\
@@ -336,7 +344,7 @@ def init_hmm(clusters, configuration):
 
     # the probability transition from GAP_STATE to
     # model end should be high
-    hmm_model.add_transition(n_state, hmm_model.end, 1.0)
+    #hmm_model.add_transition(n_state, hmm_model.end, 1.0)
 
 
   # finally we need to bake
@@ -395,10 +403,10 @@ def hmm_train(clusters, regions, configuration):
                                                           len(observations)))
 
       for i, seq in enumerate(observations):
-        if -2.0 in seq:
+        if -999.0 in seq:
           print("{0} Sequence {1} has -2.0".format(INFO, i))
           print(seq)
-        elif (-2.0, -2.0) in seq:
+        elif (-999.0, -999.0) in seq:
           print("{0} Sequence {1} has -2.0".format(INFO, i))
           print(seq)
 
@@ -413,7 +421,7 @@ def hmm_train(clusters, regions, configuration):
                       return_history=True,
                       verbose=configuration["HMM"]["verbose"],
                       lr_decay=configuration["HMM"]["lr_decay"],
-                      callbacks=[HMMCallback(callback=print_logs_callback)],
+                      callbacks=[HMMCallback(callback=None)],
                       inertia=configuration["HMM"]["inertia"])
   else:
       print("{0} No training performed.".format(INFO))

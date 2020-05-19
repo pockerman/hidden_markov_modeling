@@ -15,21 +15,6 @@ WARNING="WARNING:"
 ERROR="ERROR:"
 DEBUG="DEBUG:"
 
-class HMMCallback(object):
-
-  def __init__(self, callback):
-    self._callback = callback
-    self.model = None
-
-  def on_epoch_end(self, logs):
-    pass
-    #self._callback(logs)
-
-  def on_training_begin(self):
-    pass
-
-  def on_training_end(self, logs):
-    pass
 
 def print_logs_callback(logs):
   print(logs)
@@ -322,7 +307,11 @@ class Window(object):
     """
 
     N_WINDOW_MARKER=-999
-
+    
+    @staticmethod
+    def set_window_marker(marker):
+        Window.N_WINDOW_MARKER= marker
+        
     def __init__(self, idx, capacity):
 
         # the id of the window
@@ -415,6 +404,7 @@ class Window(object):
 
     def set_window_rd_mark(self, mark):
       try:
+        Window.set_window_marker(marker=mark)
         for obs in self._observations:
           try:
             obs.read_depth=mark
