@@ -13,7 +13,7 @@ from analysis_helpers import save_clusters
 from analysis_helpers import save_windows_statistic
 
 from cluster import Cluster
-from cluster_utils import build_cluster_densities, label_clusters
+from cluster_utils import build_cluster_mean_and_std
 from preprocess_utils import build_clusterer
 from exceptions import Error
 
@@ -187,11 +187,11 @@ def create_clusters(regions, configuration):
   return clusters
 
 
-def fit_clusters_distribution(clusters, configuration):
+def make_clusters_mean_and_std(clusters, configuration):
 
   kwargs = configuration["cluster_distribution"]
-  print("{0} Fitting clusters densities...".format(INFO) )
-  build_cluster_densities(clusters=clusters, **kwargs)
+  print("{0} Make clusters mu/std...".format(INFO) )
+  build_cluster_mean_and_std(clusters=clusters, **kwargs)
   print("{0} Done...".format(INFO))
 
 def main():
@@ -213,9 +213,17 @@ def main():
     logging.info("Checking if logger is sane...")
     print("{0} Done...".format(INFO))
 
-    print("{0} Creating windows...".format(INFO))
+    print("{0} Creating window regions...".format(INFO))
     time_start = time.perf_counter()
     regions = make_window_regions(configuration=configuration)
+    time_end = time.perf_counter()
+    print("{0} Done. Execution time {1} secs".format(INFO, time_end - time_start))
+
+    print("{0} Saving regions...".format(INFO))
+    time_start = time.perf_counter()
+
+    for region in regions:
+      region.save()
     time_end = time.perf_counter()
     print("{0} Done. Execution time {1} secs".format(INFO, time_end - time_start))
 
@@ -226,31 +234,22 @@ def main():
     time_end = time.perf_counter()
     print("{0} Done. Execution time {1} secs".format(INFO, time_end - time_start))
 
-    #print("{0} Compute max mean "
-    #      "difference in clusters...".format(INFO))
-    #mean_diff, cluster = \
-    #  find_tuf_in_clusters(clusters=clusters,
-    #                       configuration=configuration)
-    #print("{0} Done...".format(INFO))
-    #print("{0} Max mean difference: "
-    #      "{1} for cluster: {2} ".format(INFO,
-    #                                     mean_diff,
-    #                                     cluster.cidx))
-
-    if configuration["label_clusters"]:
-      print("{0} Labelling clusters...".format(INFO))
-      clusters = label_clusters(clusters=clusters,
-                                method=configuration["labeler"]["name"],
-                                **configuration)
-      print("{0} Done...".format(INFO))
 
     print("{0} Fitting clusters distributions...".format(INFO))
     time_start = time.perf_counter()
-    fit_clusters_distribution(clusters=clusters,
-                              configuration=configuration)
+    make_clusters_mean_and_std(clusters=clusters,
+                               configuration=configuration)
     time_end = time.perf_counter()
     print("{0} Done. Execution time {1} secs".format(INFO, time_end - time_start))
     total_end = time.perf_counter()
+
+    print("{0} Save clusters...".format(INFO))
+    time_start = time.perf_counter()
+    for cluster in clusters:
+      cluster.save()
+    time_end = time.perf_counter()
+    print("{0} Done. Execution time {1} secs".format(INFO, time_end - time_start))
+
     print("{0} Finished clustering. Execution time {1} secs".format(INFO, total_end - total_start))
 
 

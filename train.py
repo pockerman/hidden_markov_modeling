@@ -234,9 +234,16 @@ def main():
     print("{0} Done. Execution time"
           " {1} secs".format(INFO, time_end - time_start))
 
+    print("{0} Build cluster densities".format(INFO))
+    time_start = time.perf_counter()
+    kwargs = configuration["cluster_distribution"]
+    build_cluster_densities(clusters=clusters, **kwargs)
+    time_end = time.perf_counter()
+    print("{0} Done. Execution time"
+          " {1} secs".format(INFO, time_end - time_start))
+
     print("{0} Star HMM initialization...".format(INFO))
     time_start = time.perf_counter()
-
     hmm = init_hmm(clusters=clusters,configuration=configuration)
     time_end = time.perf_counter()
     print("{0} Done. Execution time"

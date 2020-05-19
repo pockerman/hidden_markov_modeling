@@ -20,16 +20,15 @@ class Cluster(object):
       indices = list(f.readline().split(":")[1])
 
       cluster = Cluster(id_=idx, indexes=indices, windows=None)
+      mean = float(f.readline().split(":")[1])
+      std = float(f.readline().split(":")[1])
+      cluster.wga_mean = mean
+      cluster.wga_std = std
 
-      distribution = f.readline().split(":")
-      if distribution[1] != "none":
-        dist = Distribution.from_json(distribution[1])
-        cluster.wga_density = dist
-
-      distribution = f.readline().split(":")
-      if distribution[1] != "none":
-        dist = Distribution.from_json(distribution[1])
-        cluster.no_wga_density = dist
+      mean = float(f.readline().split(":")[1])
+      std = float(f.readline().split(":")[1])
+      cluster.no_wga_mean = mean
+      cluster.no_wga_std = std
 
       return cluster
 
@@ -39,7 +38,11 @@ class Cluster(object):
     self._windows = windows
     self._state = WindowState.INVALID
     self._wga_density = None
+    self._wga_mean = 0.0
+    self._wga_std = 0.0
     self._no_wga_density = None
+    self._no_wga_mean = 0.0
+    self._no_wga_std=0.0
 
 
   @property
@@ -67,12 +70,44 @@ class Cluster(object):
     self._wga_density = value
 
   @property
+  def wga_mean(self):
+    return self._wga_mean
+
+  @wga_mean.setter
+  def wga_mean(self, value):
+    self._wga_mean = value
+
+  @property
+  def wga_std(self):
+    return self._wga_std
+
+  @wga_std.setter
+  def wga_std(self, value):
+    self._wga_std = value
+
+  @property
   def no_wga_density(self):
     return self._no_wga_density
 
   @no_wga_density.setter
   def no_wga_density(self, value):
     self._no_wga_density = value
+
+  @property
+  def no_wga_mean(self):
+    return self._no_wga_mean
+
+  @no_wga_mean.setter
+  def no_wga_mean(self, value):
+    self._no_wga_mean = value
+
+  @property
+  def no_wga_std(self):
+    return self._no_wga_std
+
+  @wga_std.setter
+  def no_wga_std(self, value):
+    self._no_wga_std = value
 
   @property
   def windows(self):
@@ -87,17 +122,11 @@ class Cluster(object):
 
       f.write("ID:"+str(self.cidx))
       f.write("Indices:"+str(self.indexes))
+      f.write("WGA_MEAN:"+str(self.wga_mean))
+      f.write("WGA_STD:"+str(self.wga_std))
+      f.write("NO_WGA_MEAN:"+str(self.wga_mean))
+      f.write("NO_WGA_STD:"+str(self.wga_std))
 
-      if self.wga_density is not None:
-        f.write("WGA_Desnity:"+str(self.wga_density))
-      else:
-        f.write("WGA_Desnity:"+"none")
-
-
-      if self.no_wga_density is not None:
-        f.write("NO_WGA_Desnity:"+str(self.no_wga_density))
-      else:
-        f.write("NO_WGA_Desnity:"+"none")
 
   def get_sequence(self, size, window_type):
 

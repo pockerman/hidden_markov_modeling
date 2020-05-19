@@ -47,7 +47,7 @@ def label_clusters(clusters, method, **kwargs):
 
 
 
-def build_cluster_densities(clusters, **kwargs):
+def build_cluster_mean_and_std(clusters, **kwargs):
   """
   Establish the probability destributions underlying
   the data for each cluster
@@ -70,17 +70,6 @@ def build_cluster_densities(clusters, **kwargs):
   config = kwargs["config"]
 
   if kwargs["name"] == "gmm":
-
-    # distributions for the first component
-    #wga_dist = kwargs["config"]["wga_dist"]
-    #wga_weights = kwargs["config"]["wga_weights"]
-
-    #print("{0} Distributions for WGA {1} ".format(INFO, wga_dist))
-
-    #non_wga_dist = kwargs["config"]["no_wga_dist"]
-    #no_wga_weights = kwargs["config"]["no_wga_dist_weights"]
-
-    #print("{0} Distributions for NON WGA {1} ".format(INFO, wga_dist))
 
     for cluster in clusters:
 
@@ -109,11 +98,33 @@ def build_cluster_densities(clusters, **kwargs):
       no_wga_params={"mean": np.mean(no_wga_data),
                      "std": np.std(no_wga_data)}
 
-      if cluster.state.name == 'TUF':
+      cluster.wga_mean = np.mean(wga_data)
+      cluster.wga_std = np.std(wga_data)
+      cluster.no_wga_mean = np.mean(no_wga_data)
+      cluster.no_wga_std = np.std(no_wga_data)
+
+
+def build_cluster_densities(clusters, **kwargs):
+
+      config = kwargs["config"]
+
+      for cluster in clusters:
+
+        clust_dists = config["distributions"][cluster.state.name]
+
+        # collected the data create the GMM for each
+      # component in the cluster
+        wga_params={"mean": cluster.wga_mean,
+                    "std": cluster.wga_std}
+
+        no_wga_params={"mean": cluster.no_wga_mean,
+                       "std": cluster.no_wga_std}
+
+        if cluster.state.name == 'TUF':
           wga_params["uniform_params"] = config["distributions"]["TUF"]["uniform_params"]
           no_wga_params["uniform_params"] = config["distributions"]["TUF"]["uniform_params"]
 
-      if config["distributions"][cluster.state.name]["type"] == "gmm":
+        if config["distributions"][cluster.state.name]["type"] == "gmm":
           wga_gmm = \
               GeneralMixtureModel(get_distributions_list_from_names(clust_dists["dists"],
                                                                      wga_params),
@@ -128,19 +139,19 @@ def build_cluster_densities(clusters, **kwargs):
 
           cluster.no_wga_density = non_wga_density
 
-      elif config["distributions"][cluster.state.name]["type"] == "distribution":
-         wga_dist = get_distributions_list_from_names(clust_dists["dists"],
+        elif config["distributions"][cluster.state.name]["type"] == "distribution":
+          wga_dist = get_distributions_list_from_names(clust_dists["dists"],
                                                        wga_params)[0]
-         cluster.wga_density = wga_dist
+          cluster.wga_density = wga_dist
 
-         non_wga_density = get_distributions_list_from_names(clust_dists["dists"],
+          non_wga_density = get_distributions_list_from_names(clust_dists["dists"],
                                                               no_wga_params)[0]
-         cluster.no_wga_density = non_wga_density
+          cluster.no_wga_density = non_wga_density
 
-  else:
-    raise Error("Invalid cluster distribution method")
+      else:
+        raise Error("Invalid cluster distribution method")
 
-  return clusters
+      return clusters
 
 
 def clusters_statistics(clusters):
