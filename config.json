@@ -104,11 +104,11 @@
         "tuf-normal":0.05,
         "normal-tuf":0.05
      },
-    "train_sequence_size": 100,
-    "train_sequence_source": "region",
+    "train_sequence_size":100,
+    "train_sequence_source":"region",
     "train_n_sequences_per_source":10000,
     "train_windowtype":"both"
   },
   "logger_file":"tuf.log",
-  "logger_level": "INFO"
+  "logger_level":"INFO"
 }
