@@ -6,13 +6,14 @@ from pomegranate import*
 
 from helpers import read_configuration_file
 from helpers import set_up_logger
-from helpers import save_hmm
+
 from helpers import Window
 from helpers import print_logs_callback
 from helpers import WindowType
 from helpers import INFO
 
 from hmm_helpers import HMMCallback
+from hmm_helpers import save_hmm
 
 from region import Region
 from analysis_helpers import save_clusters
@@ -230,7 +231,7 @@ def init_hmm(clusters, configuration):
         WindowType.BOTH:
 
           gap_dist = UniformDistribution(Window.N_WINDOW_MARKER-0.5, Window.N_WINDOW_MARKER + 0.5)
-          n_state_dist =  [gap_dist,gap_dist] 
+          n_state_dist =  [gap_dist,gap_dist]
           n_state = \
             State(IndependentComponentsDistribution(n_state_dist), name="GAP_STATE")
       else:
@@ -260,12 +261,12 @@ def init_hmm(clusters, configuration):
 
     if WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.BOTH:
-            
+
           dists = [cluster.wga_density, cluster.no_wga_density]
-          
+
           #if n_state_dist is not None:
           #    dists.append(n_state_dist[0])
-          
+
           states.append(State(IndependentComponentsDistribution(dists),
                         name=use_name))
 
@@ -392,7 +393,6 @@ def hmm_train(clusters, regions, configuration):
       else:
         raise Error("Training sequence type has not been specified")
 
-
       print("{0} Done...".format(INFO))
 
       print("{0} HMM transition matrix (before fit): ".format(INFO))
@@ -409,9 +409,6 @@ def hmm_train(clusters, regions, configuration):
         elif (-999.0, -999.0) in seq:
           print("{0} Sequence {1} has -2.0".format(INFO, i))
           print(seq)
-
-
-
 
       print("{0} Training solver is: {1}".format(INFO,
                                                      configuration["HMM"]["train_solver"]))
