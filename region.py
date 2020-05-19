@@ -135,34 +135,34 @@ class Region(object):
 
   def save(self):
 
-    with open("region_" + str(self.ridx) + ".tx", 'w') as f:
-      f.write("ID:"+str(self.ridx))
-      f.write("Start:"+str(self.start))
-      f.write("End:"+str(self.end))
-      f.write("WinSize:"+str(self.w_size))
+    with open("region_" + str(self.ridx) + ".txt", 'w') as f:
+      f.write("ID:"+str(self.ridx) + "\n")
+      f.write("Start:"+str(self.start) + "\n")
+      f.write("End:"+str(self.end) + "\n")
+      f.write("WinSize:"+str(self.w_size) + "\n")
 
-      f.write("WGA_N_WINDOWS:"+str(self.get_n_windows(type_=WindowType.WGA)))
+      f.write("WGA_N_WINDOWS:"+str(self.get_n_windows(type_=WindowType.WGA)) + "\n")
 
       for window in self._windows[WindowType.WGA]:
-        f.write("WID:"+str(window.idx))
-        f.write("Capacity:"+str(window.capacity))
-        f.write("Size:"+str(len(window)))
+        f.write("WID:"+str(window.idx) + "\n")
+        f.write("Capacity:"+str(window.capacity) + "\n")
+        f.write("Size:"+str(len(window)) + "\n")
 
         for obs in window:
-          f.write("Pos:"+str(obs.position))
-          f.write("RD:"+str(obs.read_depth))
-          f.write("Base:"+str(obs.base))
+          f.write("Pos:"+str(obs.position) + "\n")
+          f.write("RD:"+str(obs.read_depth) + "\n")
+          f.write("Base:"+str(obs.base) + "\n")
 
-      f.write("NO_WGA_N_WINDOWS:"+str(self.get_n_windows(type_=WindowType.NO_WGA)))
+      f.write("NO_WGA_N_WINDOWS:"+str(self.get_n_windows(type_=WindowType.NO_WGA)) + "\n")
       for window in self._windows[WindowType.NO_WGA]:
-        f.write("WID:"+str(window.idx))
-        f.write("Capacity:"+str(window.capacity))
-        f.write("Size:"+str(len(window)))
+        f.write("WID:"+str(window.idx) + "\n")
+        f.write("Capacity:"+str(window.capacity) + "\n")
+        f.write("Size:"+str(len(window)) + "\n")
 
         for obs in window:
-          f.write("Pos:"+str(obs.position))
-          f.write("RD:"+str(obs.read_depth))
-          f.write("Base:"+str(obs.base))
+          f.write("Pos:"+str(obs.position) + "\n")
+          f.write("RD:"+str(obs.read_depth) + "\n")
+          f.write("Base:"+str(obs.base) + "\n")
 
   def count_n_windows(self):
 

@@ -48,32 +48,9 @@ def label_clusters(clusters, method, **kwargs):
 
 
 def build_cluster_mean_and_std(clusters, **kwargs):
-  """
-  Establish the probability destributions underlying
-  the data for each cluster
-
-  Parameters
-  ----------
-  clusters : TYPE
-    DESCRIPTION.
-  **kwargs : TYPE
-    DESCRIPTION.
-
-  Returns
-  -------
-  None.
-
-  """
-  print("{0} Type of cluster density fitted: {1}".format(INFO,
-                                                         kwargs["name"]))
-
-  config = kwargs["config"]
-
-  if kwargs["name"] == "gmm":
-
+ 
     for cluster in clusters:
 
-      clust_dists = config["distributions"][cluster.state.name]
       indeces = cluster.indexes
 
       wga_data = np.empty((1,0), float)

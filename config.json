@@ -58,15 +58,14 @@
   },
   "clusters":{
 
-      "cluster_1":{
-        "filename":"",
-        "state": "state"
+      "cluster_0":{
+        "filename":"cluster_0.txt",
+        "state": "normal"
       },
-      "cluster_2":{
-      "filename":"",
-        "state": "state"
+      "cluster_1":{
+      "filename":"cluster_1.txt",
+        "state": "tuf"
       }
-
   },
 
   "HMM": {

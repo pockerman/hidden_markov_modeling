@@ -189,7 +189,7 @@ def create_clusters(regions, configuration):
 
 def make_clusters_mean_and_std(clusters, configuration):
 
-  kwargs = configuration["cluster_distribution"]
+  kwargs = {}
   print("{0} Make clusters mu/std...".format(INFO) )
   build_cluster_mean_and_std(clusters=clusters, **kwargs)
   print("{0} Done...".format(INFO))

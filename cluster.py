@@ -118,14 +118,14 @@ class Cluster(object):
 
 
   def save(self):
-    with open("cluster_" + str(self.cidx) + ".tx", 'w') as f:
+    with open("cluster_" + str(self.cidx) + ".txt", 'w') as f:
 
-      f.write("ID:"+str(self.cidx))
-      f.write("Indices:"+str(self.indexes))
-      f.write("WGA_MEAN:"+str(self.wga_mean))
-      f.write("WGA_STD:"+str(self.wga_std))
-      f.write("NO_WGA_MEAN:"+str(self.wga_mean))
-      f.write("NO_WGA_STD:"+str(self.wga_std))
+      f.write("ID:"+str(self.cidx)+"\n")
+      f.write("Indices:"+str(self.indexes)+"\n")
+      f.write("WGA_MEAN:"+str(self.wga_mean)+"\n")
+      f.write("WGA_STD:"+str(self.wga_std)+"\n")
+      f.write("NO_WGA_MEAN:"+str(self.no_wga_mean)+"\n")
+      f.write("NO_WGA_STD:"+str(self.no_wga_std)+"\n")
 
 
   def get_sequence(self, size, window_type):
