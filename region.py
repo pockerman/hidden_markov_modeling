@@ -133,7 +133,7 @@ class Region(object):
 
     return len(self._mixed_windows)
 
-  def save_region(self):
+  def save(self):
 
     with open("region_" + str(self.ridx) + ".tx", 'w') as f:
       f.write("ID:"+str(self.ridx))
