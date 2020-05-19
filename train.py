@@ -75,18 +75,20 @@ def init_hmm(clusters, configuration):
                                 start=None, end=None)
 
   for cluster in clusters:
-    name = cluster["name"]
-    dists = cluster["distributions"]
+    name = cluster.state.name
+
 
     if WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.BOTH:
-          states.append(State(IndependentComponentsDistribution(dists), name=name))
+          states.append(State(IndependentComponentsDistribution(cluster.wga_density,
+                                                                cluster.no_wga_density),
+                              name=name))
     elif WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.WGA:
-          states.append(State(cluster.wga_density, name=use_name))
+          states.append(State(cluster.wga_density, name=name))
     elif WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.NO_WGA:
-          states.append(State(cluster.no_wga_density, name=use_name))
+          states.append(State(cluster.no_wga_density, name=name))
     else:
       raise Error("Invalid train_windowtype. "
                   "{0} not in {1}".format(hmm_config["train_windowtype"],
@@ -104,7 +106,7 @@ def init_hmm(clusters, configuration):
   hmm_model.add_states(states)
 
   for state in states:
-   prob = hmm_config["states"][state.name]["start_prob"]
+   prob = hmm_config["states"][state.name.lower()]["start_prob"]
    hmm_model.add_transition(hmm_model.start,
                             state, prob)
 
@@ -113,12 +115,12 @@ def init_hmm(clusters, configuration):
   for i in states:
     for j in states:
 
-      if i.name+"-"+j.name in hmm_config["transitions"]:
-        prob =hmm_config["transitions"][i.name+"-"+j.name]
+      if i.name.lower()+"-"+j.name.lower() in hmm_config["transitions"]:
+        prob =hmm_config["transitions"][i.name.lower()+"-"+j.name.lower()]
         hmm_model.add_transition(i, j, prob)
       else:
         print("{0} Transition from state"
-              " {1} to state {2} is not specified".format(WARNING, i.name, j.name))
+              " {1} to state {2} is not specified".format(WARNING, i.name.lower(), j.name.lower()))
 
   # finally we need to bake
   hmm_model.bake(verbose=True)
@@ -235,7 +237,7 @@ def main():
 
     print("{0} Build cluster densities".format(INFO))
     time_start = time.perf_counter()
-    kwargs = configuration["cluster_distribution"]
+    kwargs = configuration["clusters"]
     build_cluster_densities(clusters=clusters, **kwargs)
     time_end = time.perf_counter()
     print("{0} Done. Execution time"

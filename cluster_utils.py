@@ -48,7 +48,7 @@ def label_clusters(clusters, method, **kwargs):
 
 
 def build_cluster_mean_and_std(clusters, **kwargs):
- 
+
     for cluster in clusters:
 
       indeces = cluster.indexes
@@ -87,41 +87,44 @@ def build_cluster_densities(clusters, **kwargs):
 
       for cluster in clusters:
 
-        clust_dists = config["distributions"][cluster.state.name]
+        name = cluster.state.name
+
 
         # collected the data create the GMM for each
-      # component in the cluster
+        # component in the cluster
         wga_params={"mean": cluster.wga_mean,
                     "std": cluster.wga_std}
 
         no_wga_params={"mean": cluster.no_wga_mean,
                        "std": cluster.no_wga_std}
 
-        if cluster.state.name == 'TUF':
-          wga_params["uniform_params"] = config["distributions"]["TUF"]["uniform_params"]
-          no_wga_params["uniform_params"] = config["distributions"]["TUF"]["uniform_params"]
+        if name == 'TUF':
+          uniform_params = config[name]["distributions"]["uniform"]["params"]
+          wga_params["uniform_params"] = uniform_params
+          no_wga_params["uniform_params"] = uniform_params
 
-        if config["distributions"][cluster.state.name]["type"] == "gmm":
+        if config[name]["distributions"]["type"] == "gmm":
           wga_gmm = \
-              GeneralMixtureModel(get_distributions_list_from_names(clust_dists["dists"],
+              GeneralMixtureModel(
+                get_distributions_list_from_names(config[name]["distributions"]["names"],
                                                                      wga_params),
-                                  weights=config["distributions"][cluster.state.name]["weights"])
+                                  weights=config[name]["distributions"]["weights"])
 
           cluster.wga_density = wga_gmm
 
           non_wga_density = \
-              GeneralMixtureModel(get_distributions_list_from_names(clust_dists["dists"],
+              GeneralMixtureModel(get_distributions_list_from_names(config[name]["distributions"]["names"],
                                                                no_wga_params),
-                                  weights=config["distributions"][cluster.state.name]["weights"] )
+                                  weights=config[name]["distributions"]["weights"] )
 
           cluster.no_wga_density = non_wga_density
 
-        elif config["distributions"][cluster.state.name]["type"] == "distribution":
-          wga_dist = get_distributions_list_from_names(clust_dists["dists"],
+        elif config[name]["distributions"]["type"] == "distribution":
+          wga_dist = get_distributions_list_from_names([config[name]["distributions"]["name"]],
                                                        wga_params)[0]
           cluster.wga_density = wga_dist
 
-          non_wga_density = get_distributions_list_from_names(clust_dists["dists"],
+          non_wga_density = get_distributions_list_from_names([config[name]["distributions"]["name"]],
                                                               no_wga_params)[0]
           cluster.no_wga_density = non_wga_density
 

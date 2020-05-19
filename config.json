@@ -58,13 +58,25 @@
   },
   "clusters":{
 
-      "cluster_0":{
+      "normal":{
         "filename":"cluster_0.txt",
-        "state": "normal"
+        "state": "normal",
+         "distributions":{
+          "type":"distribution",
+          "name":"normal"
+        }
       },
-      "cluster_1":{
-      "filename":"cluster_1.txt",
-        "state": "tuf"
+      "tuf":{
+        "filename":"cluster_1.txt",
+        "state": "tuf",
+        "distributions":{
+          "type":"gmm",
+          "uniform":{
+              "params":[2.0, 8.0]
+          },
+          "names":["normal", "uniform"],
+          "weights":null
+        }
       }
   },
 
@@ -77,23 +89,25 @@
     "verbose":true,
     "save_model":true,
     "save_hmm_filename":"HMM_Model",
-    "start_prob":{
-      "OTHER_0": 0.475,
-      "OTHER_1": 0.475,
-      "DELETE": 0.0166,
-      "TUF": 0.0166
-    },
+
     "states":{
-      "STATE_0":{
-        "name": "state_0",
+      "tuf":{
+        "name": "tuf",
          "start_prob": 0.5
       },
 
-      "transitions":{
-        "state_0-state_0":0.95
-      }
-
+      "normal":{
+        "name": "normal",
+         "start_prob": 0.5
+      },
     },
+    "transitions":{
+        "tuf-tuf":0.95,
+        "normal-normal":0.95,
+        "tuf-normal":0.05,
+        "normal-tuf":0.05,
+     },
+
     "train_sequence_size": 100,
     "train_sequence_source": "region",
     "train_n_sequences_per_source":10000,
