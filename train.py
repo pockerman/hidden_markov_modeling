@@ -30,9 +30,8 @@ def load_clusters(configuration):
   clusters=[]
 
   for clst in configuration["clusters"]:
-    print(clst)
-    cluster = Cluster.load(filename=clst["filename"])
-    cluster.state = WindowState.from_string(clst["state"])
+    cluster = Cluster.load(filename=configuration["clusters"][clst]["filename"])
+    cluster.state = WindowState.from_string(configuration["clusters"][clst]["state"])
     clusters.append(cluster)
 
   return clusters
