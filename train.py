@@ -18,12 +18,11 @@ from hmm_helpers import HMMCallback
 from hmm_helpers import save_hmm
 
 from region import Region
-from analysis_helpers import save_clusters
-from analysis_helpers import save_windows_statistic
+
 
 from cluster import Cluster
 from cluster_utils import build_cluster_densities, label_clusters
-from preprocess_utils import build_clusterer
+
 from preprocess_utils import get_distributions_list_from_names
 from exceptions import Error
 
@@ -31,6 +30,7 @@ def load_clusters(configuration):
   clusters=[]
 
   for clst in configuration["clusters"]:
+    print(clst)
     cluster = Cluster.load(filename=clst["filename"])
     cluster.state = WindowState.from_string(clst["state"])
     clusters.append(cluster)
