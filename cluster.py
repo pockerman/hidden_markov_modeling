@@ -4,6 +4,7 @@ Cluster: A collection of windows
 from helpers import WindowState
 from helpers import flat_windows_rd_from_indexes
 from helpers import MixedWindowView
+from pomegranate import*
 from helpers import WindowType
 from helpers import WARNING
 from preprocess_utils import compute_statistic
@@ -11,6 +12,26 @@ from preprocess_utils import compute_statistic
 
 
 class Cluster(object):
+
+  @staticmethod
+  def load(filename):
+    with open(filename, 'r') as f:
+      idx = int(f.readline().split(":")[1])
+      indices = list(f.readline().split(":")[1])
+
+      cluster = Cluster(id_=idx, indexes=indices, windows=None)
+
+      distribution = f.readline().split(":")
+      if distribution[1] != "none":
+        dist = Distribution.from_json(distribution[1])
+        cluster.wga_density = dist
+
+      distribution = f.readline().split(":")
+      if distribution[1] != "none":
+        dist = Distribution.from_json(distribution[1])
+        cluster.no_wga_density = dist
+
+      return cluster
 
   def __init__(self, id_, indexes, windows):
     self._id = id_
@@ -60,13 +81,23 @@ class Cluster(object):
   def merge(self, cluster):
     self._indexes.extend(cluster.indexes)
 
-  """
-  def get_data_from_windows(self):
-      
-    return flat_windows_rd_from_indexes(indexes=self._indexes,
-                                        windows=self._windows)
-  """
- 
+
+  def save(self):
+    with open("cluster_" + str(self.cidx) + ".tx", 'w') as f:
+
+      f.write("ID:"+str(self.cidx))
+      f.write("Indices:"+str(self.indexes))
+
+      if self.wga_density is not None:
+        f.write("WGA_Desnity:"+str(self.wga_density))
+      else:
+        f.write("WGA_Desnity:"+"none")
+
+
+      if self.no_wga_density is not None:
+        f.write("NO_WGA_Desnity:"+str(self.no_wga_density))
+      else:
+        f.write("NO_WGA_Desnity:"+"none")
 
   def get_sequence(self, size, window_type):
 
@@ -127,7 +158,7 @@ class Cluster(object):
 
         window_data = flat_windows_rd_from_indexes(indexes=self._indexes,
                                                    windows=wga_windows)
-        
+
         return compute_statistic(data=window_data,statistics=statistic)
 
   def get_window_statistics(self, statistic, **kwargs):

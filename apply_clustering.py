@@ -5,9 +5,7 @@ import time
 
 from helpers import read_configuration_file
 from helpers import set_up_logger
-from helpers import save_hmm
-from helpers import HMMCallback
-from helpers import print_logs_callback
+
 from helpers import WindowType
 from helpers import INFO
 from region import Region

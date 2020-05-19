@@ -35,19 +35,6 @@ def save_hmm(hmm_model, configuration, win_interval_length):
       json.dump(json_str, jsonfile)
 
 def build_hmm(hmm_file):
-  """
-
-
-  Parameters
-  ----------
-  jsonfile : TYPE
-    DESCRIPTION.
-
-  Returns
-  -------
-  None.
-
-  """
 
   with open(hmm_file) as json_file:
     hmm_json_map = json.load(json_file)

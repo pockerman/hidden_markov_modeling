@@ -157,7 +157,6 @@ class Observation(object):
                   "in observation. Type {1} "
                   "not in ['str', 'list']".format(type(base)))
 
-
   @property
   def position(self):
     return self._position
@@ -272,6 +271,29 @@ class WindowState(Enum):
   NOT_NORMAL = 5
   OTHER = 6
   INVALID = 7
+
+  @staticmethod
+  def from_string(string):
+    if string.upper() == "DELETE":
+      return WindowState.DELETE
+    elif string.upper() == "ONE_COPY_DELETE":
+      return WindowState.ONE_COPY_DELETE
+    elif string.upper() == "NORMAL":
+      return WindowState.NORMAL
+    elif string.upper() == "INSERT":
+      return WindowState.INSERT
+    elif string.upper() == "TUF":
+      return WindowState.TUF
+    elif string.upper() == "OTHER":
+      return WindowState.OTHER
+
+    raise Error("Invalid WindowState. "
+                "Type {0} not in {1}".format(string,
+                                             ["DELETE",
+                                              "ONE_COPY_DELETE",
+                                              "NORMAL",
+                                              "INSERT", "TUF", "OTHER"]))
+
 
 
 class WindowIterator(object):

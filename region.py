@@ -135,7 +135,7 @@ class Region(object):
 
   def save_region(self):
 
-    with open("region_" + self.ridx + ".tx", 'w') as f:
+    with open("region_" + str(self.ridx) + ".tx", 'w') as f:
       f.write("ID:"+str(self.ridx))
       f.write("Start:"+str(self.start))
       f.write("End:"+str(self.end))

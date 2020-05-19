@@ -1,9 +1,9 @@
 import numpy as np
-#from sklearn.neighbors import KernelDensity
 from pomegranate import *
 from exceptions import Error
 from helpers import INFO
 from helpers import WindowType,  WindowState
+from preprocess_utils import get_distributions_list_from_names
 
 
 def label_clusters(clusters, method, **kwargs):
@@ -115,25 +115,25 @@ def build_cluster_densities(clusters, **kwargs):
 
       if config["distributions"][cluster.state.name]["type"] == "gmm":
           wga_gmm = \
-              GeneralMixtureModel(_get_distributions_list_from_names(clust_dists["dists"],
+              GeneralMixtureModel(get_distributions_list_from_names(clust_dists["dists"],
                                                                      wga_params),
                                   weights=config["distributions"][cluster.state.name]["weights"])
 
           cluster.wga_density = wga_gmm
 
           non_wga_density = \
-              GeneralMixtureModel(_get_distributions_list_from_names(clust_dists["dists"],
+              GeneralMixtureModel(get_distributions_list_from_names(clust_dists["dists"],
                                                                no_wga_params),
                                   weights=config["distributions"][cluster.state.name]["weights"] )
 
           cluster.no_wga_density = non_wga_density
 
       elif config["distributions"][cluster.state.name]["type"] == "distribution":
-         wga_dist = _get_distributions_list_from_names(clust_dists["dists"],
+         wga_dist = get_distributions_list_from_names(clust_dists["dists"],
                                                        wga_params)[0]
          cluster.wga_density = wga_dist
 
-         non_wga_density = _get_distributions_list_from_names(clust_dists["dists"],
+         non_wga_density = get_distributions_list_from_names(clust_dists["dists"],
                                                               no_wga_params)[0]
          cluster.no_wga_density = non_wga_density
 
@@ -169,32 +169,4 @@ def clusters_statistics(clusters):
 
     statistics[c] = clusters[c].get_statistics(statistic="all")
   return statistics
-
-
-def _form_cluster_2d_array(cluster):
-  indeces = cluster.indexes
-  arr = np.empty((0, 2), float)
-  windows = cluster.windows
-  for idx in indeces:
-    window = windows[idx]
-    mu1, mu2 = window.get_rd_stats(statistics="mean", name="both")
-    arr = np.append(arr, np.array([[mu1, mu2]]), axis=0)
-  return arr
-
-
-def _get_distributions_list_from_names(dists_name, params):
-
-  dists = []
-
-  for name in dists_name:
-    if name == "normal":
-      dists.append(NormalDistribution(params["mean"], params["std"]))
-    elif name == "poisson":
-      dists.append(PoissonDistribution(params["mean"]))
-    elif name == "uniform":
-      dists.append(UniformDistribution(params["uniform_params"][0] ,
-                                       params["uniform_params"][1]))
-    else:
-      raise Error("Name {0} is an unknown distribution ".format(name))
-  return dists
 

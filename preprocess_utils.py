@@ -202,3 +202,19 @@ def build_clusterer(data, nclusters, method, **kwargs):
 
   raise Error("Invalid clustering method: " + method )
 
+def get_distributions_list_from_names(dists_name, params):
+
+  dists = []
+
+  for name in dists_name:
+    if name == "normal":
+      dists.append(NormalDistribution(params["mean"], params["std"]))
+    elif name == "poisson":
+      dists.append(PoissonDistribution(params["mean"]))
+    elif name == "uniform":
+      dists.append(UniformDistribution(params["uniform_params"][0] ,
+                                       params["uniform_params"][1]))
+    else:
+      raise Error("Name {0} is an unknown distribution ".format(name))
+  return dists
+
