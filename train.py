@@ -36,6 +36,21 @@ def load_clusters(configuration):
 
   return clusters
 
+def load_regions(configuration):
+  regions=[]
+
+  for file in configuration["regions_files"]:
+    region = Region.load(filename=file)
+    
+    if "check_windowing_sanity" in configuration and configuration["check_windowing_sanity"]:
+        print("{0} Check window sanity for region {1}".format(INFO, region.ridx))
+        region.check_windows_sanity()
+        print("{0} Done...".format(INFO))
+    region.get_mixed_windows()
+    regions.append(region)
+
+  return regions
+
 
 def init_hmm(clusters, configuration):
 
@@ -56,14 +71,14 @@ def init_hmm(clusters, configuration):
 
           n_state_dist = get_distributions_list_from_names(dists_name=[configuration["n_windows_dist"]["name"],
                                                                       configuration["n_windows_dist"]["name"]],
-                                                           params=configuration["n_windows_dist"]["config"]["parameters"])
+                                                           params={"uniform_params":configuration["n_windows_dist"]["config"]["parameters"]})
 
           n_state = \
             State(IndependentComponentsDistribution(n_state_dist), name="GAP_STATE")
       else:
         n_state_dist = get_distributions_list_from_names(dists_name=[configuration["n_windows_dist"]["name"],
                                                                       configuration["n_windows_dist"]["name"]],
-                                                           params=configuration["n_windows_dist"]["config"]["parameters"])
+                                                         params={"uniform_params":configuration["n_windows_dist"]["config"]["parameters"]})
         n_state = \
           State(n_state_dist[0], name="GAP_STATE")
 
@@ -75,13 +90,13 @@ def init_hmm(clusters, configuration):
                                 start=None, end=None)
 
   for cluster in clusters:
-    name = cluster.state.name
+    name = cluster.state.name.lower()
 
 
     if WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.BOTH:
-          states.append(State(IndependentComponentsDistribution(cluster.wga_density,
-                                                                cluster.no_wga_density),
+          states.append(State(IndependentComponentsDistribution([cluster.wga_density,
+                                                                cluster.no_wga_density]),
                               name=name))
     elif WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.WGA:
@@ -227,6 +242,13 @@ def main():
     set_up_logger(configuration=configuration)
     logging.info("Checking if logger is sane...")
     print("{0} Done...".format(INFO))
+    
+    print("{0} Load regions...".format(INFO))
+    time_start = time.perf_counter()
+    regions = load_regions(configuration=configuration)
+    time_end = time.perf_counter()
+    print("{0} Done. Execution time"
+          " {1} secs".format(INFO, time_end - time_start))
 
     print("{0} Load clusters".format(INFO))
     time_start = time.perf_counter()

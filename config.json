@@ -4,6 +4,7 @@
       "start":[1000000],
       "end":[2000000]
   },
+  "regions_files":["/home/a/ag568/region_0.txt"],
   "chromosome": "chr1",
   "reference_file":{
     "filename": "/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
@@ -58,7 +59,7 @@
   },
   "clusters":{
       "normal":{
-        "filename":"cluster_0.txt",
+        "filename":"/home/a/ag568/cluster_0.txt",
         "state": "normal",
          "distributions":{
           "type":"distribution",
@@ -66,7 +67,7 @@
         }
       },
       "tuf":{
-        "filename":"cluster_1.txt",
+        "filename":"/home/a/ag568/cluster_1.txt",
         "state": "tuf",
         "distributions":{
           "type":"gmm",
@@ -91,18 +92,27 @@
     "states":{
       "tuf":{
         "name":"tuf",
-         "start_prob":0.5
+         "start_prob":0.48
       },
       "normal":{
         "name": "normal",
-         "start_prob":0.5
+         "start_prob":0.48
+      },
+      "gap_state":{
+          "name":"gap_state",
+          "start_prob":0.04
       }
     },
     "transitions":{
         "tuf-tuf":0.95,
         "normal-normal":0.95,
         "tuf-normal":0.05,
-        "normal-tuf":0.05
+        "normal-tuf":0.05,
+        "gap_state-gap_state":0.95,
+        "gap_state-tuf":0.05,
+        "tuf-gap_state":0.05,
+        "normal-gap_state":0.05,
+        "gap_state-normal":0.05
      },
     "train_sequence_size":100,
     "train_sequence_source":"region",
