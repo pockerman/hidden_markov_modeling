@@ -1,5 +1,7 @@
 from helpers import WindowType
 from helpers import MixedWindowView
+from helpers import Window
+from helpers import Observation
 from helpers import WARNING, INFO
 from exceptions import Error
 from preprocess_utils import remove_outliers
@@ -37,6 +39,57 @@ class Region(object):
   of windows
   """
 
+  @staticmethod
+  def load(filename):
+     with open(filename, 'r') as f:
+       idx = int(f.readline().split(":")[1])
+       start = int(f.readline().split(":")[1])
+       end = int(f.readline().split(":")[1])
+       w_size = int(f.readline().split(":")[1])
+
+       region = Region(idx=idx, start=start,
+                       end=end,window_size=w_size)
+
+       n_wag_wins = int(f.readline().split(":")[1])
+       windows = []
+       for w in range(n_wag_wins):
+         wid = int(f.readline().split(":")[1])
+         cap = int(f.readline().split(":")[1])
+         size = int(f.readline().split(":")[1])
+
+         window = Window(idx=wid, capacity=cap)
+
+         for obs in range(size):
+           pos = int(f.readline().split(":")[1])
+           rd = int(f.readline().split(":")[1])
+           base = list(f.readline().split(":")[1])
+
+           obs = Observation(position=pos, read_depth=rd, base=base)
+           window.add(observation=obs)
+         windows.append(window)
+
+       region.set_windows(wtype=WindowType.WGA, windows=windows)
+       n_no_wag_wins = int(f.readline().split(":")[1])
+
+       windows = []
+       for w in range(n_no_wag_wins):
+         wid = int(f.readline().split(":")[1])
+         cap = int(f.readline().split(":")[1])
+         size = int(f.readline().split(":")[1])
+
+         window = Window(idx=wid, capacity=cap)
+
+         for obs in range(size):
+           pos = int(f.readline().split(":")[1])
+           rd = int(f.readline().split(":")[1])
+           base = list(f.readline().split(":")[1])
+
+           obs = Observation(position=pos, read_depth=rd, base=base)
+           window.add(observation=obs)
+         windows.append(window)
+       region.set_windows(wtype=WindowType.NO_WGA, windows=windows)
+       return region
+
   def __init__(self, idx, start, end, window_size):
 
     if end <= start:
@@ -52,6 +105,21 @@ class Region(object):
 
     self._mixed_windows = None
 
+  @property
+  def ridx(self):
+    return self._idx
+
+  @property
+  def w_size(self):
+    return self._w_size
+
+  @property
+  def start(self):
+    return self._start
+
+  @property
+  def end(self):
+    return self._end
 
   def size(self):
     return self._end - self._start
@@ -65,6 +133,37 @@ class Region(object):
 
     return len(self._mixed_windows)
 
+  def save(self):
+
+    with open("region_" + str(self.ridx) + ".txt", 'w') as f:
+      f.write("ID:"+str(self.ridx) + "\n")
+      f.write("Start:"+str(self.start) + "\n")
+      f.write("End:"+str(self.end) + "\n")
+      f.write("WinSize:"+str(self.w_size) + "\n")
+
+      f.write("WGA_N_WINDOWS:"+str(self.get_n_windows(type_=WindowType.WGA)) + "\n")
+
+      for window in self._windows[WindowType.WGA]:
+        f.write("WID:"+str(window.idx) + "\n")
+        f.write("Capacity:"+str(window.capacity) + "\n")
+        f.write("Size:"+str(len(window)) + "\n")
+
+        for obs in window:
+          f.write("Pos:"+str(obs.position) + "\n")
+          f.write("RD:"+str(obs.read_depth) + "\n")
+          f.write("Base:"+str(obs.base) + "\n")
+
+      f.write("NO_WGA_N_WINDOWS:"+str(self.get_n_windows(type_=WindowType.NO_WGA)) + "\n")
+      for window in self._windows[WindowType.NO_WGA]:
+        f.write("WID:"+str(window.idx) + "\n")
+        f.write("Capacity:"+str(window.capacity) + "\n")
+        f.write("Size:"+str(len(window)) + "\n")
+
+        for obs in window:
+          f.write("Pos:"+str(obs.position) + "\n")
+          f.write("RD:"+str(obs.read_depth) + "\n")
+          f.write("Base:"+str(obs.base) + "\n")
+
   def count_n_windows(self):
 
     counter = 0
@@ -74,6 +173,14 @@ class Region(object):
 
     return counter
 
+  def set_windows(self, wtype, windows):
+
+    if wtype != WindowType.WGA and\
+      wtype != WindowType.NO_WGA:
+        raise Error("Invalid Window type {0}"
+                    " not in ['WGA', 'NO_WGA']".format(wtype))
+
+    self._windows[wtype] = windows
 
   def make_wga_windows(self, chromosome,
                        ref_filename,

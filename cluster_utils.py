@@ -1,9 +1,9 @@
 import numpy as np
-#from sklearn.neighbors import KernelDensity
 from pomegranate import *
 from exceptions import Error
 from helpers import INFO
 from helpers import WindowType,  WindowState
+from preprocess_utils import get_distributions_list_from_names
 
 
 def label_clusters(clusters, method, **kwargs):
@@ -47,44 +47,10 @@ def label_clusters(clusters, method, **kwargs):
 
 
 
-def build_cluster_densities(clusters, **kwargs):
-  """
-  Establish the probability destributions underlying
-  the data for each cluster
-
-  Parameters
-  ----------
-  clusters : TYPE
-    DESCRIPTION.
-  **kwargs : TYPE
-    DESCRIPTION.
-
-  Returns
-  -------
-  None.
-
-  """
-  print("{0} Type of cluster density fitted: {1}".format(INFO,
-                                                         kwargs["name"]))
-
-  config = kwargs["config"]
-
-  if kwargs["name"] == "gmm":
-
-    # distributions for the first component
-    #wga_dist = kwargs["config"]["wga_dist"]
-    #wga_weights = kwargs["config"]["wga_weights"]
-
-    #print("{0} Distributions for WGA {1} ".format(INFO, wga_dist))
-
-    #non_wga_dist = kwargs["config"]["no_wga_dist"]
-    #no_wga_weights = kwargs["config"]["no_wga_dist_weights"]
-
-    #print("{0} Distributions for NON WGA {1} ".format(INFO, wga_dist))
+def build_cluster_mean_and_std(clusters, **kwargs):
 
     for cluster in clusters:
 
-      clust_dists = config["distributions"][cluster.state.name]
       indeces = cluster.indexes
 
       wga_data = np.empty((1,0), float)
@@ -109,38 +75,61 @@ def build_cluster_densities(clusters, **kwargs):
       no_wga_params={"mean": np.mean(no_wga_data),
                      "std": np.std(no_wga_data)}
 
-      if cluster.state.name == 'TUF':
-          wga_params["uniform_params"] = config["distributions"]["TUF"]["uniform_params"]
-          no_wga_params["uniform_params"] = config["distributions"]["TUF"]["uniform_params"]
+      cluster.wga_mean = np.mean(wga_data)
+      cluster.wga_std = np.std(wga_data)
+      cluster.no_wga_mean = np.mean(no_wga_data)
+      cluster.no_wga_std = np.std(no_wga_data)
 
-      if config["distributions"][cluster.state.name]["type"] == "gmm":
+
+def build_cluster_densities(clusters, **kwargs):
+
+      for cluster in clusters:
+
+        name = cluster.state.name.lower()
+        
+        # collected the data create the GMM for each
+        # component in the cluster
+        wga_params={"mean": cluster.wga_mean,
+                    "std": cluster.wga_std}
+
+        no_wga_params={"mean": cluster.no_wga_mean,
+                       "std": cluster.no_wga_std}
+
+        if name == 'tuf':
+          uniform_params = kwargs[name]["distributions"]["uniform"]["params"]
+          wga_params["uniform_params"] = uniform_params
+          no_wga_params["uniform_params"] = uniform_params
+
+        if kwargs[name]["distributions"]["type"] == "gmm":
+            
           wga_gmm = \
-              GeneralMixtureModel(_get_distributions_list_from_names(clust_dists["dists"],
-                                                                     wga_params),
-                                  weights=config["distributions"][cluster.state.name]["weights"])
+              GeneralMixtureModel(
+                get_distributions_list_from_names(kwargs[name]["distributions"]["names"],
+                                                  wga_params),
+                                  weights=kwargs[name]["distributions"]["weights"])
 
           cluster.wga_density = wga_gmm
 
           non_wga_density = \
-              GeneralMixtureModel(_get_distributions_list_from_names(clust_dists["dists"],
-                                                               no_wga_params),
-                                  weights=config["distributions"][cluster.state.name]["weights"] )
+              GeneralMixtureModel(get_distributions_list_from_names(kwargs[name]["distributions"]["names"],
+                                                                    no_wga_params),
+                                  weights=kwargs[name]["distributions"]["weights"] )
 
           cluster.no_wga_density = non_wga_density
 
-      elif config["distributions"][cluster.state.name]["type"] == "distribution":
-         wga_dist = _get_distributions_list_from_names(clust_dists["dists"],
+        elif kwargs[name]["distributions"]["type"] == "distribution":
+          wga_dist = get_distributions_list_from_names([kwargs[name]["distributions"]["name"]],
                                                        wga_params)[0]
-         cluster.wga_density = wga_dist
+          cluster.wga_density = wga_dist
 
-         non_wga_density = _get_distributions_list_from_names(clust_dists["dists"],
+          non_wga_density = get_distributions_list_from_names([kwargs[name]["distributions"]["name"]],
                                                               no_wga_params)[0]
-         cluster.no_wga_density = non_wga_density
+          cluster.no_wga_density = non_wga_density
 
-  else:
-    raise Error("Invalid cluster distribution method")
+        else:
+            raise Error("Invalid cluster distribution method. {0}".format(kwargs[name]["distributions"]["type"]))
 
-  return clusters
+      return clusters
 
 
 def clusters_statistics(clusters):
@@ -169,32 +158,4 @@ def clusters_statistics(clusters):
 
     statistics[c] = clusters[c].get_statistics(statistic="all")
   return statistics
-
-
-def _form_cluster_2d_array(cluster):
-  indeces = cluster.indexes
-  arr = np.empty((0, 2), float)
-  windows = cluster.windows
-  for idx in indeces:
-    window = windows[idx]
-    mu1, mu2 = window.get_rd_stats(statistics="mean", name="both")
-    arr = np.append(arr, np.array([[mu1, mu2]]), axis=0)
-  return arr
-
-
-def _get_distributions_list_from_names(dists_name, params):
-
-  dists = []
-
-  for name in dists_name:
-    if name == "normal":
-      dists.append(NormalDistribution(params["mean"], params["std"]))
-    elif name == "poisson":
-      dists.append(PoissonDistribution(params["mean"]))
-    elif name == "uniform":
-      dists.append(UniformDistribution(params["uniform_params"][0] ,
-                                       params["uniform_params"][1]))
-    else:
-      raise Error("Name {0} is an unknown distribution ".format(name))
-  return dists
 

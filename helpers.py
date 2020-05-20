@@ -16,9 +16,6 @@ ERROR="ERROR:"
 DEBUG="DEBUG:"
 
 
-def print_logs_callback(logs):
-  print(logs)
-
 def read_configuration_file(config_file):
     """
     Read the json configuration file and
@@ -37,14 +34,6 @@ def save_windows(windows, configuration, win_interval_length):
     with open(configuration["windows_filename"]+
                   "_"+str(win_interval_length)+".json", 'w') as jsonfile:
       json_str = windows_to_json(windows)
-      json.dump(json_str, jsonfile)
-
-def save_hmm(hmm_model, configuration, win_interval_length):
-
-  json_str = hmm_model.to_json()
-  import json
-  with open(configuration["HMM"]["save_hmm_filename"]+
-              "_"+str(win_interval_length)+".json", 'w') as jsonfile:
       json.dump(json_str, jsonfile)
 
 
@@ -156,10 +145,17 @@ def windows_from_json(jsonmap):
 
 class Observation(object):
   def __init__(self, position, read_depth, base):
-    self._position = position
-    self._read_depth = read_depth
-    self._base = base
+    self._position = int(position)
+    self._read_depth = int(read_depth)
 
+    if isinstance(base, str):
+      self._base = [base]
+    elif isinstance(base, list):
+      self._base = base
+    else:
+      raise Error("Unknown type for base "
+                  "in observation. Type {1} "
+                  "not in ['str', 'list']".format(type(base)))
 
   @property
   def position(self):
@@ -276,6 +272,29 @@ class WindowState(Enum):
   OTHER = 6
   INVALID = 7
 
+  @staticmethod
+  def from_string(string):
+    if string.upper() == "DELETE":
+      return WindowState.DELETE
+    elif string.upper() == "ONE_COPY_DELETE":
+      return WindowState.ONE_COPY_DELETE
+    elif string.upper() == "NORMAL":
+      return WindowState.NORMAL
+    elif string.upper() == "INSERT":
+      return WindowState.INSERT
+    elif string.upper() == "TUF":
+      return WindowState.TUF
+    elif string.upper() == "OTHER":
+      return WindowState.OTHER
+
+    raise Error("Invalid WindowState. "
+                "Type {0} not in {1}".format(string,
+                                             ["DELETE",
+                                              "ONE_COPY_DELETE",
+                                              "NORMAL",
+                                              "INSERT", "TUF", "OTHER"]))
+
+
 
 class WindowIterator(object):
 
@@ -307,11 +326,11 @@ class Window(object):
     """
 
     N_WINDOW_MARKER=-999
-    
+
     @staticmethod
     def set_window_marker(marker):
         Window.N_WINDOW_MARKER= marker
-        
+
     def __init__(self, idx, capacity):
 
         # the id of the window

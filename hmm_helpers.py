@@ -15,7 +15,7 @@ class HMMCallback(object):
     self.model = None
 
   def on_epoch_end(self, logs):
-    
+
       for key in logs.keys():
           print("{0} {1}: {2}".format(INFO, key, logs[key]))
 
@@ -25,20 +25,16 @@ class HMMCallback(object):
   def on_training_end(self, logs):
     pass
 
+
+def save_hmm(hmm_model, configuration, win_interval_length):
+
+  json_str = hmm_model.to_json()
+  import json
+  with open(configuration["HMM"]["save_hmm_filename"]+
+              "_"+str(win_interval_length)+".json", 'w') as jsonfile:
+      json.dump(json_str, jsonfile)
+
 def build_hmm(hmm_file):
-  """
-
-
-  Parameters
-  ----------
-  jsonfile : TYPE
-    DESCRIPTION.
-
-  Returns
-  -------
-  None.
-
-  """
 
   with open(hmm_file) as json_file:
     hmm_json_map = json.load(json_file)
@@ -66,9 +62,6 @@ def build_hmm(hmm_file):
     hmm.bake(verbose=True)
     return hmm
 
-
-def build_edges(edges):
-  pass
 
 def build_states(hmm, states, distribution_ties):
 

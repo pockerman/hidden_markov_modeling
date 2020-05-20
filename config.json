@@ -2,8 +2,9 @@
 
   "regions":{
       "start":[1000000],
-      "end":[10000000]
+      "end":[2000000]
   },
+  "regions_files":["/home/a/ag568/region_0.txt"],
   "chromosome": "chr1",
   "reference_file":{
     "filename": "/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
@@ -25,7 +26,14 @@
   "remove_windows_with_N":false,
   "mark_N_windows":true,
   "mark_for_N_windows":-999.0,
+  "n_windows_dist":{
+    "name":"uniform",
+    "config":{
+      "parameters":[-999.5, -998.5]
+    }
+  },
   "windows_filename":"hmm_windows.json",
+  "check_windowing_sanity":true,
   "outlier_remove":{
 
     "name":"zscore",
@@ -49,26 +57,27 @@
     "n_clusters":2
     }
   },
-  "cluster_distribution":{
-    "name": "gmm",
-    "config":{
-      "distributions":{
-          "TUF":{
-              "type":"gmm",
-              "dists":["normal", "uniform"],
-              "weights":null,
-              "uniform_params":[2.0, 8.0]
+  "clusters":{
+      "normal":{
+        "filename":"/home/a/ag568/cluster_0.txt",
+        "state": "normal",
+         "distributions":{
+          "type":"distribution",
+          "name":"normal"
+        }
+      },
+      "tuf":{
+        "filename":"/home/a/ag568/cluster_1.txt",
+        "state": "tuf",
+        "distributions":{
+          "type":"gmm",
+          "uniform":{
+              "params":[2.0, 8.0]
           },
-          "OTHER":{
-              "type":"distribution",
-              "dists":["normal"]
-          },
-          "DELETE":{
-              "type":"distribution",
-              "dists":["normal"]
-          }
+          "names":["normal", "uniform"],
+          "weights":null
+        }
       }
-    }
   },
 
   "HMM": {
@@ -80,17 +89,36 @@
     "verbose":true,
     "save_model":true,
     "save_hmm_filename":"HMM_Model",
-    "start_prob":{
-      "OTHER_0": 0.475,
-      "OTHER_1": 0.475,
-      "DELETE": 0.0166,
-      "TUF": 0.0166
+    "states":{
+      "tuf":{
+        "name":"tuf",
+         "start_prob":0.48
+      },
+      "normal":{
+        "name": "normal",
+         "start_prob":0.48
+      },
+      "gap_state":{
+          "name":"gap_state",
+          "start_prob":0.04
+      }
     },
-    "train_sequence_size": 100,
-    "train_sequence_source": "region",
+    "transitions":{
+        "tuf-tuf":0.95,
+        "normal-normal":0.95,
+        "tuf-normal":0.05,
+        "normal-tuf":0.05,
+        "gap_state-gap_state":0.95,
+        "gap_state-tuf":0.05,
+        "tuf-gap_state":0.05,
+        "normal-gap_state":0.05,
+        "gap_state-normal":0.05
+     },
+    "train_sequence_size":100,
+    "train_sequence_source":"region",
     "train_n_sequences_per_source":10000,
     "train_windowtype":"both"
   },
   "logger_file":"tuf.log",
-  "logger_level": "INFO"
+  "logger_level":"INFO"
 }
