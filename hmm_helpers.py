@@ -68,8 +68,6 @@ def build_states(hmm, states, distribution_ties):
   state_objs = []
   for state in states:
 
-      print("Working with state: ", state["name"])
-      #print(state)
       state_obj = build_state(state_map=state)
 
       if state_obj is not None:
@@ -91,8 +89,6 @@ def build_state(state_map):
   dist_map = state_map["distribution"]
 
   if dist_map is not None:
-
-    #dist_name = dist_map["name"]
 
     # the state has IndependentComponentsDistribution
     # as a distribution. In this case we have more
