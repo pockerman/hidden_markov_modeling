@@ -1,14 +1,11 @@
 import argparse
 import logging
-import numpy as np
 import time
 import json
 from pomegranate import*
 
 from helpers import read_configuration_file
 from helpers import set_up_logger
-
-from helpers import Window
 from helpers import WindowType
 from helpers import WindowState
 from helpers import INFO
@@ -19,9 +16,8 @@ from hmm_helpers import save_hmm
 
 from region import Region
 
-
 from cluster import Cluster
-from cluster_utils import build_cluster_densities, label_clusters
+from cluster_utils import build_cluster_densities
 
 from preprocess_utils import get_distributions_list_from_names
 from exceptions import Error
@@ -41,7 +37,7 @@ def load_regions(configuration):
 
   for file in configuration["regions_files"]:
     region = Region.load(filename=file)
-    
+
     if "check_windowing_sanity" in configuration and configuration["check_windowing_sanity"]:
         print("{0} Check window sanity for region {1}".format(INFO, region.ridx))
         region.check_windows_sanity()
@@ -135,7 +131,9 @@ def init_hmm(clusters, configuration):
         hmm_model.add_transition(i, j, prob)
       else:
         print("{0} Transition from state"
-              " {1} to state {2} is not specified".format(WARNING, i.name.lower(), j.name.lower()))
+              " {1} to state {2} is not specified".format(WARNING,
+                                                          i.name.lower(),
+                                                          j.name.lower()))
 
   # finally we need to bake
   hmm_model.bake(verbose=True)
@@ -185,16 +183,8 @@ def hmm_train(hmm_model, regions, configuration):
       print("{0} Number of training sequences {1}".format(INFO,
                                                           len(observations)))
 
-      for i, seq in enumerate(observations):
-        if -999.0 in seq:
-          print("{0} Sequence {1} has -2.0".format(INFO, i))
-          print(seq)
-        elif (-999.0, -999.0) in seq:
-          print("{0} Sequence {1} has -2.0".format(INFO, i))
-          print(seq)
-
       print("{0} Training solver is: {1}".format(INFO,
-                                                     configuration["HMM"]["train_solver"]))
+                                                 configuration["HMM"]["train_solver"]))
       hmm_model, history = \
         hmm_model.fit(sequences=observations,
                       algorithm=configuration["HMM"]["train_solver"],
@@ -207,7 +197,7 @@ def hmm_train(hmm_model, regions, configuration):
       print("{0} No training performed.".format(INFO))
 
   #finalize the model
-  hmm_model.bake()
+  hmm_model.bake(verbose=True)
   print("{0} Done...".format(INFO))
 
   print("{0} HMM transition matrix (after fit): ".format(INFO))
@@ -221,28 +211,13 @@ def hmm_train(hmm_model, regions, configuration):
     print("{0} Done...".format(INFO))
 
 
-def main():
-
-    print("{0} Start training...".format(INFO))
-    total_start = time.perf_counter()
-    description = "Check the README file for "
-    "information on how to use the script"
-    parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('--config', type=str, default='config.json',
-                        help="You must specify a json"
-                        " formatted configuration file")
-
-
-    print("{0} Read configuration file".format(INFO))
-    args = parser.parse_args()
-    configuration = read_configuration_file(args.config)
-    print("{0} Done...".format(INFO))
+def main(configuration):
 
     print("{0} Set up logger".format(INFO))
     set_up_logger(configuration=configuration)
     logging.info("Checking if logger is sane...")
     print("{0} Done...".format(INFO))
-    
+
     print("{0} Load regions...".format(INFO))
     time_start = time.perf_counter()
     regions = load_regions(configuration=configuration)
@@ -281,9 +256,29 @@ def main():
     print("{0} Done. Execution time"
           " {1} secs".format(INFO, time_end - time_start))
 
+
+
+if __name__ == '__main__':
+    print("{0} Start training...".format(INFO))
+    total_start = time.perf_counter()
+    description = "Check the README file for "
+    "information on how to use the script"
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('--config', type=str, default='config.json',
+                        help="You must specify a json"
+                        " formatted configuration file")
+
+
+    print("{0} Read configuration file".format(INFO))
+    args = parser.parse_args()
+
+    print("{0} Read configuration file".format(INFO))
+    args = parser.parse_args()
+    configuration = read_configuration_file(args.config)
+    print("{0} Done...".format(INFO))
+
+    main(configuration=configuration)
+
     total_end = time.perf_counter()
     print("{0} Finished training. "
           "Execution time {1} secs".format(INFO, total_end - total_start))
-
-if __name__ == '__main__':
-    main()
