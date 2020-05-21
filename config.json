@@ -2,7 +2,7 @@
 
   "regions":{
       "start":[1000000],
-      "end":[2000000]
+      "end":[10000000]
   },
   "regions_files":["/home/a/ag568/region_0.txt"],
   "chromosome": "chr1",
@@ -54,7 +54,7 @@
     "init_cluster_idx":"random_from_data",
     "metric":"MANHATAN",
     "features":["mean"],
-    "n_clusters":2
+    "n_clusters":4
     }
   },
   "clusters":{
