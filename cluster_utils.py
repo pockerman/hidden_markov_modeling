@@ -81,6 +81,13 @@ def build_cluster_mean_and_std(clusters, **kwargs):
       cluster.no_wga_mean = np.mean(no_wga_data)
       cluster.no_wga_std = np.std(no_wga_data)
 
+def find_name_from_state(state, **kwargs):
+
+  for clst in kwargs['clusters']:
+    if kwargs['clusters'][clst]['state'] == state:
+      return clst
+
+  raise Error("No cluster with state {0} found".format(state))
 @timefn
 def build_cluster_densities(clusters, **kwargs):
 
@@ -88,7 +95,8 @@ def build_cluster_densities(clusters, **kwargs):
 
       for cluster in clusters:
 
-        name = cluster.state.name.lower()
+        state = cluster.state.name.lower()
+        name = find_name_from_state(state, **kwargs)
 
         # collected the data create the GMM for each
         # component in the cluster
@@ -98,7 +106,7 @@ def build_cluster_densities(clusters, **kwargs):
         no_wga_params={"mean": cluster.no_wga_mean,
                        "std": cluster.no_wga_std}
 
-        if name == 'tuf':
+        if state == 'tuf':
 
           if 'names' in kwargs[name]["distributions"]["wga"] and \
             'uniform' in kwargs[name]["distributions"]["wga"]['names']:
