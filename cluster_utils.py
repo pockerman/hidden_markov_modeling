@@ -183,7 +183,7 @@ def build_cluster_densities(clusters_lst, **kwargs):
                         "distribution method for NO_WGA sample. "
                         " Method: {0}".format(type_))
 
-      return clusters
+      return clusters_lst
 
 
 def clusters_statistics(clusters):
