@@ -16,17 +16,17 @@ class Cluster(object):
   @staticmethod
   def load(filename):
     with open(filename, 'r') as f:
-      idx = int(f.readline().split(":")[1])
-      indices = list(f.readline().split(":")[1])
+      idx = int(f.readline().split(":")[1].rstrip("\n"))
+      indices = list(f.readline().split(":")[1].rstrip("\n"))
 
       cluster = Cluster(id_=idx, indexes=indices, windows=None)
-      mean = float(f.readline().split(":")[1])
-      std = float(f.readline().split(":")[1])
+      mean = float(f.readline().split(":")[1].rstrip("\n"))
+      std = float(f.readline().split(":")[1].rstrip("\n"))
       cluster.wga_mean = mean
       cluster.wga_std = std
 
-      mean = float(f.readline().split(":")[1])
-      std = float(f.readline().split(":")[1])
+      mean = float(f.readline().split(":")[1].rstrip("\n"))
+      std = float(f.readline().split(":")[1].rstrip("\n"))
       cluster.no_wga_mean = mean
       cluster.no_wga_std = std
 

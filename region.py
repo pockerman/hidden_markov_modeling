@@ -42,47 +42,47 @@ class Region(object):
   @staticmethod
   def load(filename):
      with open(filename, 'r') as f:
-       idx = int(f.readline().split(":")[1])
-       start = int(f.readline().split(":")[1])
-       end = int(f.readline().split(":")[1])
-       w_size = int(f.readline().split(":")[1])
+       idx = int(f.readline().split(":")[1].rstrip("\n"))
+       start = int(f.readline().split(":")[1].rstrip("\n"))
+       end = int(f.readline().split(":")[1].rstrip("\n"))
+       w_size = int(f.readline().split(":")[1].rstrip("\n"))
 
        region = Region(idx=idx, start=start,
                        end=end,window_size=w_size)
 
-       n_wag_wins = int(f.readline().split(":")[1])
+       n_wag_wins = int(f.readline().split(":")[1].rstrip("\n"))
        windows = []
        for w in range(n_wag_wins):
-         wid = int(f.readline().split(":")[1])
-         cap = int(f.readline().split(":")[1])
-         size = int(f.readline().split(":")[1])
+         wid = int(f.readline().split(":")[1].rstrip("\n"))
+         cap = int(f.readline().split(":")[1].rstrip("\n"))
+         size = int(f.readline().split(":")[1].rstrip("\n"))
 
          window = Window(idx=wid, capacity=cap)
 
          for obs in range(size):
-           pos = int(f.readline().split(":")[1])
-           rd = int(f.readline().split(":")[1])
-           base = list(f.readline().split(":")[1])
+           pos = int(f.readline().split(":")[1].rstrip("\n"))
+           rd = int(f.readline().split(":")[1].rstrip("\n"))
+           base = list(f.readline().split(":")[1].rstrip("\n"))
 
            obs = Observation(position=pos, read_depth=rd, base=base)
            window.add(observation=obs)
          windows.append(window)
 
        region.set_windows(wtype=WindowType.WGA, windows=windows)
-       n_no_wag_wins = int(f.readline().split(":")[1])
+       n_no_wag_wins = int(f.readline().split(":")[1].rstrip("\n"))
 
        windows = []
        for w in range(n_no_wag_wins):
-         wid = int(f.readline().split(":")[1])
-         cap = int(f.readline().split(":")[1])
-         size = int(f.readline().split(":")[1])
+         wid = int(f.readline().split(":")[1].rstrip("\n"))
+         cap = int(f.readline().split(":")[1].rstrip("\n"))
+         size = int(f.readline().split(":")[1].rstrip("\n"))
 
          window = Window(idx=wid, capacity=cap)
 
          for obs in range(size):
-           pos = int(f.readline().split(":")[1])
-           rd = int(f.readline().split(":")[1])
-           base = list(f.readline().split(":")[1])
+           pos = int(f.readline().split(":")[1].rstrip("\n"))
+           rd = int(f.readline().split(":")[1].rstrip("\n"))
+           base = list(f.readline().split(":")[1].rstrip("\n"))
 
            obs = Observation(position=pos, read_depth=rd, base=base)
            window.add(observation=obs)
