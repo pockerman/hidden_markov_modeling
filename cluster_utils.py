@@ -112,8 +112,8 @@ def build_cluster_densities(clusters_lst, **kwargs):
         if state == 'tuf':
 
           if 'names' in kwargs['clusters'][name]["distributions"]["wga"] and \
-            'uniform' in kwargs['clusters']["distributions"]["wga"]['names']:
-            uniform_params = kwargs['clusters']["distributions"]["wga"]["uniform"]["params"]
+            'uniform' in kwargs['clusters'][name]["distributions"]["wga"]['names']:
+            uniform_params = kwargs['clusters'][name]["distributions"]["wga"]["uniform"]["params"]
             wga_params["uniform_params"] = uniform_params
 
           if 'names' in kwargs['clusters'][name]["distributions"]["no_wga"] and \
