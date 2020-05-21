@@ -89,11 +89,11 @@ def find_name_from_state(state, **kwargs):
 
   raise Error("No cluster with state {0} found".format(state))
 @timefn
-def build_cluster_densities(clusters, **kwargs):
+def build_cluster_densities(clusters_lst, **kwargs):
 
       print("{0} Build cluster densities".format(INFO))
 
-      for cluster in clusters:
+      for cluster in clusters_lst:
 
         state = cluster.state.name.lower()
         name = find_name_from_state(state, **kwargs)

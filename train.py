@@ -244,7 +244,7 @@ def main(configuration):
     #print("{0} Build cluster densities".format(INFO))
     #time_start = time.perf_counter()
     #kwargs = configuration["clusters"]
-    build_cluster_densities(clusters=clusters, **configuration)
+    build_cluster_densities(clusters_lst=clusters, **configuration)
     #time_end = time.perf_counter()
     #print("{0} Done. Execution time"
     #      " {1} secs".format(INFO, time_end - time_start))
