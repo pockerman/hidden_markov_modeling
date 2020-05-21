@@ -99,15 +99,16 @@ def build_cluster_densities(clusters, **kwargs):
                        "std": cluster.no_wga_std}
 
         if name == 'tuf':
-          uniform_params = kwargs[name]["distributions"]["wga"]["uniform"]["params"]
 
-          if uniform_params is not None:
+          if 'names' in kwargs[name]["distributions"]["wga"] and \
+            'uniform' in kwargs[name]["distributions"]["wga"]['names']:
+            uniform_params = kwargs[name]["distributions"]["wga"]["uniform"]["params"]
             wga_params["uniform_params"] = uniform_params
 
-          uniform_params = kwargs[name]["distributions"]["no_wga"]["uniform"]["params"]
-
-          if uniform_params is not None:
-            no_wga_params["uniform_params"] = uniform_params
+          if 'names' in kwargs[name]["distributions"]["no_wga"] and \
+            'uniform' in kwargs[name]["distributions"]["no_wga"]['names']:
+              uniform_params = kwargs[name]["distributions"]["no_wga"]["uniform"]["params"]
+              no_wga_params["uniform_params"] = uniform_params
 
         type_ = kwargs[name]["distributions"]["wga"]["type"]
         if type_ == "gmm":
@@ -124,6 +125,10 @@ def build_cluster_densities(clusters, **kwargs):
           cluster.wga_density = wga_gmm
         elif type_ == 'distribution':
           name = kwargs[name]["distributions"]["wga"]["name"]
+
+          if 'name' == 'uniform':
+            wga_params = kwargs[name]["distributions"]["wga"]["parameters"]
+
           wga_dist = get_distributions_list_from_names([name],
                                                        wga_params)[0]
           cluster.wga_density = wga_dist
@@ -149,6 +154,10 @@ def build_cluster_densities(clusters, **kwargs):
 
         elif type_ == "distribution":
           name = kwargs[name]["distributions"]["no_wga"]["name"]
+
+          if 'name' == 'uniform':
+            no_wga_params = kwargs[name]["distributions"]["wga"]["parameters"]
+
           non_wga_density = get_distributions_list_from_names([name],
                                                               no_wga_params)[0]
           cluster.no_wga_density = non_wga_density

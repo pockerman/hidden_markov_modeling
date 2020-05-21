@@ -58,7 +58,7 @@
     }
   },
   "clusters":{
-      "normal":{
+      "cluster_0":{
         "filename":"/home/a/ag568/cluster_0.txt",
         "state": "normal",
          "distributions":{
@@ -72,7 +72,7 @@
             }
         }
       },
-      "tuf":{
+      "cluster_1":{
         "filename":"/home/a/ag568/cluster_1.txt",
         "state": "tuf",
         "distributions":{
