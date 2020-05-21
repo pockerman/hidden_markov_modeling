@@ -62,20 +62,36 @@
         "filename":"/home/a/ag568/cluster_0.txt",
         "state": "normal",
          "distributions":{
-          "type":"distribution",
-          "name":"normal"
+          "wga":{
+            "type":"distribution",
+            "name":"normal"
+            },
+            "no_wga":{
+              "type":"distribution",
+              "name":"normal"
+            }
         }
       },
       "tuf":{
         "filename":"/home/a/ag568/cluster_1.txt",
         "state": "tuf",
         "distributions":{
-          "type":"gmm",
-          "uniform":{
+          "wga":{
+            "type":"gmm",
+            "uniform":{
               "params":[2.0, 8.0]
+            },
+            "names":["normal", "uniform"],
+            "weights":null
           },
-          "names":["normal", "uniform"],
-          "weights":null
+          "no_wga":{
+            "type":"gmm",
+            "uniform":{
+              "params":[2.0, 8.0]
+            },
+            "names":["normal", "uniform"],
+            "weights":null
+          }
         }
       }
   },

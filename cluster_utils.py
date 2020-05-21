@@ -1,7 +1,7 @@
 import numpy as np
 from pomegranate import *
 from exceptions import Error
-from helpers import INFO
+from helpers import INFO, WARNING
 from helpers import timefn
 from helpers import WindowType,  WindowState
 from preprocess_utils import get_distributions_list_from_names
@@ -99,38 +99,66 @@ def build_cluster_densities(clusters, **kwargs):
                        "std": cluster.no_wga_std}
 
         if name == 'tuf':
-          uniform_params = kwargs[name]["distributions"]["uniform"]["params"]
-          wga_params["uniform_params"] = uniform_params
-          no_wga_params["uniform_params"] = uniform_params
+          uniform_params = kwargs[name]["distributions"]["wga"]["uniform"]["params"]
 
-        if kwargs[name]["distributions"]["type"] == "gmm":
+          if uniform_params is not None:
+            wga_params["uniform_params"] = uniform_params
+
+          uniform_params = kwargs[name]["distributions"]["no_wga"]["uniform"]["params"]
+
+          if uniform_params is not None:
+            no_wga_params["uniform_params"] = uniform_params
+
+        type_ = kwargs[name]["distributions"]["wga"]["type"]
+        if type_ == "gmm":
+
+          names = kwargs[name]["distributions"]["wga"]["names"]
+          weights = kwargs[name]["distributions"]["wga"]["weights"]
 
           wga_gmm = \
               GeneralMixtureModel(
-                get_distributions_list_from_names(kwargs[name]["distributions"]["names"],
+                get_distributions_list_from_names(names,
                                                   wga_params),
-                                  weights=kwargs[name]["distributions"]["weights"])
+                                  weights=weights)
 
           cluster.wga_density = wga_gmm
-
-          non_wga_density = \
-              GeneralMixtureModel(get_distributions_list_from_names(kwargs[name]["distributions"]["names"],
-                                                                    no_wga_params),
-                                  weights=kwargs[name]["distributions"]["weights"] )
-
-          cluster.no_wga_density = non_wga_density
-
-        elif kwargs[name]["distributions"]["type"] == "distribution":
-          wga_dist = get_distributions_list_from_names([kwargs[name]["distributions"]["name"]],
+        elif type_ == 'distribution':
+          name = kwargs[name]["distributions"]["wga"]["name"]
+          wga_dist = get_distributions_list_from_names([name],
                                                        wga_params)[0]
           cluster.wga_density = wga_dist
+        elif type_ is None:
+          print("{0} No density specified for WGA sample".format(WARNING))
+        else:
+          raise Error("Invalid cluster "
+                      "distribution method for WGA sample."
+                      " Method: {0}".format(type_))
 
-          non_wga_density = get_distributions_list_from_names([kwargs[name]["distributions"]["name"]],
-                                                              no_wga_params)[0]
+
+        type_ = kwargs[name]["distributions"]["no_wga"]["type"]
+        if type_ == "gmm":
+
+          names = kwargs[name]["distributions"]["no_wga"]["names"]
+          weights = kwargs[name]["distributions"]["no_wga"]["weights"]
+          non_wga_density = \
+              GeneralMixtureModel(get_distributions_list_from_names(names,
+                                                                    no_wga_params),
+                                  weights=weights)
+
           cluster.no_wga_density = non_wga_density
 
+        elif type_ == "distribution":
+          name = kwargs[name]["distributions"]["no_wga"]["name"]
+          non_wga_density = get_distributions_list_from_names([name],
+                                                              no_wga_params)[0]
+          cluster.no_wga_density = non_wga_density
+        elif type_ is None:
+          print("{0} No density specified for NO_WGA sample".format(WARNING))
+
         else:
-            raise Error("Invalid cluster distribution method. {0}".format(kwargs[name]["distributions"]["type"]))
+            raise Error("Invalid cluster "
+                        "distribution method for NO_WGA sample. "
+                        " Method: {0}".format(type_))
 
       return clusters
 
