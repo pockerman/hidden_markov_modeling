@@ -2,6 +2,7 @@ import numpy as np
 from pomegranate import *
 from exceptions import Error
 from helpers import INFO
+from helpers import timefn
 from helpers import WindowType,  WindowState
 from preprocess_utils import get_distributions_list_from_names
 
@@ -80,13 +81,15 @@ def build_cluster_mean_and_std(clusters, **kwargs):
       cluster.no_wga_mean = np.mean(no_wga_data)
       cluster.no_wga_std = np.std(no_wga_data)
 
-
+@timefn
 def build_cluster_densities(clusters, **kwargs):
+
+      print("{0} Build cluster densities".format(INFO))
 
       for cluster in clusters:
 
         name = cluster.state.name.lower()
-        
+
         # collected the data create the GMM for each
         # component in the cluster
         wga_params={"mean": cluster.wga_mean,
@@ -101,7 +104,7 @@ def build_cluster_densities(clusters, **kwargs):
           no_wga_params["uniform_params"] = uniform_params
 
         if kwargs[name]["distributions"]["type"] == "gmm":
-            
+
           wga_gmm = \
               GeneralMixtureModel(
                 get_distributions_list_from_names(kwargs[name]["distributions"]["names"],

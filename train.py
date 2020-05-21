@@ -8,6 +8,7 @@ from helpers import read_configuration_file
 from helpers import set_up_logger
 from helpers import WindowType
 from helpers import WindowState
+from helpers import timefn
 from helpers import INFO
 from helpers import WARNING
 
@@ -22,7 +23,10 @@ from cluster_utils import build_cluster_densities
 from preprocess_utils import get_distributions_list_from_names
 from exceptions import Error
 
+@timefn
 def load_clusters(configuration):
+
+  print("{0} Load clusters".format(INFO))
   clusters=[]
 
   for clst in configuration["clusters"]:
@@ -32,7 +36,10 @@ def load_clusters(configuration):
 
   return clusters
 
+@timefn
 def load_regions(configuration):
+
+  print("{0} Load regions...".format(INFO))
   regions=[]
 
   for file in configuration["regions_files"]:
@@ -47,10 +54,11 @@ def load_regions(configuration):
 
   return regions
 
-
+@timefn
 def init_hmm(clusters, configuration):
 
 
+  print("{0} Star HMM initialization...".format(INFO))
   hmm_config = configuration["HMM"]
   n_state = None
   n_state_dist = None
@@ -139,9 +147,10 @@ def init_hmm(clusters, configuration):
   hmm_model.bake(verbose=True)
   return hmm_model
 
+@timefn
 def hmm_train(hmm_model, regions, configuration):
 
-
+  print("{0} Star HMM training...".format(INFO))
   if configuration["HMM"]["train"] == True:
       print("{0} Creating training sequence...".format(INFO))
 
@@ -218,43 +227,43 @@ def main(configuration):
     logging.info("Checking if logger is sane...")
     print("{0} Done...".format(INFO))
 
-    print("{0} Load regions...".format(INFO))
-    time_start = time.perf_counter()
+    #print("{0} Load regions...".format(INFO))
+    #time_start = time.perf_counter()
     regions = load_regions(configuration=configuration)
-    time_end = time.perf_counter()
-    print("{0} Done. Execution time"
-          " {1} secs".format(INFO, time_end - time_start))
+    #time_end = time.perf_counter()
+    #print("{0} Done. Execution time"
+    #      " {1} secs".format(INFO, time_end - time_start))
 
-    print("{0} Load clusters".format(INFO))
-    time_start = time.perf_counter()
+    #print("{0} Load clusters".format(INFO))
+    #time_start = time.perf_counter()
     clusters = load_clusters(configuration=configuration)
-    time_end = time.perf_counter()
-    print("{0} Done. Execution time"
-          " {1} secs".format(INFO, time_end - time_start))
+    #time_end = time.perf_counter()
+    #print("{0} Done. Execution time"
+    #      " {1} secs".format(INFO, time_end - time_start))
 
-    print("{0} Build cluster densities".format(INFO))
-    time_start = time.perf_counter()
+    #print("{0} Build cluster densities".format(INFO))
+    #time_start = time.perf_counter()
     kwargs = configuration["clusters"]
     build_cluster_densities(clusters=clusters, **kwargs)
-    time_end = time.perf_counter()
-    print("{0} Done. Execution time"
-          " {1} secs".format(INFO, time_end - time_start))
+    #time_end = time.perf_counter()
+    #print("{0} Done. Execution time"
+    #      " {1} secs".format(INFO, time_end - time_start))
 
-    print("{0} Star HMM initialization...".format(INFO))
-    time_start = time.perf_counter()
+    #print("{0} Star HMM initialization...".format(INFO))
+    #time_start = time.perf_counter()
     hmm = init_hmm(clusters=clusters,configuration=configuration)
-    time_end = time.perf_counter()
-    print("{0} Done. Execution time"
-          " {1} secs".format(INFO, time_end - time_start))
+    #time_end = time.perf_counter()
+    #print("{0} Done. Execution time"
+    #      " {1} secs".format(INFO, time_end - time_start))
 
-    print("{0} Star HMM training...".format(INFO))
-    time_start = time.perf_counter()
+    #print("{0} Star HMM training...".format(INFO))
+    #time_start = time.perf_counter()
     hmm_train(hmm_model=hmm,
               regions=regions,
               configuration=configuration)
-    time_end = time.perf_counter()
-    print("{0} Done. Execution time"
-          " {1} secs".format(INFO, time_end - time_start))
+    #time_end = time.perf_counter()
+    #print("{0} Done. Execution time"
+    #      " {1} secs".format(INFO, time_end - time_start))
 
 
 

@@ -2,8 +2,11 @@ import json
 import numpy as np
 import logging
 import json
+import time
 from enum import Enum
-from scipy import stats
+from functools import wraps
+
+
 
 from collections import namedtuple
 from exceptions import FullWindowException
@@ -19,12 +22,22 @@ DEBUG="DEBUG:"
 def read_configuration_file(config_file):
     """
     Read the json configuration file and
-    return a map with the configuration
-    entries
+    return a map with the config entries
     """
     with open(config_file) as json_file:
         configuration = json.load(json_file)
         return configuration
+
+def timefn(fn):
+  @wraps(fn)
+  def measure(*args, **kwargs):
+    time_start = time.perf_counter()
+    result = fn(*args, **kwargs)
+    time_end = time.perf_counter()
+    print("{0} Done. Execution time"
+          " {1} secs".format(INFO, time_end - time_start))
+    return result
+  return measure
 
 
 def save_windows(windows, configuration, win_interval_length):
@@ -38,6 +51,7 @@ def save_windows(windows, configuration, win_interval_length):
 
 
 def set_up_logger(configuration):
+
     # set up the logger
     logger_file = configuration.get("logger_file", None)
 
