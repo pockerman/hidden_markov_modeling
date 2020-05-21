@@ -96,7 +96,10 @@ def build_cluster_densities(clusters_lst, **kwargs):
       for cluster in clusters_lst:
 
         state = cluster.state.name.lower()
+
+        print("{0} Cluster state: {1}".format(INFO, state))
         name = find_name_from_state(state, **kwargs)
+        print("{0} Cluster name: {1}".format(INFO, name))
 
         # collected the data create the GMM for each
         # component in the cluster
