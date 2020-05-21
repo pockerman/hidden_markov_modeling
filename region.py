@@ -61,7 +61,7 @@ class Region(object):
 
          for obs in range(size):
            pos = int(f.readline().split(":")[1].rstrip("\n"))
-           rd = int(f.readline().split(":")[1].rstrip("\n"))
+           rd = float(f.readline().split(":")[1].rstrip("\n"))
            base = list(f.readline().split(":")[1].rstrip("\n"))
 
            obs = Observation(position=pos, read_depth=rd, base=base)
@@ -81,7 +81,7 @@ class Region(object):
 
          for obs in range(size):
            pos = int(f.readline().split(":")[1].rstrip("\n"))
-           rd = int(f.readline().split(":")[1].rstrip("\n"))
+           rd = float(f.readline().split(":")[1].rstrip("\n"))
            base = list(f.readline().split(":")[1].rstrip("\n"))
 
            obs = Observation(position=pos, read_depth=rd, base=base)
