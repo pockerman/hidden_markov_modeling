@@ -215,6 +215,6 @@ def get_distributions_list_from_names(dists_name, params):
       dists.append(UniformDistribution(params["uniform_params"][0] ,
                                        params["uniform_params"][1]))
     else:
-      raise Error("Name {0} is an unknown distribution ".format(name))
+      raise Error("Name '{0}' is an unknown distribution ".format(name))
   return dists
 
