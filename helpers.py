@@ -280,7 +280,7 @@ class WindowState(Enum):
   DELETE = 0
   ONE_COPY_DELETE = 1
   NORMAL = 2
-  INSERT = 3
+  INSERTION = 3
   TUF = 4
   NOT_NORMAL = 5
   OTHER = 6
@@ -294,19 +294,19 @@ class WindowState(Enum):
       return WindowState.ONE_COPY_DELETE
     elif string.upper() == "NORMAL":
       return WindowState.NORMAL
-    elif string.upper() == "INSERT":
-      return WindowState.INSERT
+    elif string.upper() == "INSERTION":
+      return WindowState.INSERTION
     elif string.upper() == "TUF":
       return WindowState.TUF
     elif string.upper() == "OTHER":
       return WindowState.OTHER
 
     raise Error("Invalid WindowState. "
-                "Type {0} not in {1}".format(string,
+                "Type '{0}' not in {1}".format(string,
                                              ["DELETE",
                                               "ONE_COPY_DELETE",
                                               "NORMAL",
-                                              "INSERT", "TUF", "OTHER"]))
+                                              "INSERTION", "TUF", "OTHER"]))
 
 
 
