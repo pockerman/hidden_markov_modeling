@@ -88,7 +88,7 @@
     "inertia":0.6,
     "verbose":true,
     "save_model":true,
-    "save_hmm_filename":"HMM_Model",
+    "save_hmm_filename":"/home/a/ag568/HMM_Model",
     "states":{
       "tuf":{
         "name":"tuf",
