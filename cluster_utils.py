@@ -108,21 +108,21 @@ def build_cluster_densities(clusters_lst, **kwargs):
 
         if state == 'tuf':
 
-          if 'names' in kwargs[name]["distributions"]["wga"] and \
-            'uniform' in kwargs[name]["distributions"]["wga"]['names']:
-            uniform_params = kwargs[name]["distributions"]["wga"]["uniform"]["params"]
+          if 'names' in kwargs['clusters'][name]["distributions"]["wga"] and \
+            'uniform' in kwargs['clusters']["distributions"]["wga"]['names']:
+            uniform_params = kwargs['clusters']["distributions"]["wga"]["uniform"]["params"]
             wga_params["uniform_params"] = uniform_params
 
-          if 'names' in kwargs[name]["distributions"]["no_wga"] and \
-            'uniform' in kwargs[name]["distributions"]["no_wga"]['names']:
-              uniform_params = kwargs[name]["distributions"]["no_wga"]["uniform"]["params"]
+          if 'names' in kwargs['clusters'][name]["distributions"]["no_wga"] and \
+            'uniform' in kwargs['clusters'][name]["distributions"]["no_wga"]['names']:
+              uniform_params = kwargs['clusters'][name]["distributions"]["no_wga"]["uniform"]["params"]
               no_wga_params["uniform_params"] = uniform_params
 
-        type_ = kwargs[name]["distributions"]["wga"]["type"]
+        type_ = kwargs['clusters'][name]["distributions"]["wga"]["type"]
         if type_ == "gmm":
 
-          names = kwargs[name]["distributions"]["wga"]["names"]
-          weights = kwargs[name]["distributions"]["wga"]["weights"]
+          names = kwargs['clusters'][name]["distributions"]["wga"]["names"]
+          weights = kwargs['clusters'][name]["distributions"]["wga"]["weights"]
 
           wga_gmm = \
               GeneralMixtureModel(
@@ -132,10 +132,10 @@ def build_cluster_densities(clusters_lst, **kwargs):
 
           cluster.wga_density = wga_gmm
         elif type_ == 'distribution':
-          name = kwargs[name]["distributions"]["wga"]["name"]
+          name = kwargs['clusters'][name]["distributions"]["wga"]["name"]
 
           if 'name' == 'uniform':
-            wga_params = kwargs[name]["distributions"]["wga"]["parameters"]
+            wga_params = kwargs['clusters'][name]["distributions"]["wga"]["parameters"]
 
           wga_dist = get_distributions_list_from_names([name],
                                                        wga_params)[0]
@@ -148,11 +148,11 @@ def build_cluster_densities(clusters_lst, **kwargs):
                       " Method: {0}".format(type_))
 
 
-        type_ = kwargs[name]["distributions"]["no_wga"]["type"]
+        type_ = kwargs['clusters'][name]["distributions"]["no_wga"]["type"]
         if type_ == "gmm":
 
-          names = kwargs[name]["distributions"]["no_wga"]["names"]
-          weights = kwargs[name]["distributions"]["no_wga"]["weights"]
+          names = kwargs['clusters'][name]["distributions"]["no_wga"]["names"]
+          weights = kwargs['clusters'][name]["distributions"]["no_wga"]["weights"]
           non_wga_density = \
               GeneralMixtureModel(get_distributions_list_from_names(names,
                                                                     no_wga_params),
@@ -161,10 +161,10 @@ def build_cluster_densities(clusters_lst, **kwargs):
           cluster.no_wga_density = non_wga_density
 
         elif type_ == "distribution":
-          name = kwargs[name]["distributions"]["no_wga"]["name"]
+          name = kwargs['clusters'][name]["distributions"]["no_wga"]["name"]
 
           if 'name' == 'uniform':
-            no_wga_params = kwargs[name]["distributions"]["wga"]["parameters"]
+            no_wga_params = kwargs['clusters'][name]["distributions"]["wga"]["parameters"]
 
           non_wga_density = get_distributions_list_from_names([name],
                                                               no_wga_params)[0]
