@@ -132,12 +132,14 @@ def build_cluster_densities(clusters_lst, **kwargs):
 
           cluster.wga_density = wga_gmm
         elif type_ == 'distribution':
-          name = kwargs['clusters'][name]["distributions"]["wga"]["name"]
+          dist_name = kwargs['clusters'][name]["distributions"]["wga"]["name"]
 
-          if 'name' == 'uniform':
-            wga_params = kwargs['clusters'][name]["distributions"]["wga"]["parameters"]
 
-          wga_dist = get_distributions_list_from_names([name],
+          if dist_name == 'uniform':
+            wga_params['uniform_params'] = \
+              kwargs['clusters'][name]["distributions"]["wga"]["parameters"]
+
+          wga_dist = get_distributions_list_from_names([dist_name],
                                                        wga_params)[0]
           cluster.wga_density = wga_dist
         elif type_ is None:
@@ -161,10 +163,11 @@ def build_cluster_densities(clusters_lst, **kwargs):
           cluster.no_wga_density = non_wga_density
 
         elif type_ == "distribution":
-          name = kwargs['clusters'][name]["distributions"]["no_wga"]["name"]
+          dist_name = kwargs['clusters'][name]["distributions"]["no_wga"]["name"]
 
-          if 'name' == 'uniform':
-            no_wga_params = kwargs['clusters'][name]["distributions"]["wga"]["parameters"]
+          if dist_name == 'uniform':
+            no_wga_params['uniform_params'] = \
+              kwargs['clusters'][name]["distributions"]["wga"]["parameters"]
 
           non_wga_density = get_distributions_list_from_names([name],
                                                               no_wga_params)[0]
