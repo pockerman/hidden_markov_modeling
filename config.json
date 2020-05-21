@@ -107,15 +107,12 @@
     "save_hmm_filename":"/home/a/ag568/HMM_Model",
     "states":{
       "tuf":{
-        "name":"tuf",
          "start_prob":0.48
       },
       "normal":{
-        "name": "normal",
          "start_prob":0.48
       },
       "gap_state":{
-          "name":"gap_state",
           "start_prob":0.04
       }
     },
