@@ -186,7 +186,8 @@ def create_clusters(regions, configuration):
     clusters.append(Cluster(id_ = i,
                             indexes=clusters_indexes[i],
                             windows=windows,
-                            center_idx=centers[i]))
+                            center_idx=centers[i],
+                            dist_metric=kwargs["config"]["metric"]))
 
   print("{0} Saving clusters means".format(INFO))
   save_clusters(clusters=clusters, statistic="mean")
@@ -210,11 +211,7 @@ def main(configuration):
     logging.info("Checking if logger is sane...")
     print("{0} Done...".format(INFO))
 
-    #print("{0} Creating window regions...".format(INFO))
-    #time_start = time.perf_counter()
     regions = make_window_regions(configuration=configuration)
-    #time_end = time.perf_counter()
-    #print("{0} Done. Execution time {1} secs".format(INFO, time_end - time_start))
 
     print("{0} Saving regions...".format(INFO))
     time_start = time.perf_counter()
@@ -224,24 +221,23 @@ def main(configuration):
     time_end = time.perf_counter()
     print("{0} Done. Execution time {1} secs".format(INFO, time_end - time_start))
 
-    #print("{0} Start clustering....".format(INFO))
-    #time_start = time.perf_counter()
     clusters = create_clusters(regions=regions,
                                configuration=configuration)
-    #time_end = time.perf_counter()
-    #print("{0} Done. Execution time {1} secs".format(INFO, time_end - time_start))
 
-
-    #print("{0} Fitting clusters distributions...".format(INFO))
-    #time_start = time.perf_counter()
     make_clusters_mean_and_std(clusters=clusters,
                                configuration=configuration)
-    #time_end = time.perf_counter()
-    #print("{0} Done. Execution time {1} secs".format(INFO, time_end - time_start))
-    #total_end = time.perf_counter()
 
     print("{0} Save clusters...".format(INFO))
     time_start = time.perf_counter()
+
+    if "save_cluster_dbi" in configuration and\
+      configuration["save_cluster_dbi"]:
+        for cluster in clusters:
+          cluster.diameter
+
+          for other in clusters:
+            cluster.distance_from_other(other=other)
+
     for cluster in clusters:
       cluster.save()
     time_end = time.perf_counter()

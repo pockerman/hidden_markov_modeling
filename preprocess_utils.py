@@ -5,14 +5,13 @@ Preprocessing utilities
 from pomegranate import*
 from scipy import stats
 import numpy as np
+from pyclustering.utils.metric import type_metric
+from pyclustering.utils.metric import  distance_metric
 
-from exceptions import Error
 
-#from helpers import listify_dicts_property
-from helpers import WindowState
 from helpers import WindowType
-from helpers import flat_windows
 from helpers import INFO
+from exceptions import Error
 
 VALID_DISTS = ['normal', 'uniform',
                'poisson','discrete',]
@@ -129,6 +128,27 @@ def remove_outliers(windows, removemethod, config):
   raise Error("Unknown outlier removal method: {0}".format(removemethod))
 
 
+def get_distance_metric(dist_metric, degree=4):
+  if dist_metric.upper() == "MANHATAN":
+      t_metric= type_metric.MANHATTAN
+      metric = distance_metric(metric_type=t_metric)
+  elif dist_metric.upper() == "EUCLIDEAN":
+      t_metric = type_metric.EUCLIDEAN
+      metric = distance_metric(metric_type=t_metric)
+  elif dist_metric.upper() == "CHEBYSHEV":
+      t_metric = type_metric.CHEBYSHEV
+      metric = distance_metric(metric_type=t_metric)
+  elif dist_metric.upper() == "MINKOWSKI":
+      t_metric = type_metric.MINKOWSKI
+      metric = distance_metric(metric_type=t_metric, degree=degree)
+  else:
+      raise Error("Metric type '{0}' "
+                  "not in {1}".format(dist_metric,
+                                   ['MANHATAN',"EUCLIDEAN", "CHEBYSHEV", "MINKOWSKI"]))
+
+  return metric
+
+
 def build_clusterer(data, nclusters, method, **kwargs):
 
   """
@@ -165,25 +185,11 @@ def build_clusterer(data, nclusters, method, **kwargs):
   elif method == "kmedoids":
 
     from pyclustering.cluster.kmedoids import kmedoids
-    from pyclustering.utils.metric import type_metric
-    from pyclustering.utils.metric import  distance_metric
 
 
-    if kwargs["config"]["metric"].upper() == "MANHATAN":
-      t_metric= type_metric.MANHATTAN
-      metric = distance_metric(metric_type=t_metric)
-    elif kwargs["config"]["metric"].upper() == "EUCLIDEAN":
-      t_metric = type_metric.EUCLIDEAN
-      metric = distance_metric(metric_type=t_metric)
-    elif kwargs["config"]["metric"].upper() == "CHEBYSHEV":
-      t_metric = type_metric.CHEBYSHEV
-      metric = distance_metric(metric_type=t_metric)
-    elif kwargs["config"]["metric"].upper() == "MINKOWSKI":
-      t_metric = type_metric.MINKOWSKI
-      degree = kwargs["config"]["metric_degree"]
-      metric = distance_metric(metric_type=t_metric, degree=degree)
-    else:
-      raise Error("Invalid metric specified %s"%kwargs["config"]["metric"])
+    metric = get_distance_metric(dist_metric=kwargs["config"]["metric"].upper(),
+                                 degree=kwargs["config"]["metric_degree"]
+                                 if 'metric_degree' in kwargs["config"] else 0)
 
     initial_index_medoids=[]
     if kwargs["config"]["init_cluster_idx"] == "random_from_data":
