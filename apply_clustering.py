@@ -188,7 +188,7 @@ def create_clusters(regions, configuration):
                             windows=windows,
                             center_idx=centers[i]))
 
-  print("{0} Saving cluster indices".format(INFO))
+  print("{0} Saving clusters means".format(INFO))
   save_clusters(clusters=clusters, statistic="mean")
   print("{0} Done...".format(INFO))
   return clusters
