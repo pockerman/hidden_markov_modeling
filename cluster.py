@@ -18,8 +18,11 @@ class Cluster(object):
     with open(filename, 'r') as f:
       idx = int(f.readline().split(":")[1].rstrip("\n"))
       indices = list(f.readline().split(":")[1].rstrip("\n"))
+      center = int(f.readline().split(":")[1].rstrip("\n"))
 
-      cluster = Cluster(id_=idx, indexes=indices, windows=None)
+      cluster = Cluster(id_=idx, indexes=indices,
+                        windows=None, center_idx=center)
+
       mean = float(f.readline().split(":")[1].rstrip("\n"))
       std = float(f.readline().split(":")[1].rstrip("\n"))
       cluster.wga_mean = mean
@@ -32,10 +35,11 @@ class Cluster(object):
 
       return cluster
 
-  def __init__(self, id_, indexes, windows):
+  def __init__(self, id_, indexes, windows, center_idx):
     self._id = id_
     self._indexes = indexes
-    self._windows = windows
+    self._windows = windows,
+    self._center_idx = center_idx
     self._state = WindowState.INVALID
     self._wga_density = None
     self._wga_mean = 0.0
@@ -60,6 +64,14 @@ class Cluster(object):
   @property
   def indexes(self):
     return self._indexes
+
+  @property
+  def center_idx(self):
+    return self._center_idx
+
+  @property
+  def center(self):
+    return self._windows[self._center_idx]
 
   @property
   def wga_density(self):
@@ -105,7 +117,7 @@ class Cluster(object):
   def no_wga_std(self):
     return self._no_wga_std
 
-  @wga_std.setter
+  @no_wga_std.setter
   def no_wga_std(self, value):
     self._no_wga_std = value
 
@@ -120,12 +132,13 @@ class Cluster(object):
   def save(self):
     with open("cluster_" + str(self.cidx) + ".txt", 'w') as f:
 
-      f.write("ID:"+str(self.cidx)+"\n")
-      f.write("Indices:"+str(self.indexes)+"\n")
-      f.write("WGA_MEAN:"+str(self.wga_mean)+"\n")
-      f.write("WGA_STD:"+str(self.wga_std)+"\n")
-      f.write("NO_WGA_MEAN:"+str(self.no_wga_mean)+"\n")
-      f.write("NO_WGA_STD:"+str(self.no_wga_std)+"\n")
+      f.write("ID:"+str(self.cidx) +"\n")
+      f.write("Indices:" + str(self.indexes) +"\n")
+      f.write("Center:"  + str(self._center_idx) +"\n")
+      f.write("WGA_MEAN:"+str(self.wga_mean) +"\n")
+      f.write("WGA_STD:" + str(self.wga_std) +"\n")
+      f.write("NO_WGA_MEAN:" + str(self.no_wga_mean) +"\n")
+      f.write("NO_WGA_STD:" + str(self.no_wga_std) +"\n")
 
 
   def get_sequence(self, size, window_type):
