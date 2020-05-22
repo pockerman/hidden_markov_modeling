@@ -154,19 +154,27 @@ def build_clusterer(data, nclusters, method, **kwargs):
     clusterer.fit(windows)
     return clusterer
   elif method == "kmedoids":
+
     from pyclustering.cluster.kmedoids import kmedoids
     from pyclustering.utils.metric import type_metric
     from pyclustering.utils.metric import  distance_metric
 
-    if kwargs["config"]["metric"] == "MANHATAN":
+
+    if kwargs["config"]["metric"].upper() == "MANHATAN":
       t_metric= type_metric.MANHATTAN
-    elif kwargs["config"]["metric"] == "EUCLIDEAN":
+      metric = distance_metric(metric_type=t_metric)
+    elif kwargs["config"]["metric"].upper() == "EUCLIDEAN":
       t_metric = type_metric.EUCLIDEAN
+      metric = distance_metric(metric_type=t_metric)
+    elif kwargs["config"]["metric"].upper() == "CHEBYSHEV":
+      t_metric = type_metric.CHEBYSHEV
+      metric = distance_metric(metric_type=t_metric)
+    elif kwargs["config"]["metric"].upper() == "MINKOWSKI":
+      t_metric = type_metric.MINKOWSKI
+      degree = kwargs["config"]["metric_degree"]
+      metric = distance_metric(metric_type=t_metric, degree=degree)
     else:
       raise Error("Invalid metric specified %s"%kwargs["config"]["metric"])
-
-    metric = distance_metric(metric_type=t_metric)
-
 
     initial_index_medoids=[]
     if kwargs["config"]["init_cluster_idx"] == "random_from_data":

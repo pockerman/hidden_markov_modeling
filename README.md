@@ -65,13 +65,22 @@ in the ```logger_file``` .
     "name":"kmedoids",
     "config":{
     "init_cluster_idx":"random_from_data", or a list of indices
-    "metric":"MANHATAN", or "EUCLIDEAN"
+    "metric":"MANHATAN", 
+    "metric_degree": 4, # only used when MINKOWSKI metric is applied
     "features":["mean"],
     "n_clusters":4
     }
   },
 ```
 
+Valid metrics are:
+
+
+  - ```"MANHATAN"```
+  - ```"EUCLIDEAN"```
+  - ```"CHEBYSHEV"```
+  - ```"MINKOWSKI"```
+      
 - ```"label_clusters"```: Flag indicating if the clusters should be labelled
 - ```"labeler"```: If ```label_clusters``` is set to ```true``` this map contains
 the properties of the labeler
