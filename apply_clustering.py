@@ -179,12 +179,14 @@ def create_clusters(regions, configuration):
 
   # get the window indexes
   clusters_indexes = clusterer.get_clusters()
+  centers = clusterer.get_medoids()
   clusters = []
 
   for i in range(len(clusters_indexes)):
     clusters.append(Cluster(id_ = i,
                             indexes=clusters_indexes[i],
-                            windows=windows))
+                            windows=windows,
+                            center_idx=centers[i]))
 
   print("{0} Saving cluster indices".format(INFO))
   save_clusters(clusters=clusters, statistic="mean")
