@@ -42,6 +42,15 @@ def fit_distribution(data, dist_name="normal", **kwargs):
 
 def compute_statistic(data, statistics):
 
+  valid_statistics = ["all", "mean", "var",
+                      "median", "min", "max",
+                       "mode", "q75", "q50", "q25"]
+
+  if statistics not in valid_statistics:
+            raise Error("Invalid statistsics: '{0}'"
+                        " not in {1}".format(statistics,
+                                             valid_statistics))
+
   if statistics == "mean":
     return np.mean(data)
   elif statistics == "var":

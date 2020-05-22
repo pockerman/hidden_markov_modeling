@@ -309,7 +309,6 @@ class WindowState(Enum):
                                               "INSERTION", "TUF", "OTHER"]))
 
 
-
 class WindowIterator(object):
 
     """
@@ -411,15 +410,6 @@ class Window(object):
         :param statistics:
         :return:
         """
-        valid_statistics = ["all",  "mean", "var",
-                            "median", "min", "max",
-                            "mode"]
-
-        if statistics not in valid_statistics:
-            raise Error("Invalid statistsics: '{0}'"
-                        " not in {1}".format(statistics,
-                                             valid_statistics))
-
         # accumulate RD as an array and use numpy
         rd_data = [item.read_depth for item in self._observations]
         from preprocess_utils import compute_statistic
