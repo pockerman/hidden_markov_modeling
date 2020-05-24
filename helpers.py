@@ -40,16 +40,6 @@ def timefn(fn):
   return measure
 
 
-def save_windows(windows, configuration, win_interval_length):
-
-  if configuration["save_windows"]:
-    import json
-    with open(configuration["windows_filename"]+
-                  "_"+str(win_interval_length)+".json", 'w') as jsonfile:
-      json_str = windows_to_json(windows)
-      json.dump(json_str, jsonfile)
-
-
 def set_up_logger(configuration):
 
     # set up the logger
@@ -100,156 +90,6 @@ def flat_windows_rd_from_indexes(indexes, windows):
       rd_observations.extend(windows[widx].get_rd_observations())
   return rd_observations
 
-
-def windows_to_json(windows):
-  """
-  Generate a json formatted string
-  representing the windows
-  Parameters
-  ----------
-  windows : list
-    DESCRIPTION. A list of Window instances
-
-  Returns
-  -------
-  string
-
-  """
-
-  str_map = {}
-
-  for window in windows:
-    str_map[window.get_id()] = window.to_json()
-
-  return json.dumps(str_map)
-
-
-def windows_from_json(jsonmap):
-  """
-
-
-  Parameters
-  ----------
-  jsonmap : TYPE
-    DESCRIPTION.
-
-  Returns
-  -------
-  list of Window instances
-
-  """
-
-  windows = []
-
-  for idx in jsonmap.keys():
-
-    window_str = jsonmap[idx]
-    window_data = json.loads(window_str)
-    window = Window(idx=window_data["id"],
-                    capacity=window_data["capacity"])
-
-    for obs in window_data["observations"]:
-      obsdata = json.loads(obs)
-      observaion =observation_from_json(jsonmap=obsdata)
-      window.add(observation=observaion)
-
-    windows.append(window)
-  return windows
-
-
-class Observation(object):
-  def __init__(self, position, read_depth, base):
-    self._position = int(position)
-    self._read_depth = int(read_depth)
-
-    if isinstance(base, str):
-      self._base = [base]
-    elif isinstance(base, list):
-      self._base = base
-    else:
-      raise Error("Unknown type for base "
-                  "in observation. Type {1} "
-                  "not in ['str', 'list']".format(type(base)))
-
-  @property
-  def position(self):
-    return self._position
-
-  @position.setter
-  def position(self, value):
-    self._position = value
-
-  @property
-  def read_depth(self):
-    return self._read_depth
-
-  @read_depth.setter
-  def read_depth(self, value):
-    self._read_depth = value
-
-  @property
-  def base(self):
-    return self._base
-
-  @base.setter
-  def base(self, value):
-    return self._base
-
-
-def observation_to_json(observation):
-  """
-  Returns a json formatted string for the
-  given observation
-
-  Parameters
-  ----------
-  observation : Observation
-    DESCRIPTION.
-
-  Returns
-  -------
-  json_str : string
-
-  """
-
-  json_str = {"position":observation.position,
-              "read_depth": observation.read_depth,
-              "base": observation.base}
-
-  json_str = json.dumps(json_str)
-  return json_str
-
-
-def observation_from_json(jsonmap):
-
-  observation = Observation(position=jsonmap["position"],
-                            read_depth=jsonmap["read_depth"],
-                            base=jsonmap["base"])
-  return observation
-
-
-def add_window_observation(window, windows,
-                           observation, windowcapacity):
-    """
-    Add a new observation to the given window. If the
-    window has reached its capacity a new window
-    is created and then the observation is appened
-    :param window: The window instance to add the observation
-    :param windows: The list of windows where the window is cached
-    :param observation: The observation to add in the window
-    :param windowcapacity: The maximum window capacity
-    :return: instance of Window class
-    """
-
-    if window.has_capacity():
-        window.add(observation=observation)
-    else:
-        windows.append(window)
-        window = Window(idx=window.idx + 1,
-                        capacity=windowcapacity)
-        window.add(observation=observation)
-
-    return window
 
 
 class WindowType(Enum):
@@ -344,7 +184,7 @@ class Window(object):
     def set_window_marker(marker):
         Window.N_WINDOW_MARKER= marker
 
-    def __init__(self, idx, capacity):
+    def __init__(self, idx, capacity, samdata):
 
         # the id of the window
         self._id = idx
@@ -352,10 +192,8 @@ class Window(object):
         # maximum capacity of the window
         self._capacity = capacity
 
-        # holds tuples of observations:
-        # the first tuple is the wga_treated
-        # and the second is the non wga_treated
-        self._observations = []
+        # the data collected from the SAM file
+        self._samdata = data
 
         # the state of the window
         self._state = WindowState.INVALID
@@ -382,48 +220,18 @@ class Window(object):
         return self._capacity
 
     def get_start_end_pos(self):
-      return (self._observations[0].position,
-              self._observations[len(self._observations)-1].position)
+      return (self._samdata['start'], self._samdata['end'])
 
-    def has_capacity(self):
-        """
-        Returns True if the caapacity of the
-        window has not been exhausted
-        :return: boolean
-        """
-        return (self.capacity - len(self._observations)) != 0
+    def get_rd_statistic(self, statistic):
 
-    def get_range(self, start, end):
-        """
-        Returns a range of the observations stored in
-        the window
-        :param start:
-        :param end:
-        :return:
-        """
-        return self._observations[start:end]
-
-    def get_rd_stats(self, statistics="all"):
-        """
-        Returns a statistical summary as a dictionary
-        of the read depth variable in the window
-        :param statistics:
-        :return:
-        """
-        # accumulate RD as an array and use numpy
-        rd_data = [item.read_depth for item in self._observations]
-        from preprocess_utils import compute_statistic
-        return compute_statistic(data=rd_data,
-                                 statistics=statistics)
+      if statistic== "mean":
+        return self._samdata["allmean"]
+      elif statistic == "all":
+        pass
 
 
-    def add(self, observation):
-
-        if len(self._observations) >= self._capacity:
-            raise FullWindowException(self._capacity)
-
-        # all the observations accumulated in the window
-        self._observations.append(observation)
+    def get_gc_percent(self):
+     return self._samdata["gcr"]
 
     def set_window_rd_mark(self, mark):
       try:
@@ -438,112 +246,17 @@ class Window(object):
         print("{0} For window {1} an excpetion {2}".format(ERROR, self.idx, str(e)))
         raise
 
-    def get_rd_observations(self):
-        """
-        Returns a list with read depth observations
-        contained in the window
-        :return:
-        """
-        rd_data = [item.read_depth
-                   for item in self._observations]
-        return rd_data
 
-    def get_bases(self):
-
-      bases = []
-
-      for observation in self._observations:
-        bases.append(observation.base[0])
-
-      return bases
-
-    def get_sequence(self):
-
-      seq = ""
-      for observaion in self._observations:
-        seq += observaion.base[0]
-      return seq.strip()
-
-    def has_base(self, string):
-      for observaion in self._observations:
-        if observaion.base[0].upper() == string.upper():
-          return True
-      return False
-
-    def get_gc_percent(self):
-      gc_count = 0
-
-      for observation in self._observations:
-         if observation.base[0].upper() == "C" \
-                    or observation.base[0].upper() == "G":
-                gc_count += 1
-
-      if gc_count == 0:
-        return 0
-
-      return gc_count / len(self._observations)
-
-
-    def get_gc_count(self):
-        """
-        Returns the GC count for the window
-        :return:
-        """
-        gc_count = 0
-        at_count = 0
-
-        for observation in self._observations:
-
-            if observation.base.upper() == "C" \
-                    or observation.base.upper() == "G":
-                gc_count += 1
-            elif observation.base.upper() != "N":
-                at_count += 1
-
-        if gc_count == 0:
-            return 0
-
-        return gc_count / (gc_count + at_count)
 
     def has_gaps(self):
         """
-        Returns true if the window contains gaps. This is done
-        by looping over the the window observations and check if the
-        observed positions are contiguous without gaps
-        :return:
+        Returns true if the window contains gaps.
         """
-        previous = int(self._observations[0].position)
-        for item in range(1, len(self)):
+        return self._samdata["gapAlert"]
 
-            pos = int (self._observations[item].position)
-
-            if pos != previous + 1:
-                # we have a gap
-                return True
-            else:
-                previous = pos
-        return False
-
-
-    def to_json(self):
-      """
-      Returns a json formatted string represneting
-      the window
-      """
-      json_str = {"id":self._id,
-                  "state":self._state.name,
-                  "capacity":self._capacity,}
-
-      observations = []
-      for obs in self._observations:
-        obs_json = observation_to_json(observation=obs)
-        observations.append(obs_json)
-
-      json_str["observations"] = observations
-      return json.dumps(json_str)
 
     def __len__(self):
-        return len(self._observations)
+        return len(self._samdata)
 
     def __iter__(self):
         """
@@ -582,7 +295,6 @@ class MixedWindowView(object):
 
     # the state of the window
     self._state = WindowState.INVALID
-
 
   @property
   def state(self):
@@ -631,42 +343,17 @@ class MixedWindowView(object):
             return Window.N_WINDOW_MARKER
 
         if name == WindowType.BOTH:
-          return (self._windows[WindowType.WGA].get_rd_stats(statistics=statistics),
-                  self._windows[WindowType.NO_WGA].get_rd_stats(statistics=statistics))
+          return (self._windows[WindowType.WGA].get_rd_statistic(statistic=statistics),
+                  self._windows[WindowType.NO_WGA].get_rd_statistic(statistic=statistics))
         elif name == WindowType.WGA:
-          return self._windows[WindowType.WGA].get_rd_stats(statistics=statistics)
+          return self._windows[WindowType.WGA].get_rd_statistic(statistic=statistics)
         elif name == WindowType.NO_WGA:
-          return self._windows[WindowType.NO_WGA].get_rd_stats(statistics=statistics)
+          return self._windows[WindowType.NO_WGA].get_rd_statistic(statistic=statistics)
 
         raise Error("Windowtype {0}"
                     " not in {1}".format(name, [WindowType.BOTH.name,
                                                 WindowType.WGA.name,
                                                 WindowType.NO_WGA.name]))
-
-  def get_bases(self, windowtype="both"):
-
-    if windowtype == "both":
-      wga_w = self._windows[WindowType.WGA]
-      n_wga_w = self._windows[WindowType.NO_WGA]
-
-      pairs = zip(wga_w.get_bases(), n_wga_w.get_bases())
-      return pairs
-
-  def get_sequence(self, windowtype="both"):
-
-    if windowtype == "both":
-      return (self._windows[WindowType.WGA].get_sequence(),
-              self._windows[WindowType.NO_WGA].get_sequence())
-    elif windowtype == WindowType.WGA:
-      return self._windows[WindowType.WGA].get_sequence()
-    elif windowtype == WindowType.NO_WGA:
-      return self._windows[WindowType.NO_WGA].get_sequence()
-
-
-    raise Error("Windowtype {0}"
-                " not in {1}".format(windowtype, ["both",
-                                                  WindowType.WGA.name,
-                                                  WindowType.NO_WGA.name]))
 
   def get_gc_percent(self, windowtype="both"):
     if windowtype == "both":
