@@ -144,11 +144,14 @@ def window_sam_file(chromosome, sam_file, fastafile,
             start+=1
 
     #Metrics for read depth
-    allmean = np.mean(nseq) #metrics, may not need all these
+    rdmean = np.mean(nseq)
+    rdstd  = np.std(nseq)
+    rdmedian = np.median(nseq)
+    rdsum = np.sum(nseq)
+
     qmean = np.mean(nalign)
-    allmedian = np.median(nseq)
+    qstd = np.std(nalign)
     qmedian = np.median(nalign)
-    allsum = np.sum(nseq)
     qsum = np.sum(nalign)
 
     #GC content
@@ -177,9 +180,13 @@ def window_sam_file(chromosome, sam_file, fastafile,
             'gcmin':gcmin,
             'gcr':gcr,
             'gapAlert':gapAlert,
-            'allmean':allmean,
+            'rdmean':rdmean,
+            'rdstd':rdstd,
+            'rdmedian':rdmedian,
+            'rdsum':rdsum,
             'qmean':qmean,
-            'allsum':allsum,
+            'qstd':qstd,
+            'qmedian':qmedian,
             'qsum':qsum,
             'errorAlert':errorAlert,
             'head':head,

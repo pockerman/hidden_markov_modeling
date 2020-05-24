@@ -26,9 +26,6 @@
     "log_bam_for_debug":false
   },
   "window_size":100,
-  "fill_missing_window_data":false,
-  "fill_missing_window_data_factor":0,
-
   "save_windows":false,
   "remove_windows_with_N":false,
   "mark_N_windows":true,
