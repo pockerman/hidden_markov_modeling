@@ -185,6 +185,14 @@ class Cluster(object):
   def diameter(self, value):
    self._diameter = value
 
+  @property
+  def distance_from_others(self):
+    return self._distance_from_others
+
+  @distance_from_others.setter
+  def distance_from_others(self, value):
+    self._distance_from_others = value
+
   def calculate_diameter(self):
 
     if self._windows is None:
