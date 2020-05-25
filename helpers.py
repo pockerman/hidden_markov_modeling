@@ -1,3 +1,4 @@
+import sys
 import json
 import logging
 import time
@@ -12,6 +13,11 @@ WARNING="WARNING:"
 ERROR="ERROR:"
 DEBUG="DEBUG:"
 
+
+def print_msg(msg, pid, master_pid=0):
+  if pid == master_pid:
+    print(msg)
+    sys.stdout.flush()
 
 def read_configuration_file(config_file):
     """
@@ -34,13 +40,23 @@ def timefn(fn):
   return measure
 
 
-def set_up_logger(configuration):
+def set_up_logger(configuration, **kwargs):
 
     # set up the logger
     logger_file = configuration.get("logger_file", None)
 
-    # always force logging
-    if logger_file is None:
+    if configuration["execution_type"] == "mpi":
+      pid = kwargs["pid"]
+
+      # always force logging
+      if logger_file is None:
+        logger_file = "tuf_" + str(pid) + ".log"
+      else:
+        logger_file = logger_file + "_" +  str(pid) + ".log"
+    else:
+
+      # always force logging
+      if logger_file is None:
         logger_file = "tuf.log"
 
     logging_level = configuration.get("logger_level", None)
@@ -247,6 +263,22 @@ class Window(object):
           self._samdata["rdmedian"] = compute_statistic(data=self._samdata["rseq"],
                                                      statistics="median")
           return self._samdata["rdmedian"]
+      elif statistic == "sum":
+        if "rsum" in self._samdata:
+          return self._samdata["rsum"]
+        else:
+          self._samdata["rsum"] = compute_statistic(data=self._samdata["rseq"],
+                                                     statistics="sum")
+          return self._samdata["rsum"]
+
+      elif statistic == "sum_sqrd":
+        if "rsum_sqrd" in self._samdata:
+          return self._samdata["rsum_sqrd"]
+        else:
+          self._samdata["rsum_sqrd"] = compute_statistic(data=self._samdata["rseq"],
+                                                     statistics="sum_sqrd")
+          return self._samdata["rsum_sqrd"]
+
 
       raise Error("Statistic '{0}' is not currently "
                   "computed for Window".format(statistic))

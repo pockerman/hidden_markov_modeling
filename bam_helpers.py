@@ -7,13 +7,13 @@ import logging
 import numpy as np
 import re
 
-
+from helpers import print_msg
 from helpers import Window
 from helpers import INFO, WARNING, DEBUG
 from exceptions import Error
 
 
-def extract_windows(chromosome, ref_filename, bam_filename, **args):
+def extract_windows(chromosome, ref_filename, bam_filename, pid, **args):
 
     """
     Extract the windows that couple the seq_file and ref_files
@@ -33,10 +33,14 @@ def extract_windows(chromosome, ref_filename, bam_filename, **args):
 
     with pysam.FastaFile(ref_filename) as fastafile:
 
-        print("{0} Reference file: {1}".format(INFO, fastafile.filename))
+        print_msg(msg="{0} Reference file: {1}".format(INFO, fastafile.filename),
+                  pid=pid)
+
 
         with pysam.AlignmentFile(bam_filename, "rb") as sam_file:
-            print("{0} Sam file: {1} ".format(INFO, sam_file.filename))
+
+            print_msg(msg="{0} Sam file: {1} ".format(INFO, sam_file.filename),
+                  pid=pid)
 
             wcounter = 0
             while start_idx < end_idx:
@@ -51,10 +55,9 @@ def extract_windows(chromosome, ref_filename, bam_filename, **args):
               wcounter += 1
               start_idx += windowcapacity
 
-              print("{0} Created window: {1}".format(INFO, wcounter))
+              #print("{0} Created window: {1}".format(INFO, wcounter))
 
         return windows
-
 
 
 def window_sam_file(chromosome, sam_file, fastafile,

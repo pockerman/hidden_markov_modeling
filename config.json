@@ -2,7 +2,7 @@
 
   "regions":{
       "start":[1],
-      "end":[1000000]
+      "end":[1000101]
   },
   "regions_files":["/home/a/ag568/region_0.txt"],
   "chromosome": "chr1",
@@ -15,6 +15,7 @@
   "wga_file":{
     "filename": "data/m605_chopped_1_1000101.bam"
   },
+  "execution_type":"mpi",
   "sam_read_config":{
     "max_depth":1000,
     "ignore_orphans":false,
@@ -137,6 +138,6 @@
     "train_n_sequences_per_source":10000,
     "train_windowtype":"both"
   },
-  "logger_file":"tuf.log",
+  "logger_file":"tuf",
   "logger_level":"INFO"
 }

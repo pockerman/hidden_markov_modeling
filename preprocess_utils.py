@@ -42,6 +42,7 @@ def fit_distribution(data, dist_name="normal", **kwargs):
 def compute_statistic(data, statistics):
 
   valid_statistics = ["all", "mean", "var",
+                      "sum", "sum_sqrd",
                       "median", "min", "max",
                        "mode", "q75", "q50", "q25"]
 
@@ -68,6 +69,10 @@ def compute_statistic(data, statistics):
     return np.percentile(data, [25])
   elif statistics == "q50":
     return np.percentile(data, [50])
+  elif statistics=="sum":
+    return np.sum(data)
+  elif statistics=="sum_sqrd":
+    return np.square(data)
   elif statistics == "all":
 
           mean = np.mean(data)

@@ -89,13 +89,14 @@ class Region(object):
        region.set_windows(wtype=WindowType.NO_WGA, windows=windows)
        return region
 
-  def __init__(self, idx, start, end, window_size):
+  def __init__(self, idx, pid, start, end, window_size):
 
     if end <= start:
       raise Error("Invalid start/end points. "
                   "End cannot be less than or equal to start")
 
     self._idx = idx
+    self._pid = pid
     self._start = start
     self._end = end
     self._w_size = window_size
@@ -183,7 +184,8 @@ class Region(object):
 
   def make_wga_windows(self, chromosome,
                        ref_filename,
-                       bam_filename, **kwargs):
+                       bam_filename, pid,
+                       **kwargs):
 
     args = {"start_idx": self._start,
             "end_idx": self._end,
@@ -197,7 +199,7 @@ class Region(object):
     windows = extract_windows(chromosome=chromosome,
                                   ref_filename=ref_filename,
                                   bam_filename=bam_filename,
-                                      **args)
+                                  pid=pid,**args)
 
     print("{0} Start Window: Start/End idx {1}".format(INFO, windows[0].get_start_end_pos()))
     print("{0} End Window: Start/End idx {1}".format(INFO, windows[-1].get_start_end_pos()))
@@ -205,7 +207,9 @@ class Region(object):
 
   def make_no_wga_windows(self, chromosome,
                           ref_filename,
-                          bam_filename, **kwargs):
+                          bam_filename,
+                          pid,
+                          **kwargs):
 
     args = {"start_idx": self._start,
             "end_idx": self._end,
@@ -219,6 +223,7 @@ class Region(object):
     windows = extract_windows(chromosome=chromosome,
                               ref_filename=ref_filename,
                               bam_filename=bam_filename,
+                              pid=pid,
                               **args)
 
     print("{0} Start Window: Start/End idx {1}".format(INFO, windows[0].get_start_end_pos()))
@@ -289,29 +294,30 @@ class Region(object):
     save_windows_statistic(windows=self._mixed_windows,
                            statistic="mean", region_id=self._idx)
 
-  def remove_outliers(self, configuration):
+  def remove_outliers(self, configuration, global_stats):
 
     if self._mixed_windows is None:
       raise Error("Mixed windows have not been computed")
 
     # compute the statistis
 
-    wga_rds = []
-    no_wga_rds = []
+    #wga_rds = []
+    #no_wga_rds = []
 
-    for window in self._mixed_windows:
-          if not window.is_n_window():
-            wga_rds.extend(window.get_rd_observations(name=WindowType.WGA))
-            no_wga_rds.extend(window.get_rd_observations(name=WindowType.NO_WGA))
+    #for window in self._mixed_windows:
+    #      if not window.is_n_window():
+    #        wga_rds.extend(window.get_rd_observations(name=WindowType.WGA))
+    #        no_wga_rds.extend(window.get_rd_observations(name=WindowType.NO_WGA))
 
-    wga_statistics = compute_statistic(data=wga_rds,
-                                       statistics="all")
-    no_wga_statistics = compute_statistic(data=no_wga_rds,
-                                          statistics="all")
+    #wga_statistics = compute_statistic(data=wga_rds,
+    #                                   statistics="all")
+    #no_wga_statistics = compute_statistic(data=no_wga_rds,
+    #                                      statistics="all")
 
     config = configuration["outlier_remove"]["config"]
-    config["statistics"] = {WindowType.NO_WGA: no_wga_statistics,
-                            WindowType.WGA:wga_statistics}
+    config["statistics"] = {WindowType.NO_WGA: global_stats["no_wga_statistics"],
+                            WindowType.WGA: global_stats["wga_statistics"],
+                            }
 
     self._mixed_windows = \
       remove_outliers(windows=self._mixed_windows,
@@ -350,6 +356,74 @@ class Region(object):
         counter += 1
 
     return counter
+
+  def get_rd_sum_statistic(self, wtype):
+
+    if self._mixed_windows is None:
+      raise Error("Mixed windows have not been created")
+
+    if wtype==WindowType.BOTH:
+
+      sum_ = [0.0, 0.0]
+      for window in self._mixed_windows:
+        if window.is_n_window() == False:
+          sum1, sum2 = window.get_rd_statistic(statistics="sum", name=wtype)
+          sum_[0] += sum1
+          sum_[1] += sum2
+
+      return sum_
+    else:
+      sum_ = 0.0
+      for window in self._mixed_windows:
+        if window.is_n_window() == False:
+          sum_ += window.get_rd_statistic(statistics="sum", name=wtype)
+
+      return sum_
+
+  def get_rd_sum_sqrd_statistic(self, wtype):
+
+    if self._mixed_windows is None:
+      raise Error("Mixed windows have not been created")
+
+    if wtype==WindowType.BOTH:
+
+      sum_ = [0.0, 0.0]
+      for window in self._mixed_windows:
+        if window.is_n_window() == False:
+          sum1, sum2 = window.get_rd_statistic(statistics="sum_sqrd", name=wtype)
+          sum_[0] += sum1
+          sum_[1] += sum2
+
+      return sum_
+    else:
+      sum_ = 0.0
+      for window in self._mixed_windows:
+        if window.is_n_window() == False:
+          sum_ += window.get_rd_statistic(statistics="sum_sqrd", name=wtype)
+
+      return sum_
+
+
+  def get_rd_statistic(self, statistic, wtype):
+
+    raise Error("Invalid call to Region.get_rd_statistic")
+
+    """
+    if wtype==WindowType.BOTH:
+
+      for window in self._mixed_windows:
+        if window.is_n_window() == False:
+
+      return (self._mixed_windows[WindowType.WGA].get_rd_statistic(statistic=statistic),
+              self._mixed_windows[WindowType.NO_WGA].get_rd_statistic(statistic=statistic))
+    elif wtype==WindowType.WGA:
+      return self._mixed_windows[WindowType.WGA].get_rd_statistic(statistic=statistic)
+    elif wtype == WindowType.NO_WGA:
+      return self._mixed_windows[WindowType.NO_WGA].get_rd_statistic(statistic=statistic)
+
+    raise Error("Window type '{0}' "
+                "not in ['BOTH', 'WGA', 'NO_WGA'".format(str(wtype)))
+    """
 
   def get_rd_mean_sequence(self, size, window_type):
 
