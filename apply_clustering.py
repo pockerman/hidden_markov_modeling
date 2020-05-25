@@ -51,18 +51,16 @@ def make_window_regions(configuration):
                         end=end_idx,
                         window_size=windowsize)
 
-        kwargs = {}
-
-        if "quality_theshold" in configuration:
-          kwargs["quality_theshold"] = configuration["quality_theshold"]
+        kwargs = {"sam_read_config":configuration["sam_read_config"]}
 
         if "debug" in configuration:
           kwargs["debug"] = configuration["debug"]
 
+
         print("{0} Creating WGA Windows...".format(INFO))
         region.make_wga_windows(chromosome=chromosome,
                                 ref_filename=configuration["reference_file"]["filename"],
-                                test_filename=configuration["test_file"]["filename"],
+                                bam_filename=configuration["wga_file"]["filename"],
                                 **kwargs)
 
         if region.get_n_windows(type_=WindowType.WGA) == 0:
@@ -74,7 +72,7 @@ def make_window_regions(configuration):
         print("{0} Creating No WGA Windows...".format(INFO))
         region.make_no_wga_windows(chromosome=chromosome,
                                    ref_filename=configuration["reference_file"]["filename"],
-                                   test_filename=configuration["no_wga_file"]["filename"],
+                                   bam_filename=configuration["no_wga_file"]["filename"],
                                    **kwargs)
 
         if region.get_n_windows(type_=WindowType.NO_WGA) == 0:

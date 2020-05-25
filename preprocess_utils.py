@@ -166,7 +166,7 @@ def build_clusterer(data, nclusters, method, **kwargs):
 
   for window in data:
 
-    window_data = window.get_rd_stats(statistics="all")
+    window_data = window.get_rd_statistic(statistics="all")
     window_values =[]
 
     for feature in features:

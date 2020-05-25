@@ -1,15 +1,9 @@
 import json
-import numpy as np
 import logging
-import json
 import time
 from enum import Enum
 from functools import wraps
 
-
-
-from collections import namedtuple
-from exceptions import FullWindowException
 from exceptions import Error
 
 DUMMY_ID = -1
@@ -193,7 +187,7 @@ class Window(object):
         self._capacity = capacity
 
         # the data collected from the SAM file
-        self._samdata = data
+        self._samdata = samdata
 
         # the state of the window
         self._state = WindowState.INVALID
@@ -219,41 +213,55 @@ class Window(object):
         """
         return self._capacity
 
+    def get_rd_observations(self):
+      return self._samdata["rdseq"]
+
+    def get_gc_observations(self):
+      return self._samdata["qseq"]
+
     def get_start_end_pos(self):
       return (self._samdata['start'], self._samdata['end'])
 
     def get_rd_statistic(self, statistic):
 
-      if statistic== "mean":
-        return self._samdata["allmean"]
-      elif statistic == "all":
-        pass
+      from preprocess_utils import compute_statistic
 
+      if statistic== "mean":
+        if "rdmean" in self._samdata:
+          return self._samdata["rdmean"]
+        else:
+          self._samdata["rdmean"]= compute_statistic(data=self._samdata["rseq"],
+                                                     statistics="mean")
+          return self._samdata["rdmean"]
+      elif statistic == "var":
+        if "rdvar" in self._samdata:
+          return self._samdata["rdvar"]
+        else:
+          self._samdata["rdvar"] = compute_statistic(data=self._samdata["rseq"],
+                                                     statistics="var")
+          return self._samdata["rdvar"]
+      elif statistic == "median":
+        if "rdmedian" in self._samdata:
+          return self._samdata["rdmedian"]
+        else:
+          self._samdata["rdmedian"] = compute_statistic(data=self._samdata["rseq"],
+                                                     statistics="median")
+          return self._samdata["rdmedian"]
+
+      raise Error("Statistic '{0}' is not currently "
+                  "computed for Window".format(statistic))
 
     def get_gc_percent(self):
      return self._samdata["gcr"]
 
     def set_window_rd_mark(self, mark):
-      try:
         Window.set_window_marker(marker=mark)
-        for obs in self._observations:
-          try:
-            obs.read_depth=mark
-          except Exception as e:
-            print("{0} At observation {1} {2}".format(ERROR, obs, str(e)))
-            raise
-      except Exception as e:
-        print("{0} For window {1} an excpetion {2}".format(ERROR, self.idx, str(e)))
-        raise
-
-
 
     def has_gaps(self):
         """
         Returns true if the window contains gaps.
         """
         return self._samdata["gapAlert"]
-
 
     def __len__(self):
         return len(self._samdata)
@@ -316,7 +324,7 @@ class MixedWindowView(object):
   def get_window(self, wtype):
     return self._windows[wtype]
 
-  def get_rd_counts(self, name):
+  def get_rd_observations(self, name):
 
      if name == WindowType.BOTH:
           return (self._windows[WindowType.WGA].get_rd_observations(),
@@ -329,7 +337,7 @@ class MixedWindowView(object):
      raise Error("Name {0} is invalid ".format(name))
 
 
-  def get_rd_stats(self, statistics="all", name=WindowType.BOTH):
+  def get_rd_statistic(self, statistics="all", name=WindowType.BOTH):
         """
         Returns a statistical summary as a dictionary
         of the read depth variable in the window
@@ -354,22 +362,6 @@ class MixedWindowView(object):
                     " not in {1}".format(name, [WindowType.BOTH.name,
                                                 WindowType.WGA.name,
                                                 WindowType.NO_WGA.name]))
-
-  def get_gc_percent(self, windowtype="both"):
-    if windowtype == "both":
-      return self._windows[WindowType.WGA].get_gc_percent(),\
-        self._windows[WindowType.NO_WGA].get_gc_percent()
-    elif windowtype == WindowType.WGA:
-      return self._windows[WindowType.WGA].get_gc_percent()
-    elif windowtype == WindowType.NO_WGA:
-      return self._windows[WindowType.NO_WGA].get_gc_percent()
-
-    raise Error("Windowtype {0}"
-                " not in {1}".format(windowtype, ["both",
-                                                  WindowType.WGA.name,
-                                                  WindowType.NO_WGA.name]))
-
-
 
 
 

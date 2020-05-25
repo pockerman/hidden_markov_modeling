@@ -1,7 +1,6 @@
 from helpers import WindowType
 from helpers import MixedWindowView
 from helpers import Window
-from helpers import Observation
 from helpers import WARNING, INFO
 from exceptions import Error
 from preprocess_utils import remove_outliers
@@ -64,8 +63,8 @@ class Region(object):
            rd = float(f.readline().split(":")[1].rstrip("\n"))
            base = list(f.readline().split(":")[1].rstrip("\n"))
 
-           obs = Observation(position=pos, read_depth=rd, base=base)
-           window.add(observation=obs)
+           #obs = Observation(position=pos, read_depth=rd, base=base)
+           #window.add(observation=obs)
          windows.append(window)
 
        region.set_windows(wtype=WindowType.WGA, windows=windows)
@@ -84,8 +83,8 @@ class Region(object):
            rd = float(f.readline().split(":")[1].rstrip("\n"))
            base = list(f.readline().split(":")[1].rstrip("\n"))
 
-           obs = Observation(position=pos, read_depth=rd, base=base)
-           window.add(observation=obs)
+           #obs = Observation(position=pos, read_depth=rd, base=base)
+           #window.add(observation=obs)
          windows.append(window)
        region.set_windows(wtype=WindowType.NO_WGA, windows=windows)
        return region
@@ -184,21 +183,20 @@ class Region(object):
 
   def make_wga_windows(self, chromosome,
                        ref_filename,
-                       test_filename, **kwargs):
+                       bam_filename, **kwargs):
 
     args = {"start_idx": self._start,
             "end_idx": self._end,
             "windowsize": self._w_size}
 
-    if "quality_theshold" in kwargs:
-      args["quality_theshold"] = kwargs["quality_theshold"]
-
     if "debug" in kwargs:
       args["debug"] = kwargs["debug"]
 
+    args["sam_read_config"]=kwargs["sam_read_config"]
+
     windows = extract_windows(chromosome=chromosome,
                                   ref_filename=ref_filename,
-                                  test_filename=test_filename,
+                                  bam_filename=bam_filename,
                                       **args)
 
     print("{0} Start Window: Start/End idx {1}".format(INFO, windows[0].get_start_end_pos()))
@@ -207,27 +205,25 @@ class Region(object):
 
   def make_no_wga_windows(self, chromosome,
                           ref_filename,
-                          test_filename, **kwargs):
+                          bam_filename, **kwargs):
 
     args = {"start_idx": self._start,
             "end_idx": self._end,
             "windowsize": self._w_size}
 
-    if "quality_theshold" in kwargs:
-      args["quality_theshold"] = kwargs["quality_theshold"]
-
     if "debug" in kwargs:
       args["debug"] = kwargs["debug"]
 
+    args["sam_read_config"]=kwargs["sam_read_config"]
+
     windows = extract_windows(chromosome=chromosome,
                               ref_filename=ref_filename,
-                              test_filename=test_filename,
+                              bam_filename=bam_filename,
                               **args)
 
     print("{0} Start Window: Start/End idx {1}".format(INFO, windows[0].get_start_end_pos()))
     print("{0} End Window: Start/End idx {1}".format(INFO, windows[-1].get_start_end_pos()))
     self._windows[WindowType.NO_WGA] = windows
-
 
   def check_windows_sanity(self):
 
@@ -258,9 +254,6 @@ class Region(object):
                                                                       start_no_wga,
                                                                       end_no_wga))
 
-
-
-
   def get_mixed_windows(self):
 
     if self._mixed_windows is not None:
@@ -279,11 +272,11 @@ class Region(object):
      # filter the windows for N's
      wga_filter_windows = [window
                            for window in self._windows[WindowType.WGA]
-                                  if not window.has_base("N")]
+                                  if not window.has_gaps()]
 
      no_wga_filter_windows = [window
                               for window in self._windows[WindowType.NO_WGA]
-                                  if not window.has_base("N")]
+                                  if not window.has_gaps()]
 
      self._windows[WindowType.WGA] = wga_filter_windows
      self._windows[WindowType.NO_WGA] = no_wga_filter_windows
@@ -308,8 +301,8 @@ class Region(object):
 
     for window in self._mixed_windows:
           if not window.is_n_window():
-            wga_rds.extend(window.get_rd_counts(name=WindowType.WGA))
-            no_wga_rds.extend(window.get_rd_counts(name=WindowType.NO_WGA))
+            wga_rds.extend(window.get_rd_observations(name=WindowType.WGA))
+            no_wga_rds.extend(window.get_rd_observations(name=WindowType.NO_WGA))
 
     wga_statistics = compute_statistic(data=wga_rds,
                                        statistics="all")
@@ -335,19 +328,20 @@ class Region(object):
       wga_w = window.get_window(wtype=WindowType.WGA)
       n_wga_w = window.get_window(wtype=WindowType.NO_WGA)
 
-      if wga_w.has_base("N") == True and\
-        n_wga_w.has_base("N") == False:
+      ## Add error if one has N and the other not
+      if wga_w.has_gaps() == True and\
+        n_wga_w.has_gaps() == False:
         raise Error("WGA Window {0} has N "
                     "but Non WGA Window {1} does not".format(wga_w.idx,
                                                              n_wga_w.idx))
-      elif wga_w.has_base("N") == False and\
-        n_wga_w.has_base("N") == True:
+      elif wga_w.has_gaps() == False and\
+        n_wga_w.has_gaps() == True:
         raise Error("WGA Window {0} does not have N "
                     "but Non WGA Window {1} does".format(wga_w.idx,
                                                          n_wga_w.idx))
 
-      ## Add error if one has N and the other not
-      if wga_w.has_base("N") or n_wga_w.has_base("N"):
+
+      if wga_w.has_gaps() or n_wga_w.has_gaps():
         wga_w.set_window_rd_mark(mark=n_mark)
         wga_w.state = WindowType.N_WIN
 
@@ -357,7 +351,7 @@ class Region(object):
 
     return counter
 
-  def get_sequence(self, size, window_type):
+  def get_rd_mean_sequence(self, size, window_type):
 
 
     sequence =[]
@@ -365,7 +359,7 @@ class Region(object):
     if size < len(self._mixed_windows):
         counter = 0
         for window in self._mixed_windows:
-          sequence.append(window.get_rd_stats(statistics="mean", name=window_type))
+          sequence.append(window.get_rd_statistic(statistics="mean", name=window_type))
           counter +=1
 
           if counter == size:
@@ -374,17 +368,17 @@ class Region(object):
 
       print("{0} Region size is less than {1}".format(WARNING, size))
       for window in self._mixed_windows:
-          sequence.append(window.get_rd_stats(statistics="mean",name=window_type))
+          sequence.append(window.get_rd_statistic(statistics="mean",name=window_type))
 
     return sequence
 
-  def get_region_as_sequences(self, size, window_type, n_seqs):
+  def get_region_as_rd_mean_sequences(self, size, window_type, n_seqs):
 
     sequences = []
     sequence_local=[]
     for window in self._mixed_windows:
-      sequence_local.append(window.get_rd_stats(statistics="mean",
-                                                name=window_type))
+      sequence_local.append(window.get_rd_statistic(statistics="mean",
+                                                    name=window_type))
 
       if len(sequence_local) == size:
         sequences.append(sequence_local)
@@ -399,28 +393,12 @@ class Region(object):
         return self.get_n_mixed_windows()
 
   def __iter__(self):
-        """
-        Produce an iterator to iterate over the accumulated
-        window observations
-        :return:
-        """
         return RegionIterator(data=self._mixed_windows)
 
   def __getitem__(self, item):
-        """
-        Returns the item-th observation
-        :param item: int the index of the observation to access
-        :return: Observation instance
-        """
         return self._mixed_windows[item]
 
   def __setitem__(self, o, value):
-        """
-        Set the o-th observation to value
-        :param o:
-        :param value:
-        :return:
-        """
         self._mixed_windows[o] = value
 
 

@@ -7,15 +7,13 @@ import logging
 import numpy as np
 import re
 
-from collections import Counter
-from helpers import Window, Observation, DUMMY_ID
-from helpers import add_window_observation
+
+from helpers import Window
 from helpers import INFO, WARNING, DEBUG
-from exceptions import FullWindowException
 from exceptions import Error
 
 
-def extract_windows(chromosome, ref_filename, test_filename, **args):
+def extract_windows(chromosome, ref_filename, bam_filename, **args):
 
     """
     Extract the windows that couple the seq_file and ref_files
@@ -37,7 +35,7 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
 
         print("{0} Reference file: {1}".format(INFO, fastafile.filename))
 
-        with pysam.AlignmentFile(test_filename, "rb") as sam_file:
+        with pysam.AlignmentFile(bam_filename, "rb") as sam_file:
             print("{0} Sam file: {1} ".format(INFO, sam_file.filename))
 
             wcounter = 0
@@ -46,12 +44,14 @@ def extract_windows(chromosome, ref_filename, test_filename, **args):
                                        sam_file=sam_file,
                                        fastafile=fastafile,
                                        start=start_idx, end=start_idx+windowcapacity,
-                                       **kwargs)
+                                       **args)
               windows.append(Window(idx=wcounter,
                                     capacity=windowcapacity,
                                     samdata=sam_output))
               wcounter += 1
               start_idx += windowcapacity
+
+              print("{0} Created window: {1}".format(INFO, wcounter))
 
         return windows
 
@@ -93,7 +93,7 @@ def window_sam_file(chromosome, sam_file, fastafile,
             pos.append(start)
             nseq.append(0)
             nalign.append(0)
-            start+=1
+            start += 1
 
     #collect metrics for pileup column
     pos.append(start)
@@ -132,7 +132,7 @@ def window_sam_file(chromosome, sam_file, fastafile,
                                               pcol.reference_pos+1))
             except Exception as e:
                 errorAlert = True
-    start+=1
+    start += 1
 
     #fill in end if no reads at end of window
     while start < end:
@@ -144,15 +144,17 @@ def window_sam_file(chromosome, sam_file, fastafile,
             start+=1
 
     #Metrics for read depth
-    rdmean = np.mean(nseq)
-    rdstd  = np.std(nseq)
-    rdmedian = np.median(nseq)
-    rdsum = np.sum(nseq)
+    rdseq = nseq
+   #rdmean = np.mean(nseq)
+   # rdstd  = np.std(nseq)
+    #rdmedian = np.median(nseq)
+    #rdsum = np.sum(nseq)
 
-    qmean = np.mean(nalign)
-    qstd = np.std(nalign)
-    qmedian = np.median(nalign)
-    qsum = np.sum(nalign)
+    qseq = nalign
+    #qmean = np.mean(nalign)
+    #qstd = np.std(nalign)
+    #qmedian = np.median(nalign)
+    #qsum = np.sum(nalign)
 
     #GC content
     gcr = (refseq.count('G') + refseq.count('g') + refseq.count('C') + refseq.count('c'))/len(refseq)
@@ -176,22 +178,24 @@ def window_sam_file(chromosome, sam_file, fastafile,
         gcmax = gct if gct > gcmax else gcmax
         gcmin = gct if gct < gcmin else gcmin
 
-    output={'gcmax':gcmax,
-            'gcmin':gcmin,
-            'gcr':gcr,
-            'gapAlert':gapAlert,
-            'rdmean':rdmean,
-            'rdstd':rdstd,
-            'rdmedian':rdmedian,
-            'rdsum':rdsum,
-            'qmean':qmean,
-            'qstd':qstd,
-            'qmedian':qmedian,
-            'qsum':qsum,
+    output={'gcmax': gcmax,
+            'gcmin': gcmin,
+            'gcr': gcr,
+            'gapAlert': gapAlert,
+            'rdseq': rdseq,
+            #'rdmean': rdmean,
+            #'rdstd': rdstd,
+            #'rdmedian': rdmedian,
+            #'rdsum':rdsum,
+            'qseq': qseq,
+            #'qmean':qmean,
+            #'qstd':qstd,
+            #'qmedian':qmedian,
+            #'qsum':qsum,
             'errorAlert':errorAlert,
             'head':head,
             'start':pos[0],
-            'end':pos[-1]
+            'end': pos[-1]
             }
 
     return output

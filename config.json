@@ -1,25 +1,25 @@
 {
 
   "regions":{
-      "start":[1000000],
-      "end":[10000000]
+      "start":[1],
+      "end":[1000000]
   },
   "regions_files":["/home/a/ag568/region_0.txt"],
   "chromosome": "chr1",
   "reference_file":{
-    "filename": "/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
+    "filename": "data/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna"
   },
   "no_wga_file": {
-     "filename": "/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam"
+     "filename": "data/m585_chopper_1_1000101.bam"
   },
-  "test_file":{
-    "filename": "/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam"
+  "wga_file":{
+    "filename": "data/m605_chopped_1_1000101.bam"
   },
   "sam_read_config":{
     "max_depth":1000,
     "ignore_orphans":false,
     "truncate":true,
-    "quality_threshold":null,
+    "quality_threshold":20,
     "add_indels":true
   },
   "debug":{
