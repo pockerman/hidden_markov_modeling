@@ -146,22 +146,29 @@ class Region(object):
         f.write("WID:"+str(window.idx) + "\n")
         f.write("Capacity:"+str(window.capacity) + "\n")
         f.write("Size:"+str(len(window)) + "\n")
+        f.write("N props:" +str(len(window.sam_property_names())) + "\n")
+        for name in window.sam_property_names():
+          f.write(name +":" + str(window.sam_property(name)) + "\n")
 
-        for obs in window:
-          f.write("Pos:"+str(obs.position) + "\n")
-          f.write("RD:"+str(obs.read_depth) + "\n")
-          f.write("Base:"+str(obs.base) + "\n")
+        f.write("N statistics" +str(len(window.get_statistics_map())) + "\n")
+
+        for name in window.get_statistics_map():
+          f.write(name +":" + str(window.get_statistics_value(name)) + "\n")
 
       f.write("NO_WGA_N_WINDOWS:"+str(self.get_n_windows(type_=WindowType.NO_WGA)) + "\n")
       for window in self._windows[WindowType.NO_WGA]:
         f.write("WID:"+str(window.idx) + "\n")
         f.write("Capacity:"+str(window.capacity) + "\n")
         f.write("Size:"+str(len(window)) + "\n")
+        f.write("N props:" +str(len(window.sam_property_names())) +"\n")
 
-        for obs in window:
-          f.write("Pos:"+str(obs.position) + "\n")
-          f.write("RD:"+str(obs.read_depth) + "\n")
-          f.write("Base:"+str(obs.base) + "\n")
+        for name in window.sam_property_names():
+          f.write(name +":" + str(window.sam_property(name)) + "\n")
+
+        f.write("N statistics" +str(len(window.get_statistics_map())) + "\n")
+
+        for name in window.get_statistics_map():
+          f.write(name +":" + str(window.get_statistics_value(name)) + "\n")
 
   def count_n_windows(self):
 
@@ -195,12 +202,12 @@ class Region(object):
     args["sam_read_config"]=kwargs["sam_read_config"]
 
     windows = extract_windows(chromosome=chromosome,
-                                  ref_filename=ref_filename,
-                                  bam_filename=bam_filename,
+                              ref_filename=ref_filename,
+                              bam_filename=bam_filename,
                                       **args)
 
-    print("{0} Start Window: Start/End idx {1}".format(INFO, windows[0].get_start_end_pos()))
-    print("{0} End Window: Start/End idx {1}".format(INFO, windows[-1].get_start_end_pos()))
+    print("{0} Start Window: Start/End idx {1}".format(INFO, windows[0].start_end_pos))
+    print("{0} End Window: Start/End idx {1}".format(INFO, windows[-1].start_end_pos))
     self._windows[WindowType.WGA] = windows
 
   def make_no_wga_windows(self, chromosome,
@@ -221,8 +228,8 @@ class Region(object):
                               bam_filename=bam_filename,
                               **args)
 
-    print("{0} Start Window: Start/End idx {1}".format(INFO, windows[0].get_start_end_pos()))
-    print("{0} End Window: Start/End idx {1}".format(INFO, windows[-1].get_start_end_pos()))
+    print("{0} Start Window: Start/End idx {1}".format(INFO, windows[0].start_end_pos))
+    print("{0} End Window: Start/End idx {1}".format(INFO, windows[-1].start_end_pos))
     self._windows[WindowType.NO_WGA] = windows
 
   def check_windows_sanity(self):
@@ -267,7 +274,7 @@ class Region(object):
 
     return self._mixed_windows
 
-  def remove_windows_with_ns(self):
+  def remove_windows_with_gaps(self):
 
      # filter the windows for N's
      wga_filter_windows = [window
@@ -304,6 +311,12 @@ class Region(object):
             wga_rds.extend(window.get_rd_observations(name=WindowType.WGA))
             no_wga_rds.extend(window.get_rd_observations(name=WindowType.NO_WGA))
 
+
+    if len(wga_rds) == 0 or len(no_wga_rds) == 0:
+      print("{0} Cannot remove outliers for region. "
+            "Empty RD list detected".format(WARNING))
+      return
+
     wga_statistics = compute_statistic(data=wga_rds,
                                        statistics="all")
     no_wga_statistics = compute_statistic(data=no_wga_rds,
@@ -318,7 +331,7 @@ class Region(object):
                       removemethod=configuration["outlier_remove"]["name"],
                       config=config)
 
-  def mark_windows_with_ns(self, n_mark):
+  def mark_windows_with_gaps(self, n_mark):
 
     if self._mixed_windows is None:
       raise Error("Mixed windows have not been computed")
