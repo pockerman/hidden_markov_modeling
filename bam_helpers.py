@@ -65,7 +65,7 @@ def window_sam_file(chromosome, sam_file, fastafile,
                     start, end, **kwargs):
 
   # store the refseq
-  refseq = array.array('u')
+  refseq = '' #array.array('u')
 
   # store for the sample
   samseq = array.array('u')
@@ -93,7 +93,7 @@ def window_sam_file(chromosome, sam_file, fastafile,
     #fill in start when there are no reads present
     while pcol.reference_pos != start:
             samseq.append('_')
-            refseq.append(str(fastafile.fetch(chromosome,start,start+1)))
+            refseq += fastafile.fetch(chromosome,start,start+1)
             pos.append(start)
             nseq.append(0)
             nalign.append(0)
@@ -120,20 +120,20 @@ def window_sam_file(chromosome, sam_file, fastafile,
     try:
             if pcol.get_num_aligned() == 0:
                 samseq.append('_')
-                refseq.append(str(fastafile.fetch(chromosome, pcol.reference_pos,
-                                              pcol.reference_pos+1)))
+                refseq += fastafile.fetch(chromosome, pcol.reference_pos,
+                                              pcol.reference_pos+1)
             else:
                 x = pcol.get_query_sequences(add_indels=kwargs["sam_read_config"]["add_indels"])
                 x = [a.upper() for a in x]
                 samseq.append(set(x)) #store as unique set
-                refseq.append(fastafile.fetch(chromosome,pcol.reference_pos,pcol.reference_pos+1))
+                refseq += fastafile.fetch(chromosome,pcol.reference_pos,pcol.reference_pos+1)
     except Exception as e: # may fail if large number of reads
             try:
                 x = pcol.get_query_sequences(add_indels=kwargs["sam_read_config"]["add_indels"])
                 x = [a.upper() for a in x]
                 samseq.append(set(x)) #store as unique set
-                refseq.append(fastafile.fetch(chromosome, pcol.reference_pos,
-                                              pcol.reference_pos+1))
+                refseq += fastafile.fetch(chromosome, pcol.reference_pos,
+                                              pcol.reference_pos+1)
             except Exception as e:
                 errorAlert = True
     start += 1
@@ -141,7 +141,7 @@ def window_sam_file(chromosome, sam_file, fastafile,
   #fill in end if no reads at end of window
   while start < end:
             samseq.append('_')
-            refseq.append(str(fastafile.fetch(chromosome,start,start+1)))
+            refseq += fastafile.fetch(chromosome,start,start+1)
             pos.append(start)
             nseq.append(0)
             nalign.append(0)
