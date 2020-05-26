@@ -6,6 +6,7 @@ import pysam
 import logging
 import numpy as np
 import re
+import array
 
 
 from helpers import Window
@@ -64,13 +65,13 @@ def window_sam_file(chromosome, sam_file, fastafile,
                     start, end, **kwargs):
 
   # store the refseq
-  refseq = []
+  refseq = array.array('u')
 
   # store for the sample
-  samseq = []
-  pos = [] #reference pos
-  nseq = [] #all reads
-  nalign = [] #quality limited reads
+  samseq = array.array('u')
+  pos = array.array('L') #[] #reference pos
+  nseq = array.array('L') #[] #all reads
+  nalign = array.array('L') #[] #quality limited reads
   head = 0 #whether read starts in window
   head1 = 0 #start of read 1 in pair
   head2 = 0 #start of read 2 in pair
@@ -147,23 +148,23 @@ def window_sam_file(chromosome, sam_file, fastafile,
             start+=1
 
   #Metrics for read depth
-  rdseq = nseq
-   #rdmean = np.mean(nseq)
-   # rdstd  = np.std(nseq)
-    #rdmedian = np.median(nseq)
-    #rdsum = np.sum(nseq)
+  #allmean = nseq
+  rdmean = np.mean(nseq)
+  rdstd  = np.std(nseq)
+  rdmedian = np.median(nseq)
+  rdsum = np.sum(nseq)
 
-  qseq = nalign
-    #qmean = np.mean(nalign)
-    #qstd = np.std(nalign)
-    #qmedian = np.median(nalign)
-    #qsum = np.sum(nalign)
+  #qseq = nalign
+  qmean = np.mean(nalign)
+  qstd = np.std(nalign)
+  qmedian = np.median(nalign)
+  qsum = np.sum(nalign)
 
     #GC content
   gcr = (refseq.count('G') + refseq.count('g') + refseq.count('C') + refseq.count('c'))/len(refseq)
   gapAlert = True if 'N' in refseq or 'n' in refseq else False
 
-  altseq = ['']
+  altseq = array.array('u')
   for bs in samseq:
         talt = []
         for i in range(len(altseq)):
@@ -174,31 +175,36 @@ def window_sam_file(chromosome, sam_file, fastafile,
 
   gcmax = 0
   gcmin = 1
-
+  minLen = pos[-1] - pos[0] +1
   for alt in altseq:
-        t1 = re.sub('[\+\-_Nn*]','',alt)
-        gct = len(re.sub('[\+\-_Nn*AaTt]','',alt))/len(re.sub('[\+\-_Nn*]','',alt))
-        gcmax = gct if gct > gcmax else gcmax
-        gcmin = gct if gct < gcmin else gcmin
+        minLen = len(re.sub('[\+\-_Nn*]','',alt)) if len(re.sub('[\+\-_Nn*]','',alt)) < minLen else minLen
+
+        try:
+          gct = len(re.sub('[\+\-_Nn*AaTt]','',alt))/len(re.sub('[\+\-_Nn*]','',alt))
+          gcmax = gct if gct > gcmax else gcmax
+          gcmin = gct if gct < gcmin else gcmin
+        except:
+          pass
 
   output={'gcmax': gcmax,
             'gcmin': gcmin,
             'gcr': gcr,
             'gapAlert': gapAlert,
-            'rdseq': rdseq,
-            #'rdmean': rdmean,
-            #'rdstd': rdstd,
-            #'rdmedian': rdmedian,
-            #'rdsum':rdsum,
-            'qseq': qseq,
-            #'qmean':qmean,
-            #'qstd':qstd,
-            #'qmedian':qmedian,
-            #'qsum':qsum,
+            #'allmean': nseq,
+            'rdmean': rdmean,
+            'rdstd': rdstd,
+            'rdmedian': rdmedian,
+            'rdsum':rdsum,
+            #'qseq': nalign,
+            'qmean':qmean,
+            'qstd':qstd,
+            'qmedian':qmedian,
+            'qsum':qsum,
             'errorAlert':errorAlert,
             'head':head,
             'start':pos[0],
-            'end': pos[-1]
+            'end': pos[-1],
+            'minLen':minLen
             }
 
   return output

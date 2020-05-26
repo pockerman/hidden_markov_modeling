@@ -85,7 +85,6 @@ def flat_windows_rd_from_indexes(indexes, windows):
   return rd_observations
 
 
-
 class WindowType(Enum):
   WGA = 0
   NO_WGA = 1
@@ -245,26 +244,12 @@ class Window(object):
       from preprocess_utils import compute_statistic
 
       if statistic== "mean":
-        if "rdmean" in self._statistics:
-          return self._statistics["rdmean"]
-        else:
-          self._statistics["rdmean"]= compute_statistic(data=self._samdata["rseq"],
-                                                     statistics="mean")
-          return self._statistics["rdmean"]
+        return self._samdata["qmean"]
+
       elif statistic == "var":
-        if "rdvar" in self._statistics:
-          return self._statistics["rdvar"]
-        else:
-          self._statistics["rdvar"] = compute_statistic(data=self._samdata["rseq"],
-                                                     statistics="var")
-          return self._statistics["rdvar"]
+        self._samdata["qvar"]
       elif statistic == "median":
-        if "rdmedian" in self._statistics:
-          return self._statistics["rdmedian"]
-        else:
-          self._statistics["rdmedian"] = compute_statistic(data=self._samdata["rseq"],
-                                                     statistics="median")
-          return self._statistics["rdmedian"]
+        self._samdata["qmedian"]
 
       raise Error("Statistic '{0}' is not currently "
                   "computed for Window".format(statistic))
