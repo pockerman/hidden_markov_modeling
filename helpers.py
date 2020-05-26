@@ -189,12 +189,23 @@ class Window(object):
         # the data collected from the SAM file
         self._samdata = samdata
 
+        # the statistics
+        self._statistics = {}
+
         # the state of the window
         self._state = WindowState.INVALID
 
     @property
     def idx(self):
       return self._id
+
+    @property
+    def start(self):
+      return self._samdata["start"]
+
+    @property
+    def end(self):
+      return self._samdata["end"]
 
     @property
     def state(self):
@@ -213,40 +224,47 @@ class Window(object):
         """
         return self._capacity
 
-    def get_rd_observations(self):
-      return self._samdata["rdseq"]
+    @property
+    def start_end_pos(self):
+      return self.sam_property("start"), self.sam_property("end")
 
-    def get_gc_observations(self):
-      return self._samdata["qseq"]
+    def sam_property_names(self):
+      return self._samdata.keys()
 
-    def get_start_end_pos(self):
-      return (self._samdata['start'], self._samdata['end'])
+    def sam_property(self, name):
+      return self._samdata[name]
+
+    def get_statistics_map(self):
+      return self._statistics
+
+    def get_statistics_value(self, name):
+      return self._statistics[name]
 
     def get_rd_statistic(self, statistic):
 
       from preprocess_utils import compute_statistic
 
       if statistic== "mean":
-        if "rdmean" in self._samdata:
-          return self._samdata["rdmean"]
+        if "rdmean" in self._statistics:
+          return self._statistics["rdmean"]
         else:
-          self._samdata["rdmean"]= compute_statistic(data=self._samdata["rseq"],
+          self._statistics["rdmean"]= compute_statistic(data=self._samdata["rseq"],
                                                      statistics="mean")
-          return self._samdata["rdmean"]
+          return self._statistics["rdmean"]
       elif statistic == "var":
-        if "rdvar" in self._samdata:
-          return self._samdata["rdvar"]
+        if "rdvar" in self._statistics:
+          return self._statistics["rdvar"]
         else:
-          self._samdata["rdvar"] = compute_statistic(data=self._samdata["rseq"],
+          self._statistics["rdvar"] = compute_statistic(data=self._samdata["rseq"],
                                                      statistics="var")
-          return self._samdata["rdvar"]
+          return self._statistics["rdvar"]
       elif statistic == "median":
-        if "rdmedian" in self._samdata:
-          return self._samdata["rdmedian"]
+        if "rdmedian" in self._statistics:
+          return self._statistics["rdmedian"]
         else:
-          self._samdata["rdmedian"] = compute_statistic(data=self._samdata["rseq"],
+          self._statistics["rdmedian"] = compute_statistic(data=self._samdata["rseq"],
                                                      statistics="median")
-          return self._samdata["rdmedian"]
+          return self._statistics["rdmedian"]
 
       raise Error("Statistic '{0}' is not currently "
                   "computed for Window".format(statistic))
