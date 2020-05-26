@@ -216,11 +216,6 @@ class Window(object):
 
     @property
     def capacity(self):
-        """
-        Returns the capacity of the window i.e. the maximum
-        number of observations the window can accumulate
-        :return:
-        """
         return self._capacity
 
     @property
