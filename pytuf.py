@@ -22,9 +22,6 @@ def windowAna(chr,start,end,qual,fas,sam):
                            fastafile=fas, max_depth=1000):
         pcol.set_min_base_quality(qual)
 
-        print("==============================")
-        print("Starting at: {0}".format(start))
-
         print("Start first while loop")
         time_start = time.perf_counter()
     #fill in start when there are no reads present
@@ -165,6 +162,7 @@ if __name__ == '__main__':
 
 
   while start < end:
+      print("==============================")
       met = windowAna(c,start,start+100,qual,fas,sam)
       print("Created window: {0}".format(wcounter))
       start = start + 100
