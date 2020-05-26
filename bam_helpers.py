@@ -51,7 +51,7 @@ def extract_windows(chromosome, ref_filename, bam_filename, **args):
               wcounter += 1
               start_idx += windowcapacity
 
-              print("{0} Created window: {1}".format(INFO, wcounter))
+              #print("{0} Created window: {1}".format(INFO, wcounter))
 
         return windows
 
@@ -135,7 +135,7 @@ def window_sam_file(chromosome, sam_file, fastafile,
     start += 1
 
     #fill in end if no reads at end of window
-    while start < end:
+  while start < end:
             samseq.append('_')
             refseq.append( fastafile.fetch(chromosome,start,start+1))
             pos.append(start)
@@ -143,25 +143,25 @@ def window_sam_file(chromosome, sam_file, fastafile,
             nalign.append(0)
             start+=1
 
-    #Metrics for read depth
-    rdseq = nseq
+  #Metrics for read depth
+  rdseq = nseq
    #rdmean = np.mean(nseq)
    # rdstd  = np.std(nseq)
     #rdmedian = np.median(nseq)
     #rdsum = np.sum(nseq)
 
-    qseq = nalign
+  qseq = nalign
     #qmean = np.mean(nalign)
     #qstd = np.std(nalign)
     #qmedian = np.median(nalign)
     #qsum = np.sum(nalign)
 
     #GC content
-    gcr = (refseq.count('G') + refseq.count('g') + refseq.count('C') + refseq.count('c'))/len(refseq)
-    gapAlert = True if 'N' in refseq or 'n' in refseq else False
+  gcr = (refseq.count('G') + refseq.count('g') + refseq.count('C') + refseq.count('c'))/len(refseq)
+  gapAlert = True if 'N' in refseq or 'n' in refseq else False
 
-    altseq = ['']
-    for bs in samseq:
+  altseq = ['']
+  for bs in samseq:
         talt = []
         for i in range(len(altseq)):
             for el in bs:
@@ -169,16 +169,16 @@ def window_sam_file(chromosome, sam_file, fastafile,
                 talt.append(alt)
         altseq = talt
 
-    gcmax = 0
-    gcmin = 1
+  gcmax = 0
+  gcmin = 1
 
-    for alt in altseq:
+  for alt in altseq:
         t1 = re.sub('[\+\-_Nn*]','',alt)
         gct = len(re.sub('[\+\-_Nn*AaTt]','',alt))/len(re.sub('[\+\-_Nn*]','',alt))
         gcmax = gct if gct > gcmax else gcmax
         gcmin = gct if gct < gcmin else gcmin
 
-    output={'gcmax': gcmax,
+  output={'gcmax': gcmax,
             'gcmin': gcmin,
             'gcr': gcr,
             'gapAlert': gapAlert,
@@ -198,5 +198,5 @@ def window_sam_file(chromosome, sam_file, fastafile,
             'end': pos[-1]
             }
 
-    return output
+  return output
 
