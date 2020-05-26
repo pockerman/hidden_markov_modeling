@@ -169,6 +169,7 @@ if __name__ == '__main__':
 
       if wcounter == 10:
         break
+      wcounter += 1
 
   time_end = time.perf_counter()
   print("Total time for {0} is {1} secs".format(wcounter, time_end - time_start))
