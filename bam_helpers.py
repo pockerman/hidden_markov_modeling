@@ -40,6 +40,7 @@ def extract_windows(chromosome, ref_filename, bam_filename, **args):
 
             wcounter = 0
             while start_idx < end_idx:
+              print("{0} Window Start/End {1}/{2}.".format(INFO, start_idx, end_idx))
               sam_output = window_sam_file(chromosome=chromosome,
                                        sam_file=sam_file,
                                        fastafile=fastafile,
@@ -48,13 +49,15 @@ def extract_windows(chromosome, ref_filename, bam_filename, **args):
               windows.append(Window(idx=wcounter,
                                     capacity=windowcapacity,
                                     samdata=sam_output))
-              wcounter += 1
+
               start_idx += windowcapacity
 
-              #print("{0} Created window: {1}".format(INFO, wcounter))
+              print("{0} Created window: {1}".format(INFO, wcounter))
 
-        return windows
-
+              wcounter += 1
+              #if wcounter == 1:
+              #  break
+    return windows
 
 
 def window_sam_file(chromosome, sam_file, fastafile,
@@ -134,7 +137,7 @@ def window_sam_file(chromosome, sam_file, fastafile,
                 errorAlert = True
     start += 1
 
-    #fill in end if no reads at end of window
+  #fill in end if no reads at end of window
   while start < end:
             samseq.append('_')
             refseq.append( fastafile.fetch(chromosome,start,start+1))
