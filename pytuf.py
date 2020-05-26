@@ -126,9 +126,11 @@ if __name__ == '__main__':
   end = 2000000
   qual = 20
 
+  counter = 0
   while start < end:
       met = windowAna(c,start,start+100,qual,fas,sam)
-      print(met)
+      print("Created window: ", counter)
+      counter += 1
       start = start + 100
 
 
