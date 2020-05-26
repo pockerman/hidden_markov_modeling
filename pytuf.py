@@ -96,12 +96,18 @@ def windowAna(chr,start,end,qual,fas,sam):
 
     gcmax = 0
     gcmin = 1
+    minLen = pos[-1] - pos[0] +1
 
     for alt in altseq:
-        t1 = re.sub('[\+\-_Nn*]','',alt)
-        gct = len(re.sub('[\+\-_Nn*AaTt]','',alt))/len(re.sub('[\+\-_Nn*]','',alt))
-        gcmax = gct if gct > gcmax else gcmax
-        gcmin = gct if gct < gcmin else gcmin
+        minLen = len(re.sub('[\+\-_Nn*]','',alt)) if len(re.sub('[\+\-_Nn*]','',alt)) < minLen else minLen
+
+        try:
+          gct = len(re.sub('[\+\-_Nn*AaTt]','',alt))/len(re.sub('[\+\-_Nn*]','',alt))
+          gcmax = gct if gct > gcmax else gcmax
+          gcmin = gct if gct < gcmin else gcmin
+        except:
+          pass
+
     output={'gcmax':gcmax,
             'gcmin':gcmin,
             'gcr':gcr,
@@ -113,7 +119,8 @@ def windowAna(chr,start,end,qual,fas,sam):
             'errorAlert':errorAlert,
             'head':head,
             'start':pos[0],
-            'end':pos[-1]
+            'end':pos[-1],
+            'minLen':minLen
             }
     return output
 
