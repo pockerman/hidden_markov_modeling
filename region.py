@@ -206,8 +206,8 @@ class Region(object):
                               bam_filename=bam_filename,
                                       **args)
 
-    print("{0} Start Window: Start/End idx {1}".format(INFO, windows[0].start_end_pos))
-    print("{0} End Window: Start/End idx {1}".format(INFO, windows[-1].start_end_pos))
+    print("{0} Region Start Window Coords: Start/End idx {1}".format(INFO, windows[0].start_end_pos))
+    print("{0} Region End Window Coords: Start/End idx {1}".format(INFO, windows[-1].start_end_pos))
     self._windows[WindowType.WGA] = windows
 
   def make_no_wga_windows(self, chromosome,
@@ -271,7 +271,6 @@ class Region(object):
                           self._windows[WindowType.NO_WGA]):
           self._mixed_windows.append(MixedWindowView(wga_w=win1,
                                                      n_wga_w=win2))
-
     return self._mixed_windows
 
   def remove_windows_with_gaps(self):

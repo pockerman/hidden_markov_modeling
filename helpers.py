@@ -141,13 +141,13 @@ class WindowState(Enum):
                                               "NORMAL",
                                               "INSERTION", "TUF", "OTHER"]))
 
-
+"""
 class WindowIterator(object):
 
-    """
+
     Helper class to allow iteration over the window
     elements
-    """
+
 
     def __init__(self, data):
 
@@ -164,6 +164,7 @@ class WindowIterator(object):
             return tmp
 
         raise StopIteration
+"""
 
 
 class Window(object):
@@ -171,7 +172,10 @@ class Window(object):
     Class representing a window for arranging of the data
     """
 
+    __slots__ = ('_id', '_capacity', '_samdata', '_state' )
+
     N_WINDOW_MARKER=-999
+
 
     @staticmethod
     def set_window_marker(marker):
@@ -187,9 +191,6 @@ class Window(object):
 
         # the data collected from the SAM file
         self._samdata = samdata
-
-        # the statistics
-        self._statistics = {}
 
         # the state of the window
         self._state = WindowState.INVALID
@@ -216,11 +217,6 @@ class Window(object):
 
     @property
     def capacity(self):
-        """
-        Returns the capacity of the window i.e. the maximum
-        number of observations the window can accumulate
-        :return:
-        """
         return self._capacity
 
     @property
@@ -232,12 +228,6 @@ class Window(object):
 
     def sam_property(self, name):
       return self._samdata[name]
-
-    def get_statistics_map(self):
-      return self._statistics
-
-    def get_statistics_value(self, name):
-      return self._statistics[name]
 
     def get_rd_statistic(self, statistic):
 
@@ -266,39 +256,44 @@ class Window(object):
         """
         return self._samdata["gapAlert"]
 
+    """
     def __len__(self):
         return len(self._samdata)
 
+
     def __iter__(self):
-        """
+
         Produce an iterator to iterate over the accumulated
         window observations
         :return:
-        """
+
         return WindowIterator(data=self._observations)
 
     def __getitem__(self, item):
-        """
+
         Returns the item-th observation
         :param item: int the index of the observation to access
         :return: Observation instance
-        """
+
         return self._observations[item]
 
     def __setitem__(self, o, value):
-        """
+
         Set the o-th observation to value
         :param o:
         :param value:
         :return:
-        """
+
         self._observations[o] = value
+    """
 
 
 class MixedWindowView(object):
   """
   A class that holds two instances of windows
   """
+
+  __slots__ = ('_windows', '_state')
 
   def __init__(self, wga_w, n_wga_w):
     self._windows={WindowType.WGA: wga_w,
