@@ -2,6 +2,7 @@ import pysam
 import numpy as np
 from scipy import stats
 import re
+import time
 
 def windowAna(chr,start,end,qual,fas,sam):
     refseq = '' #store for the refseq
@@ -127,10 +128,14 @@ if __name__ == '__main__':
   qual = 20
 
   counter = 0
+
+  time_start = time.perf_counter()
   while start < end:
       met = windowAna(c,start,start+100,qual,fas,sam)
       print("Created window: ", counter)
       counter += 1
       start = start + 100
+  time_end = time.perf_counter()
+  print("Time to create  {0} windows is {1} secs".format(counter, time_end - time_start))
 
 
