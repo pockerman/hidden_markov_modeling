@@ -2,7 +2,7 @@
 
   "regions":{
       "start":[1000000],
-      "end":[10000000]
+      "end":[2000000]
   },
   "regions_files":["/home/a/ag568/region_0.txt"],
   "chromosome": "chr1",
