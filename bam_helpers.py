@@ -93,7 +93,7 @@ def window_sam_file(chromosome, sam_file, fastafile,
     #fill in start when there are no reads present
     while pcol.reference_pos != start:
             samseq.append('_')
-            refseq.append(fastafile.fetch(chromosome,start,start+1))
+            refseq.append(str(fastafile.fetch(chromosome,start,start+1)))
             pos.append(start)
             nseq.append(0)
             nalign.append(0)
@@ -120,8 +120,8 @@ def window_sam_file(chromosome, sam_file, fastafile,
     try:
             if pcol.get_num_aligned() == 0:
                 samseq.append('_')
-                refseq.append(fastafile.fetch(chromosome, pcol.reference_pos,
-                                              pcol.reference_pos+1))
+                refseq.append(str(fastafile.fetch(chromosome, pcol.reference_pos,
+                                              pcol.reference_pos+1)))
             else:
                 x = pcol.get_query_sequences(add_indels=kwargs["sam_read_config"]["add_indels"])
                 x = [a.upper() for a in x]
@@ -141,7 +141,7 @@ def window_sam_file(chromosome, sam_file, fastafile,
   #fill in end if no reads at end of window
   while start < end:
             samseq.append('_')
-            refseq.append( fastafile.fetch(chromosome,start,start+1))
+            refseq.append(str(fastafile.fetch(chromosome,start,start+1)))
             pos.append(start)
             nseq.append(0)
             nalign.append(0)
