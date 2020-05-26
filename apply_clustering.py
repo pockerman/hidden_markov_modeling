@@ -56,7 +56,6 @@ def make_window_regions(configuration):
         if "debug" in configuration:
           kwargs["debug"] = configuration["debug"]
 
-
         print("{0} Creating WGA Windows...".format(INFO))
         region.make_wga_windows(chromosome=chromosome,
                                 ref_filename=configuration["reference_file"]["filename"],
@@ -66,8 +65,9 @@ def make_window_regions(configuration):
         if region.get_n_windows(type_=WindowType.WGA) == 0:
             raise Error("WGA windows have not been created")
         else:
-            print("{0} Number of WGA windows: {1}".format(INFO,
-                                                          region.get_n_windows(type_=WindowType.WGA)))
+            print("{0} Number of WGA "
+                  "windows: {1}".format(INFO,
+                                        region.get_n_windows(type_=WindowType.WGA)))
 
         print("{0} Creating No WGA Windows...".format(INFO))
         region.make_no_wga_windows(chromosome=chromosome,
@@ -78,26 +78,25 @@ def make_window_regions(configuration):
         if region.get_n_windows(type_=WindowType.NO_WGA) == 0:
             raise Error("Non-WGA windows have not  been created")
         else:
-            print("{0} Number of non-wga"
+            print("{0} Number of Non WGA"
                   " windows: {1}".format(INFO,
                                          region.get_n_windows(type_=WindowType.NO_WGA)))
 
 
         if "check_windowing_sanity" in configuration and \
           configuration["check_windowing_sanity"]:
-
             region.check_windows_sanity()
 
         # compute the mixed windows for the region
         region.get_mixed_windows()
 
-         # filter the windows for N's
+         # filter the windows for GAPs
         if "remove_windows_with_N" in configuration and\
           configuration["remove_windows_with_N"]:
 
             print("{0} Filtering windows for Ns...".format(INFO))
 
-            region.remove_windows_with_ns()
+            region.remove_windows_with_gaps()
 
             print("{0} Number of wga windows"
                   " after filtering: {1}".format(INFO,
@@ -106,28 +105,22 @@ def make_window_regions(configuration):
                   " after filtering: {1}".format(INFO,
                                                  region.get_n_windows(type_=WindowType.NO_WGA)))
             print("{0} Done...".format(INFO))
-        elif "mark_N_windows" in configuration and\
-          configuration["mark_N_windows"]:
-
-            print("{0} Marking N "
+        else:
+            # mark the Gap windows
+            print("{0} Marking Gap "
                   " windows with: {1}".format(INFO,
                                               configuration["mark_for_N_windows"]))
             counter_ns = \
-              region.mark_windows_with_ns(n_mark=configuration["mark_for_N_windows"])
+              region.mark_windows_with_gaps(n_mark=configuration["mark_for_N_windows"])
 
-            print("{0} Marked as N {1} Windows".format(INFO, counter_ns))
-
-        else:
-            print("{0} No filtering windows"
-                  " for Ns requested...".format(INFO))
+            print("{0} Marked as Gap {1} Windows".format(INFO, counter_ns))
 
         print("{0} Number of mixed "
               "windows: {1}".format(INFO,
                                     region.get_n_mixed_windows()))
 
-        print("{0} Number of N windows: {1}".format(INFO,
+        print("{0} Number of GAP windows: {1}".format(INFO,
                                                     region.count_n_windows()))
-
 
         if "outlier_remove" in configuration and\
           configuration["outlier_remove"]:
@@ -140,11 +133,9 @@ def make_window_regions(configuration):
             print("{0} Number of N windows "
                   "after outlier removal {1}".format(INFO,
                                                      region.count_n_windows()))
-
         else:
           print("{0} No outlier "
                 "removal performed".format(INFO))
-
 
         # save the region statistics
         region.save_mixed_windows_statistic(statistic="mean")
@@ -202,7 +193,6 @@ def make_clusters_mean_and_std(clusters, configuration):
   print("{0} Done...".format(INFO))
 
 def main(configuration):
-
 
     print("{0} Set up logger".format(INFO))
     set_up_logger(configuration=configuration)
