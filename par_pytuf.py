@@ -83,11 +83,11 @@ def windowAna(chr,start,end,qual,fas,sam):
           start+=1
 
 
-      time_end = time.perf_counter()
-      print("Time for loop over pcol {0}".format(time_end - time_start))
-      sys.stdout.flush()
+      #time_end = time.perf_counter()
+      #print("Time for loop over pcol {0}".format(time_end - time_start))
+      #sys.stdout.flush()
 
-      time_start = time.perf_counter()
+      #time_start = time.perf_counter()
 
       #fill in end if no reads at end of window
       while start < end:
@@ -110,32 +110,35 @@ def windowAna(chr,start,end,qual,fas,sam):
       gcr = (refseq.count('G') + refseq.count('g') + refseq.count('C') + refseq.count('c'))/len(refseq)
       gapAlert = True if 'N' in refseq or 'n' in refseq else False
 
-      altseq = ['']
-      for bs in samseq:
-          talt = []
-          for i in range(len(altseq)):
-              for el in bs:
-                  alt = altseq[i] + el
-                  talt.append(alt)
-          altseq = talt
-
       gcmax = 0
-      gcmin = 1
-      minLen = pos[-1] - pos[0] +1
+      gcmaxlen = 0
+      gcmin = 0
+      gcminlen = 0
+      for bs in samseq:
+          minelgc = None
+          lenminelgc = None
+          maxelgc = None
+          lenmaxelgc = None
+          for el in bs:
+              el = el.split('-')
+              ellen = len(re.sub('[\+\-_Nn*]','',el[0]))
+              elgc = len(re.sub('[\+\-_Nn*AaTt]','',el[0]))
+              if minelgc == None or elgc < minelgc:
+                  minelgc = elgc
+                  lenminelgc = ellen
+              if maxelgc == None or elgc > maxelgc:
+                  maxelgc = elgc
+                  lenmaxelgc = ellen
+          gcmax += maxelgc
+          gcmaxlen += lenmaxelgc
+          gcmin += minelgc
+          gcminlen += lenminelgc
 
-      for alt in altseq:
-          minLen = len(re.sub('[\+\-_Nn*]','',alt)) if len(re.sub('[\+\-_Nn*]','',alt)) < minLen else minLen
-
-          try:
-            gct = len(re.sub('[\+\-_Nn*AaTt]','',alt))/len(re.sub('[\+\-_Nn*]','',alt))
-            gcmax = gct if gct > gcmax else gcmax
-            gcmin = gct if gct < gcmin else gcmin
-          except:
-            pass
-
+      gcmax = gcmax/gcmaxlen if gcmaxlen > 0 else None
+      gcmin = gcmin/gcminlen if gcminlen > 0 else None
       time_end = time.perf_counter()
-      print("Time for remaining function {0}".format(time_end - time_start))
-      sys.stdout.flush()
+      #print("Time for remaining function {0}".format(time_end - time_start))
+      #sys.stdout.flush()
 
       output={'gcmax':gcmax,
               'gcmin':gcmin,
@@ -149,7 +152,7 @@ def windowAna(chr,start,end,qual,fas,sam):
               'head':head,
               'start':pos[0],
               'end':pos[-1],
-              'minLen':minLen
+              'minLen':gcminlen
               }
       return output
     except MemoryError as e:
@@ -165,6 +168,8 @@ def windowAna(chr,start,end,qual,fas,sam):
 
 
 def process_worker(p, start, end, windows_dict):
+
+
 
     fas = pysam.FastaFile("/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna")
     sam = pysam.AlignmentFile("/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam", "rb")
@@ -194,12 +199,12 @@ def process_worker(p, start, end, windows_dict):
       print("MemoryError exception detected in process {0}. "
            "Windows memory used is: {1} GB".format(p, total*1e-9))
       sys.stdout.flush()
-      return
+      raise e
     except Exception as e:
        print("An exception detected in process {0}. "
             "Exception is: {1}".format(p, str(e)))
        sys.stdout.flush()
-       return
+       raise e
 
 if __name__ == '__main__':
 
