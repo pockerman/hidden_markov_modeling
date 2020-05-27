@@ -167,9 +167,7 @@ def windowAna(chr,start,end,qual,fas,sam):
       raise
 
 
-def process_worker(p, start, end, windows_dict):
-
-
+def process_worker(p, start, end, windows_dict, errors_dict, msg_dict):
 
     fas = pysam.FastaFile("/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna")
     sam = pysam.AlignmentFile("/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam", "rb")
@@ -178,7 +176,6 @@ def process_worker(p, start, end, windows_dict):
     start = 1000000
     end = 2000000
     qual = 20
-
 
     windows = []
     try:
@@ -190,21 +187,24 @@ def process_worker(p, start, end, windows_dict):
          start = start + 100
       time_end = time.perf_counter()
       windows_dict[p] = windows
-      print("Process {0} finished. "
-            "Total time for {1} windows {2} secs".format(p, len(windows), time_end - time_start))
-      sys.stdout.flush()
+      msg_dict[p] ="Process {0} finished. "
+      "Total time for {1} windows {2} secs".format(p, len(windows), time_end - time_start)
+
     except MemoryError as e:
 
       total = total_memory(windows)
-      print("MemoryError exception detected in process {0}. "
-           "Windows memory used is: {1} GB".format(p, total*1e-9))
-      sys.stdout.flush()
-      raise e
+      #print("MemoryError exception detected in process {0}. "
+      #     "Windows memory used is: {1} GB".format(p, total*1e-9))
+
+      errors_dict[p] = "MemoryError exception "
+      "detected in process {0}. Windows constructed {1}".format(p, len(windows))
+
+      return
     except Exception as e:
-       print("An exception detected in process {0}. "
-            "Exception is: {1}".format(p, str(e)))
-       sys.stdout.flush()
-       raise e
+        errors_dict[p] = "An exception detected "
+        "in process {0}. Exception is: {1}".format(p, str(e))
+
+        return
 
 if __name__ == '__main__':
 
@@ -216,9 +216,13 @@ if __name__ == '__main__':
 
   manager = Manager()
   windows_dict = manager.dict()
+  errors_dict = manager.dict()
+  msg_dict = manager.dict()
 
   for p in range(n_procs):
     windows_dict[p] = []
+    errors_dict[p] = "No error"
+    msg_dict[p] = "No msg"
 
   # list of processes we use
   procs = []
@@ -238,26 +242,58 @@ if __name__ == '__main__':
   print("Used chunks: {0}".format(chunks))
   sys.stdout.flush()
 
-
   time_start = time.perf_counter()
 
-  for p in range(n_procs):
+  for p in range(n_procs-1):
      procs.append(Process(target=process_worker, args=(p,
                                                        chunks[p][0], chunks[p][1],
-                                                        windows_dict)))
+                                                        windows_dict,
+                                                        errors_dict,
+                                                        msg_dict)))
      procs[p].start()
 
+  print("Created: {0} processes".format(n_procs))
+  sys.stdout.flush()
+
+  p = n_procs -1
+  print("Master process is: {0} ".format(p))
+  sys.stdout.flush()
+
+  print("Master process doing its share")
+  sys.stdout.flush()
+
+  p = n_procs -1
+  process_worker(n_procs-1,
+                 chunks[p][0], chunks[p][1],
+                 windows_dict,
+                 errors_dict,
+                 msg_dict)
+
+  print("Process {0} msg: {1}".format(p, msg_dict[p]))
+  sys.stdout.flush()
+  print("Process {0} errs: {1}".format(p, errors_dict[p]))
+  sys.stdout.flush()
+
   # wait here and join the processes
-  for p in range(n_procs):
+  for p in range(n_procs-1):
     procs[p].join()
+    print("Process {0} msg: {1}".format(p, msg_dict[p]))
+    sys.stdout.flush()
+    print("Process {0} errs: {1}".format(p, errors_dict[p]))
+    sys.stdout.flush()
 
 
   counter = 0
   for p in windows_dict:
-    print("Process {0} created"
+
+    if errors_dict[p] != "No error":
+
+      print("Process {0} created"
           " {1} windows ".format(p, len(windows_dict[p])))
-    sys.stdout.flush()
-    counter += len(windows_dict[p])
+      sys.stdout.flush()
+      counter += len(windows_dict[p])
+    else:
+      print(errors_dict[p])
 
   time_end = time.perf_counter()
   print("Time to create  {0} windows"
