@@ -10,7 +10,7 @@ def total_memory(windows):
   total = 0
   for window in windows:
     total += sys.getsizeof(window.keys())
-    total += sys.getsizeof(window.value())
+    total += sys.getsizeof(window.values())
     total += sys.getsizeof(window)
 
   return total
@@ -30,6 +30,7 @@ def windowAna(chr,start,end,qual,fas,sam):
 
     try:
 
+      time_start = time.perf_counter()
       for pcol in sam.pileup(chr,start,end,
                              truncate=True,ignore_orphans=False,
                              fastafile=fas, max_depth=1000):
@@ -77,6 +78,12 @@ def windowAna(chr,start,end,qual,fas,sam):
                   errorAlert = True
           start+=1
 
+
+      time_end = time.perf_counter()
+      print("Time for loop over pcol".format(time_end - time_start))
+
+      time_start = time.perf_counter()
+
       #fill in end if no reads at end of window
       while start < end:
               samseq.append('_')
@@ -121,6 +128,9 @@ def windowAna(chr,start,end,qual,fas,sam):
           except:
             pass
 
+      time_end = time.perf_counter()
+      print("Time for remaining function".format(time_end - time_start))
+
       output={'gcmax':gcmax,
               'gcmin':gcmin,
               'gcr':gcr,
@@ -144,7 +154,7 @@ def windowAna(chr,start,end,qual,fas,sam):
       total += sys.getsizeof(nalign)
 
       print("Memory used by function {0} GB".format(total*1e-9))
-      raise
+      raise e
 
 if __name__ == '__main__':
   fas = pysam.FastaFile("/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna")
@@ -172,9 +182,11 @@ if __name__ == '__main__':
     time_end = time.perf_counter()
     print("Time to create  {0} windows is {1} secs".format(counter, time_end - time_start))
   except MemoryError as e:
+    time_end = time.perf_counter()
+    print("Time to create  {0} windows is {1} secs (Exception case)".format(counter, time_end - time_start))
     total = total_memory(windows)
     print("MemoryError exception detected. "
           "Windows memory used is: {0} GB".format(total*1e-9))
-    raise
+    raise e
 
 
