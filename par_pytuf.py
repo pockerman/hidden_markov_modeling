@@ -83,11 +83,11 @@ def windowAna(chr,start,end,qual,fas,sam):
           start+=1
 
 
-      time_end = time.perf_counter()
-      print("Time for loop over pcol {0}".format(time_end - time_start))
-      sys.stdout.flush()
+      #time_end = time.perf_counter()
+      #print("Time for loop over pcol {0}".format(time_end - time_start))
+      #sys.stdout.flush()
 
-      time_start = time.perf_counter()
+      #time_start = time.perf_counter()
 
       #fill in end if no reads at end of window
       while start < end:
@@ -134,8 +134,8 @@ def windowAna(chr,start,end,qual,fas,sam):
             pass
 
       time_end = time.perf_counter()
-      print("Time for remaining function {0}".format(time_end - time_start))
-      sys.stdout.flush()
+      #print("Time for remaining function {0}".format(time_end - time_start))
+      #sys.stdout.flush()
 
       output={'gcmax':gcmax,
               'gcmin':gcmin,
@@ -166,6 +166,8 @@ def windowAna(chr,start,end,qual,fas,sam):
 
 def process_worker(p, start, end, windows_dict):
 
+
+
     fas = pysam.FastaFile("/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna")
     sam = pysam.AlignmentFile("/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam", "rb")
 
@@ -194,12 +196,12 @@ def process_worker(p, start, end, windows_dict):
       print("MemoryError exception detected in process {0}. "
            "Windows memory used is: {1} GB".format(p, total*1e-9))
       sys.stdout.flush()
-      return
+      raise e
     except Exception as e:
        print("An exception detected in process {0}. "
             "Exception is: {1}".format(p, str(e)))
        sys.stdout.flush()
-       return
+       raise e
 
 if __name__ == '__main__':
 
