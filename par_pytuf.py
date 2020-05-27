@@ -4,6 +4,10 @@ from scipy import stats
 import re
 import time
 import sys
+from multiprocessing import Queue
+from multiprocessing import Pool
+from multiprocessing import Process
+from multiprocessing import Manager
 
 def total_memory(windows):
 
@@ -159,40 +163,101 @@ def windowAna(chr,start,end,qual,fas,sam):
       sys.stdout.flush()
       raise
 
+
+def process_worker(p, start, end, windows_dict):
+
+    fas = pysam.FastaFile("/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna")
+    sam = pysam.AlignmentFile("/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam", "rb")
+
+    c = 'chr1'
+    start = 1000000
+    end = 2000000
+    qual = 20
+
+
+    windows = []
+    try:
+
+      time_start = time.perf_counter()
+      while start < end:
+         met = windowAna(c,start,start+100,qual,fas,sam)
+         windows.append(met)
+         start = start + 100
+      time_end = time.perf_counter()
+      windows_dict[p] = windows
+      print("Process {0} finished. "
+            "Total time for {1} windows {2} secs".format(p, len(windows), time_end - time_start))
+      sys.stdout.flush()
+    except MemoryError as e:
+
+      total = total_memory(windows)
+      print("MemoryError exception detected in process {0}. "
+           "Windows memory used is: {1} GB".format(p, total*1e-9))
+      sys.stdout.flush()
+      return
+    except Exception as e:
+       print("An exception detected in process {0}. "
+            "Exception is: {1}".format(p, str(e)))
+       sys.stdout.flush()
+       return
+
 if __name__ == '__main__':
-  fas = pysam.FastaFile("/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna")
-  sam = pysam.AlignmentFile("/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam", "rb")
 
 
-  c = 'chr1'
+  n_procs = 5
   start = 1000000
   end = 2000000
   qual = 20
 
-  counter = 0
-  windows = []
-  time_start = time.perf_counter()
-  windows = []
-  try:
-    while start < end:
-        met = windowAna(c,start,start+100,qual,fas,sam)
-        windows.append(met)
-        #print("Created window: ", counter)
-        #print("Window pos: {0}/{1} ".format(met['start'], met['end']))
+  manager = Manager()
+  windows_dict = manager.dict()
 
-        counter += 1
-        start = start + 100
-    time_end = time.perf_counter()
-    print("Time to create  {0} windows is {1} secs".format(counter, time_end - time_start))
+  for p in range(n_procs):
+    windows_dict[p] = []
+
+  # list of processes we use
+  procs = []
+
+  load = (end - start )// n_procs
+  chunks = []
+
+  start_p = start
+  end_p = start_p + load
+  for p in range(n_procs):
+
+    chunks.append((start_p, end_p ))
+    start_p = end_p
+    end_p += load
+
+
+  print("Used chunks: {0}".format(chunks))
+  sys.stdout.flush()
+
+
+  time_start = time.perf_counter()
+
+  for p in range(n_procs):
+     procs.append(Process(target=process_worker, args=(p,
+                                                       chunks[p][0], chunks[p][1],
+                                                        windows_dict)))
+     procs[p].start()
+
+  # wait here and join the processes
+  for p in range(n_procs):
+    procs[p].join()
+
+
+  counter = 0
+  for p in windows_dict:
+    print("Process {0} created"
+          " {1} windows ".format(p, len(windows_dict[p])))
     sys.stdout.flush()
-  except MemoryError as e:
-    time_end = time.perf_counter()
-    print("Time to create  {0} windows is {1} secs (Exception case)".format(counter, time_end - time_start))
-    sys.stdout.flush()
-    total = total_memory(windows)
-    print("MemoryError exception detected. "
-          "Windows memory used is: {0} GB".format(total*1e-9))
-    sys.stdout.flush()
-    raise
+    counter += len(windows_dict[p])
+
+  time_end = time.perf_counter()
+  print("Time to create  {0} windows"
+        " with {1} processes is {2} secs".format(counter, n_procs, time_end - time_start))
+  sys.stdout.flush()
+
 
 
