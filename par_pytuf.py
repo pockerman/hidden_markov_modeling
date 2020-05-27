@@ -84,7 +84,8 @@ def windowAna(chr,start,end,qual,fas,sam):
 
 
       time_end = time.perf_counter()
-      print("Time for loop over pcol".format(time_end - time_start))
+      print("Time for loop over pcol {0}".format(time_end - time_start))
+      sys.stdout.flush()
 
       time_start = time.perf_counter()
 
@@ -133,7 +134,8 @@ def windowAna(chr,start,end,qual,fas,sam):
             pass
 
       time_end = time.perf_counter()
-      print("Time for remaining function".format(time_end - time_start))
+      print("Time for remaining function {0}".format(time_end - time_start))
+      sys.stdout.flush()
 
       output={'gcmax':gcmax,
               'gcmin':gcmin,
@@ -158,7 +160,8 @@ def windowAna(chr,start,end,qual,fas,sam):
       total += sys.getsizeof(nalign)
 
       print("Memory used by function {0} GB".format(total*1e-9))
-      raise e
+      sys.stdout.flush()
+      raise
 
 
 def process_worker(p, start, end, windows_dict):
@@ -230,7 +233,9 @@ if __name__ == '__main__':
   print("Used chunks: {0}".format(chunks))
   sys.stdout.flush()
 
+
   time_start = time.perf_counter()
+
   for p in range(n_procs):
      procs.append(Process(target=process_worker, args=(p,
                                                        chunks[p][0], chunks[p][1],
@@ -240,6 +245,7 @@ if __name__ == '__main__':
   # wait here and join the processes
   for p in range(n_procs):
     procs[p].join()
+
 
   counter = 0
   for p in windows_dict:

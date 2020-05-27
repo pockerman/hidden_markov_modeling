@@ -80,7 +80,8 @@ def windowAna(chr,start,end,qual,fas,sam):
 
 
       time_end = time.perf_counter()
-      print("Time for loop over pcol".format(time_end - time_start))
+      print("Time for loop over pcol {0}".format(time_end - time_start))
+      sys.stdout.flush()
 
       time_start = time.perf_counter()
 
@@ -129,7 +130,8 @@ def windowAna(chr,start,end,qual,fas,sam):
             pass
 
       time_end = time.perf_counter()
-      print("Time for remaining function".format(time_end - time_start))
+      print("Time for remaining function {0}".format(time_end - time_start))
+      sys.stdout.flush()
 
       output={'gcmax':gcmax,
               'gcmin':gcmin,
@@ -154,7 +156,8 @@ def windowAna(chr,start,end,qual,fas,sam):
       total += sys.getsizeof(nalign)
 
       print("Memory used by function {0} GB".format(total*1e-9))
-      raise e
+      sys.stdout.flush()
+      raise
 
 if __name__ == '__main__':
   fas = pysam.FastaFile("/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna")
@@ -174,19 +177,22 @@ if __name__ == '__main__':
     while start < end:
         met = windowAna(c,start,start+100,qual,fas,sam)
         windows.append(met)
-        print("Created window: ", counter)
-        print("Window pos: {0}/{1} ".format(met['start'], met['end']))
+        #print("Created window: ", counter)
+        #print("Window pos: {0}/{1} ".format(met['start'], met['end']))
 
         counter += 1
         start = start + 100
     time_end = time.perf_counter()
     print("Time to create  {0} windows is {1} secs".format(counter, time_end - time_start))
+    sys.stdout.flush()
   except MemoryError as e:
     time_end = time.perf_counter()
     print("Time to create  {0} windows is {1} secs (Exception case)".format(counter, time_end - time_start))
+    sys.stdout.flush()
     total = total_memory(windows)
     print("MemoryError exception detected. "
           "Windows memory used is: {0} GB".format(total*1e-9))
-    raise e
+    sys.stdout.flush()
+    raise
 
 
