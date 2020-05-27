@@ -10,7 +10,7 @@ def total_memory(windows):
   total = 0
   for window in windows:
     total += sys.getsizeof(window.keys())
-    total += sys.getsizeof(window.value())
+    total += sys.getsizeof(window.values())
     total += sys.getsizeof(window)
 
   return total
