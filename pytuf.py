@@ -33,7 +33,7 @@ def windowAna(chr,start,end,qual,fas,sam):
       time_start = time.perf_counter()
       for pcol in sam.pileup(chr,start,end,
                              truncate=True,ignore_orphans=False,
-                             fastafile=fas, max_depth=1000):
+                             max_depth=1000):
           pcol.set_min_base_quality(qual)
 
           #fill in start when there are no reads present
