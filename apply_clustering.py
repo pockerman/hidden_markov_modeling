@@ -115,7 +115,7 @@ def remove_gaps(region, configuration):
                   " windows with: {1}".format(INFO,
                                               configuration["mark_for_gap_windows"]))
             counter_ns = \
-              region.mark_windows_with_gaps(n_mark=configuration["mark_for_N_windows"])
+              region.mark_windows_with_gaps(n_mark=configuration["mark_for_gap_windows"])
 
             print("{0} Marked as Gap {1} Windows".format(INFO, counter_ns))
 
