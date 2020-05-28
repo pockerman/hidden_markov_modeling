@@ -1,3 +1,4 @@
+import array
 from helpers import WindowType
 from helpers import MixedWindowView
 from helpers import Window
@@ -271,6 +272,11 @@ class Region(object):
                           self._windows[WindowType.NO_WGA]):
           self._mixed_windows.append(MixedWindowView(wga_w=win1,
                                                      n_wga_w=win2))
+
+
+    # we don't need these anymore
+    self._windows[WindowType.WGA] = None
+    self._windows[WindowType.NO_WGA] = None
     return self._mixed_windows
 
   def remove_windows_with_gaps(self):
@@ -302,23 +308,23 @@ class Region(object):
 
     # compute the statistis
 
-    wga_rds = []
-    no_wga_rds = []
+    wga_means = array.array('d')
+    no_wga_means = array.array('d')
 
     for window in self._mixed_windows:
           if not window.is_n_window():
-            wga_rds.extend(window.get_rd_observations(name=WindowType.WGA))
-            no_wga_rds.extend(window.get_rd_observations(name=WindowType.NO_WGA))
+            wga_means.append(window.get_rd_statistic(statistics="mean", name=WindowType.WGA))
+            no_wga_means.append(window.get_rd_statistic(statistics="mean", name=WindowType.NO_WGA))
 
 
-    if len(wga_rds) == 0 or len(no_wga_rds) == 0:
+    if len(wga_means) == 0 or len(no_wga_means) == 0:
       print("{0} Cannot remove outliers for region. "
             "Empty RD list detected".format(WARNING))
       return
 
-    wga_statistics = compute_statistic(data=wga_rds,
+    wga_statistics = compute_statistic(data=wga_means,
                                        statistics="all")
-    no_wga_statistics = compute_statistic(data=no_wga_rds,
+    no_wga_statistics = compute_statistic(data=no_wga_means,
                                           statistics="all")
 
     config = configuration["outlier_remove"]["config"]
