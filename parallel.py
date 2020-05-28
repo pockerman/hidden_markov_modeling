@@ -39,19 +39,19 @@ def regions_worker(worker_id, configuration, regions_chuncks,
       #no_wga_windows=[]
 
       bam_filename=configuration['wga_file']['filename']
-      wga_windows = extract_windows(chromosome=chromosome,
+      regions_dict[rid][worker_id]["wga_windows"] = extract_windows(chromosome=chromosome,
                                     ref_filename=ref_filename,
                                     bam_filename=bam_filename,
                                         **args)
 
       bam_filename=configuration['no_wga_file']['filename']
-      no_wga_windows = extract_windows(chromosome=chromosome,
+      regions_dict[rid][worker_id]["no_wga_windows"] = extract_windows(chromosome=chromosome,
                                        ref_filename=ref_filename,
                                        bam_filename=bam_filename,
                                         **args)
 
-      regions_dict[rid][worker_id]={"wga_windows": wga_windows,
-                                  "no_wga_windows": no_wga_windows}
+      #regions_dict[rid][worker_id]={"wga_windows": wga_windows,
+      #                            "no_wga_windows": no_wga_windows}
     tend = time.perf_counter()
     msg = ("Process {0} finished in {1} secs").format(worker_id, tend-tstart)
     msg_dict[worker_id] = msg
@@ -90,7 +90,8 @@ def par_make_window_regions(configuration):
 
   for i in range(len(regions_list)):
     for p in range(n_procs):
-      windows_dict[i] = {p:[]}
+      windows_dict[i] = {p:{"wga_windows":manager.list(),
+                            "no_wga_windows":manager.list()}}
 
   for p in range(n_procs):
     errors_dict[p] = "No error"
@@ -146,6 +147,9 @@ def par_make_window_regions(configuration):
 
 
   regions=[]
+
+  print("Windows dict computed: ", windows_dict[0])
+
   # now bring together the pieces of the regions
   for i, r in enumerate(regions_list):
     region = Region(idx=i, start=r[0],
