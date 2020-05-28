@@ -171,11 +171,11 @@ class Region(object):
         for name in window.get_statistics_map():
           f.write(name +":" + str(window.get_statistics_value(name)) + "\n")
 
-  def count_n_windows(self):
+  def count_gap_windows(self):
 
     counter = 0
     for win in self._mixed_windows:
-      if win.is_n_window():
+      if win.is_gap_window():
         counter += 1
 
     return counter
@@ -235,9 +235,6 @@ class Region(object):
 
   def check_windows_sanity(self):
 
-    # check if the rest of the windows
-    # are aligned
-    self.get_mixed_windows()
 
     if len(self._windows[WindowType.NO_WGA]) > len(self._windows[WindowType.WGA]) :
       print("{0} Windows size mismatch"
@@ -249,6 +246,11 @@ class Region(object):
             " WGA {1} NON_WGA {2}".format(WARNING,
                                           len(self._windows[WindowType.WGA]),
                                           len(self._windows[WindowType.NO_WGA])))
+
+
+    # check if the rest of the windows
+    # are aligned
+    self.get_mixed_windows()
 
 
     for window in self._mixed_windows:
