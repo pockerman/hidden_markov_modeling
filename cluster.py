@@ -371,13 +371,15 @@ class Cluster(object):
         return compute_statistic(data=window_data,statistics=statistic)
 
   def get_window_statistics(self, statistic, **kwargs):
+
+
     statistics = []
 
     for idx in self.indexes:
       window = self._windows[idx]
 
       if isinstance(window, MixedWindowView):
-        statistics.append(window.get_rd_stats(name=kwargs["window_type"],
+        statistics.append(window.get_rd_statistic(name=kwargs["window_type"],
                                               statistics=statistic))
       else:
         statistics.append(window.get_rd_stats(statistics=statistic))

@@ -161,18 +161,23 @@ def clean_up_regions(regions, configuration):
     remove_outliers(region=region, configuration=configuration)
 
 
-@timefn
-def create_clusters(regions, configuration):
-
-  print("{0} Start clustering....".format(INFO))
-  kwargs = configuration["clusterer"]
-
+def accumulate_windows(regions):
   # assemble all the windows
   windows = []
   for region in regions:
     for window in region:
       if not window.is_gap_window():
         windows.append(window)
+  return windows
+
+
+@timefn
+def create_clusters(regions, configuration):
+
+  print("{0} Start clustering....".format(INFO))
+  kwargs = configuration["clusterer"]
+
+  windows = accumulate_windows(regions=regions)
 
   # create the clusters
   clusterer, initial_index_medoids = \
