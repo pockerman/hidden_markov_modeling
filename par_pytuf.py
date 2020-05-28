@@ -162,8 +162,8 @@ def windowAna(chr,start,end,qual,fas,sam):
       total += sys.getsizeof(nseq)
       total += sys.getsizeof(nalign)
 
-      print("Memory used by function {0} GB".format(total*1e-9))
-      sys.stdout.flush()
+      #print("Memory used by function {0} GB".format(total*1e-9))
+      #sys.stdout.flush()
       raise
 
 
@@ -179,12 +179,12 @@ def process_worker(p, start, end, windows_dict, errors_dict, msg_dict):
     try:
 
       time_start = time.perf_counter()
-      """
+
       while start < end:
          met = windowAna(c,start,start+100,qual,fas,sam)
          windows.append(met)
          start = start + 100
-      """
+
       time_end = time.perf_counter()
       windows_dict[p] = windows
       msg_dict[p] = ("Process {0} finished. "
