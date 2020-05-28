@@ -130,7 +130,7 @@ def par_make_window_regions(configuration):
   if errors_dict[p] != "No error":
       raise Error(errors_dict[p])
   else:
-   print("{0} Process {0} msg: {1}".format(INFO, p, msg_dict[p]))
+   print("{0} Process {1} msg: {2}".format(INFO, p, msg_dict[p]))
    sys.stdout.flush()
 
 
@@ -141,7 +141,7 @@ def par_make_window_regions(configuration):
     if errors_dict[p] != "No error":
       raise Error(errors_dict[p])
     else:
-      print("{0} Process {0} msg: {1}".format(INFO, p, msg_dict[p]))
+      print("{0} Process {1} msg: {2}".format(INFO, p, msg_dict[p]))
       sys.stdout.flush()
 
 
