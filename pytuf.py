@@ -166,12 +166,13 @@ def windowAna(chr,start,end,qual,fas,sam):
 
 if __name__ == '__main__':
   fas = pysam.FastaFile("/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna")
-  sam = pysam.AlignmentFile("/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam", "rb")
+  sam = pysam.AlignmentFile("/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam", "rb")
+  #pysam.AlignmentFile("/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam", "rb")
 
 
   c = 'chr1'
   start = 1000000
-  end = 2000000
+  end = 1500000
   qual = 20
 
   counter = 0
@@ -182,8 +183,8 @@ if __name__ == '__main__':
     while start < end:
         met = windowAna(c,start,start+100,qual,fas,sam)
         windows.append(met)
-        #print("Created window: ", counter)
-        #print("Window pos: {0}/{1} ".format(met['start'], met['end']))
+        print("Created window: ", counter)
+        print("Window pos: {0}/{1} ".format(met['start'], met['end']))
 
         counter += 1
         start = start + 100
