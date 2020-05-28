@@ -171,7 +171,7 @@ if __name__ == '__main__':
 
   c = 'chr1'
   start = 1000000
-  end = 2000000
+  end = 1500000
   qual = 20
 
   counter = 0
@@ -182,8 +182,8 @@ if __name__ == '__main__':
     while start < end:
         met = windowAna(c,start,start+100,qual,fas,sam)
         windows.append(met)
-        #print("Created window: ", counter)
-        #print("Window pos: {0}/{1} ".format(met['start'], met['end']))
+        print("Created window: ", counter)
+        print("Window pos: {0}/{1} ".format(met['start'], met['end']))
 
         counter += 1
         start = start + 100
