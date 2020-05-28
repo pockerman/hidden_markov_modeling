@@ -30,9 +30,9 @@ def regions_worker(worker_id, configuration, regions_chuncks,
     for rid in regions_chuncks.keys():
       worker_chunck = regions_chuncks[rid][worker_id]
 
-      args = {"start_idx": worker_chunck[0],
-              "end_idx": worker_chunck[1],
-              "windowsize": windowsize}
+      args["start_idx"] = worker_chunck[0]
+      args["end_idx"] =  worker_chunck[1]
+      args["windowsize"] = windowsize
 
 
       #wga_windows=[]
