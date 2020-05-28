@@ -173,8 +173,8 @@ def process_worker(p, start, end, windows_dict, errors_dict, msg_dict):
     sam = pysam.AlignmentFile("/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam", "rb")
 
     c = 'chr1'
-    start = 1000000
-    end = 2000000
+    #start = 1000000
+    #end = 2000000
     qual = 20
 
     windows = []
