@@ -24,29 +24,33 @@ def regions_worker(worker_id, configuration, regions_chuncks,
     windowsize = configuration["window_size"]
 
     chromosome = configuration["chromosome"]
-    ref_filename = configuration["reference_file"]
+    ref_filename = configuration["reference_file"]['filename']
 
     tstart = time.perf_counter()
-    for i, region in enumerate(regions_chuncks):
-      worker_chunck = region[worker_id]
+    for rid in regions_chuncks.keys():
+      worker_chunck = regions_chuncks[rid][worker_id]
 
       args = {"start_idx": worker_chunck[0],
               "end_idx": worker_chunck[1],
               "windowsize": windowsize}
 
 
-      bam_filename=configuration['wga_file']
+      #wga_windows=[]
+      #no_wga_windows=[]
+
+      bam_filename=configuration['wga_file']['filename']
       wga_windows = extract_windows(chromosome=chromosome,
                                     ref_filename=ref_filename,
                                     bam_filename=bam_filename,
                                         **args)
 
-      bam_filename=configuration['no_wga_file']
+      bam_filename=configuration['no_wga_file']['filename']
       no_wga_windows = extract_windows(chromosome=chromosome,
                                        ref_filename=ref_filename,
                                        bam_filename=bam_filename,
                                         **args)
-      regions_dict[i][worker_id]={"wga_windows": wga_windows,
+
+      regions_dict[rid][worker_id]={"wga_windows": wga_windows,
                                   "no_wga_windows": no_wga_windows}
     tend = time.perf_counter()
     msg = ("Process {0} finished in {1} secs").format(worker_id, tend-tstart)
@@ -93,6 +97,8 @@ def par_make_window_regions(configuration):
     msg_dict[p] = "No msg"
 
   procs = []
+
+
   for p in range(n_procs-1):
      procs.append(Process(target=regions_worker,
                           args=(p, configuration,
@@ -101,6 +107,7 @@ def par_make_window_regions(configuration):
                                 msg_dict,
                                 errors_dict)))
      procs[p].start()
+
 
   print("{0} Created: {1} processes".format(INFO, n_procs))
   sys.stdout.flush()
@@ -136,6 +143,7 @@ def par_make_window_regions(configuration):
     else:
       print("{0} Process {0} msg: {1}".format(INFO, p, msg_dict[p]))
       sys.stdout.flush()
+
 
   regions=[]
   # now bring together the pieces of the regions
