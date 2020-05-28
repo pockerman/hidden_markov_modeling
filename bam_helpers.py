@@ -79,7 +79,7 @@ def window_sam_file(chromosome, sam_file, fastafile,
   read2 = 0 #as above for read 2s
   errorAlert = False
 
-  for pcol in sam_file.pileup(chr=chromosome,
+  for pcol in sam_file.pileup(chromosome,
                          start=start, end=end,
                          truncate=kwargs["sam_read_config"]["truncate"],
                          ignore_orphans=kwargs["sam_read_config"]["ignore_orphans"],
@@ -119,8 +119,7 @@ def window_sam_file(chromosome, sam_file, fastafile,
     try:
             if pcol.get_num_aligned() == 0:
                 samseq.append('_')
-                refseq += fastafile.fetch(chromosome, pcol.reference_pos,
-                                              pcol.reference_pos+1)
+                refseq += fastafile.fetch(chromosome, pcol.reference_pos, pcol.reference_pos+1)
             else:
                 x = pcol.get_query_sequences(add_indels=kwargs["sam_read_config"]["add_indels"])
                 x = [a.upper() for a in x]
