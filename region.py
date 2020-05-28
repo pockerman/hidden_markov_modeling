@@ -159,7 +159,7 @@ class Region(object):
         f.write("WID:"+str(no_wga_w.idx) + "\n")
         f.write("Capacity:"+str(no_wga_w.capacity) + "\n")
 
-        f.write("N props:" +str(len(window.sam_property_names())) +"\n")
+        f.write("N props:" +str(len(no_wga_w.sam_property_names())) +"\n")
 
         for name in no_wga_w.sam_property_names():
           f.write(name +":" + str(no_wga_w.sam_property(name)) + "\n")
