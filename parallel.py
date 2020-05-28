@@ -56,8 +56,7 @@ def regions_worker(worker_id, configuration, regions_chuncks,
     msg = ("Process {0} finished in {1} secs").format(worker_id, tend-tstart)
     msg_dict[worker_id] = msg
   except Exception as e:
-    msg = ("An exception occured "
-           "in worker {0}. Exception message {1}").format(worker_id, str(e))
+    msg = "An exception occured in worker {0}. Exception message {1}".format(worker_id, str(e))
     errors_dict[worker_id] = msg
     return
 
@@ -89,9 +88,10 @@ def par_make_window_regions(configuration):
 
 
   for i in range(len(regions_list)):
+    windows_dict[i] = {}
     for p in range(n_procs):
-      windows_dict[i] = {p:{"wga_windows":manager.list(),
-                            "no_wga_windows":manager.list()}}
+      windows_dict[i][p] = {"wga_windows":[],
+                            "no_wga_windows":[]}
 
   for p in range(n_procs):
     errors_dict[p] = "No error"
