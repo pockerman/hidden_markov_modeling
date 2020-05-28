@@ -206,13 +206,13 @@ class Cluster(object):
         w1 = self._windows[i]
         w2 = self._windows[j]
 
-        if w1.is_n_window() or w2.is_n_window():
+        if w1.is_gap_window() or w2.is_gap_window():
           continue
 
-        w1_wga_mean, w1_no_wga_mean = w1.get_rd_stats(statistics="mean",
+        w1_wga_mean, w1_no_wga_mean = w1.get_rd_statistic(statistics="mean",
                                                       name=WindowType.BOTH)
 
-        w2_wga_mean, w2_no_wga_mean = w2.get_rd_stats(statistics="mean",
+        w2_wga_mean, w2_no_wga_mean = w2.get_rd_statistic(statistics="mean",
                                                       name=WindowType.BOTH)
 
         metric = get_distance_metric(self._dist_metric, degree=4)

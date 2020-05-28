@@ -271,8 +271,8 @@ class Region(object):
 
 
     # we don't need these anymore
-    self._windows[WindowType.WGA] = None
-    self._windows[WindowType.NO_WGA] = None
+    #self._windows[WindowType.WGA] = None
+    #self._windows[WindowType.NO_WGA] = None
     return self._mixed_windows
 
   def remove_windows_with_gaps(self):
