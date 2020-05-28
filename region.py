@@ -125,6 +125,8 @@ class Region(object):
     return self._end - self._start
 
   def get_n_windows(self,type_):
+    if self._mixed_windows is not None:
+      return len(self._mixed_windows)
     return len(self._windows[type_])
 
   def get_n_mixed_windows(self):
@@ -271,8 +273,8 @@ class Region(object):
 
 
     # we don't need these anymore
-    self._windows[WindowType.WGA] = None
-    self._windows[WindowType.NO_WGA] = None
+    #self._windows[WindowType.WGA] = None
+    #self._windows[WindowType.NO_WGA] = None
     return self._mixed_windows
 
   def remove_windows_with_gaps(self):

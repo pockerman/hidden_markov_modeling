@@ -206,13 +206,13 @@ class Cluster(object):
         w1 = self._windows[i]
         w2 = self._windows[j]
 
-        if w1.is_n_window() or w2.is_n_window():
+        if w1.is_gap_window() or w2.is_gap_window():
           continue
 
-        w1_wga_mean, w1_no_wga_mean = w1.get_rd_stats(statistics="mean",
+        w1_wga_mean, w1_no_wga_mean = w1.get_rd_statistic(statistics="mean",
                                                       name=WindowType.BOTH)
 
-        w2_wga_mean, w2_no_wga_mean = w2.get_rd_stats(statistics="mean",
+        w2_wga_mean, w2_no_wga_mean = w2.get_rd_statistic(statistics="mean",
                                                       name=WindowType.BOTH)
 
         metric = get_distance_metric(self._dist_metric, degree=4)
@@ -262,14 +262,14 @@ class Cluster(object):
         this_w = self._windows[i]
         other_w = self._windows[j]
 
-        if this_w.is_n_window() or other_w.is_n_window():
+        if this_w.is_gap_window() or other_w.is_gap_window():
           continue
 
-        w1_wga_mean, w1_no_wga_mean = this_w.get_rd_stats(statistics="mean",
-                                                          name=WindowType.BOTH)
+        w1_wga_mean, w1_no_wga_mean = this_w.get_rd_statistic(statistics="mean",
+                                                              name=WindowType.BOTH)
 
-        w2_wga_mean, w2_no_wga_mean = other_w.get_rd_stats(statistics="mean",
-                                                           name=WindowType.BOTH)
+        w2_wga_mean, w2_no_wga_mean = other_w.get_rd_statistic(statistics="mean",
+                                                               name=WindowType.BOTH)
 
         metric = get_distance_metric(self._dist_metric, degree=4)
         new_dist = metric([w1_wga_mean, w1_no_wga_mean], [w2_wga_mean, w2_no_wga_mean])
@@ -304,10 +304,6 @@ class Cluster(object):
         for item in self._distance_from_others:
           f.write(str(item[0]) + "," + str(item[1])+":" + str(self._distance_from_others[item]) +"\n")
 
-
-
-
-
   def get_sequence(self, size, window_type):
 
     sequence =[]
@@ -316,7 +312,7 @@ class Cluster(object):
         counter = 0
         for idx in self._indexes:
           window = self._windows[idx]
-          sequence.append(window.get_rd_stats(statistics="mean"),
+          sequence.append(window.get_rd_statistic(statistics="mean"),
                           name=window_type)
           counter +=1
 
@@ -327,7 +323,7 @@ class Cluster(object):
       print("{0} Cluster size is less than {1}".format(WARNING, size))
       for idx in self._indexes:
           window = self._windows[idx]
-          sequence.append(window.get_rd_stats(statistics="mean"),
+          sequence.append(window.get_rd_statistic(statistics="mean"),
                           name=window_type)
 
     return sequence
@@ -338,7 +334,7 @@ class Cluster(object):
     sequence_local=[]
     for idx in self._indexes:
       window = self._windows[idx]
-      sequence_local.append(window.get_rd_stats(statistics="mean", name=window_type))
+      sequence_local.append(window.get_rd_statistic(statistics="mean", name=window_type))
 
       if len(sequence_local) == size:
         sequences.append(sequence_local)
@@ -358,7 +354,7 @@ class Cluster(object):
           window = self._windows[index]
 
           statistic1, statistic2 = \
-            window.get_rd_stats(statistics=statistic)
+            window.get_rd_statistic(statistics=statistic)
           return statistic1, statistic2
       else:
 
@@ -382,5 +378,5 @@ class Cluster(object):
         statistics.append(window.get_rd_statistic(name=kwargs["window_type"],
                                               statistics=statistic))
       else:
-        statistics.append(window.get_rd_stats(statistics=statistic))
+        statistics.append(window.get_rd_statistic(statistics=statistic))
     return statistics
