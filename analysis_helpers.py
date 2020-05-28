@@ -23,9 +23,9 @@ def save_clusters(clusters, statistic):
 def save_windows_statistic(windows, statistic, region_id=None):
 
   window_stats = \
-    [window.get_rd_stats(statistics=statistic,
+    [window.get_rd_statistic(statistics=statistic,
                          name=WindowType.NO_WGA)
-       for window in windows if not window.is_n_window()]
+       for window in windows if not window.is_gap_window()]
 
   if region_id is not None:
     filename = "no_wga_windows_" + statistic + "_" + str(region_id) + ".txt"
@@ -36,9 +36,9 @@ def save_windows_statistic(windows, statistic, region_id=None):
     file.write(str(window_stats))
 
   window_stats = \
-    [window.get_rd_stats(statistics=statistic,
+    [window.get_rd_statistic(statistics=statistic,
                          name=WindowType.WGA)
-     for window in windows if not window.is_n_window()]
+     for window in windows if not window.is_gap_window()]
 
   if region_id is not None:
     filename = "wga_windows_" + statistic + "_" + str(region_id) + ".txt"

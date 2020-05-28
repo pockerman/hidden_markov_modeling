@@ -314,7 +314,7 @@ class Region(object):
     no_wga_means = array.array('d')
 
     for window in self._mixed_windows:
-          if not window.is_n_window():
+          if not window.is_gap_window():
             wga_means.append(window.get_rd_statistic(statistics="mean", name=WindowType.WGA))
             no_wga_means.append(window.get_rd_statistic(statistics="mean", name=WindowType.NO_WGA))
 

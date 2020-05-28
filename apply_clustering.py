@@ -132,7 +132,7 @@ def remove_outliers(region, configuration):
 
             print("{0} Number of N windows "
                   "after outlier removal {1}".format(INFO,
-                                                     region.count_n_windows()))
+                                                     region.count_gap_windows()))
   else:
           print("{0} No outlier "
                 "removal performed".format(INFO))

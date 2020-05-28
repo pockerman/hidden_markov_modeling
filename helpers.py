@@ -314,7 +314,7 @@ class MixedWindowView(object):
         :param statistics:
         :return:
         """
-        if self.is_n_window():
+        if self.is_gap_window():
            if name == WindowType.BOTH:
              return (Window.N_WINDOW_MARKER, Window.N_WINDOW_MARKER)
            else:
