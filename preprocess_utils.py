@@ -170,8 +170,8 @@ def build_clusterer(data, nclusters, method, **kwargs):
     window_values =[]
 
     for feature in features:
-      window_values.append(window_data[0][feature])
-      window_values.append(window_data[1][feature])
+      window_values.append(window_data[0])
+      window_values.append(window_data[1])
 
     windows.append(window_values)
 
