@@ -166,7 +166,8 @@ def windowAna(chr,start,end,qual,fas,sam):
 
 if __name__ == '__main__':
   fas = pysam.FastaFile("/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna")
-  sam = pysam.AlignmentFile("/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam", "rb")
+  sam = pysam.AlignmentFile("/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam", "rb")
+  #pysam.AlignmentFile("/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam", "rb")
 
 
   c = 'chr1'
