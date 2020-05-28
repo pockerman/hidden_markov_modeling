@@ -53,7 +53,7 @@ def extract_windows(chromosome, ref_filename, bam_filename, **args):
 
               start_idx += windowcapacity
 
-              #print("{0} Created window: {1}".format(INFO, wcounter))
+              print("{0} Created window: {1}".format(INFO, wcounter))
 
               wcounter += 1
               #if wcounter == 1:
