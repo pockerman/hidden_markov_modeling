@@ -171,7 +171,7 @@ def create_clusters(regions, configuration):
   windows = []
   for region in regions:
     for window in region:
-      if not window.is_n_window():
+      if not window.is_gap_window():
         windows.append(window)
 
   # create the clusters

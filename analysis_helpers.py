@@ -24,7 +24,7 @@ def save_windows_statistic(windows, statistic, region_id=None):
 
   window_stats = \
     [window.get_rd_statistic(statistics=statistic,
-                         name=WindowType.NO_WGA)
+                             name=WindowType.NO_WGA)
        for window in windows if not window.is_gap_window()]
 
   if region_id is not None:
@@ -37,7 +37,7 @@ def save_windows_statistic(windows, statistic, region_id=None):
 
   window_stats = \
     [window.get_rd_statistic(statistics=statistic,
-                         name=WindowType.WGA)
+                             name=WindowType.WGA)
      for window in windows if not window.is_gap_window()]
 
   if region_id is not None:

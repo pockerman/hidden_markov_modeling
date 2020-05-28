@@ -292,21 +292,6 @@ class MixedWindowView(object):
     return self._windows[wtype]
 
 
-  """
-  def get_rd_observations(self, name):
-
-     if name == WindowType.BOTH:
-          return (self._windows[WindowType.WGA].get_rd_observations(),
-                  self._windows[WindowType.NO_WGA].get_rd_observations())
-     elif name == WindowType.WGA:
-          return self._windows[WindowType.WGA].get_rd_observations()
-     elif name == WindowType.NO_WGA:
-          return self._windows[WindowType.NO_WGA].get_rd_observations()
-
-     raise Error("Name {0} is invalid ".format(name))
-  """
-
-
   def get_rd_statistic(self, statistics="all", name=WindowType.BOTH):
         """
         Returns a statistical summary as a dictionary
