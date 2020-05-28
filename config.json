@@ -2,7 +2,7 @@
 
   "regions":{
       "start":[1000000],
-      "end":[2000000]
+      "end":[10000000]
   },
   "regions_files":["/home/a/ag568/region_0.txt"],
   "chromosome": "chr1",
@@ -16,7 +16,7 @@
     "filename": "/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam"
   },
   "sam_read_config":{
-    "max_depth":500,
+    "max_depth":1000,
     "ignore_orphans":false,
     "truncate":true,
     "quality_threshold":20,
