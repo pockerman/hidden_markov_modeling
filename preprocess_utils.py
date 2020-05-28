@@ -99,8 +99,8 @@ def zscore_outlier_removal(windows, config):
     # we don't want to remove the n_windows
     # as these mark gaps
     if not window.is_n_window():
-      mu = window.get_rd_stats(statistics="mean",
-                               name=WindowType.BOTH)
+      mu = window.get_rd_statistic(statistics="mean",
+                                   name=WindowType.BOTH)
 
       zscore_wga = (mu[0] - statistics[WindowType.WGA]["mean"])/sigma_wga
       zscore_no_wga = (mu[1] - statistics[WindowType.NO_WGA]["mean"])/sigma_no_wga

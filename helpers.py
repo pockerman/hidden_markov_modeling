@@ -280,7 +280,7 @@ class MixedWindowView(object):
     self._state = value
 
 
-  def is_n_window(self):
+  def is_gap_window(self):
 
     if self._windows[WindowType.WGA].state == WindowType.N_WIN or\
       self._windows[WindowType.NO_WGA].state == WindowType.N_WIN:

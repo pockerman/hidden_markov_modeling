@@ -156,7 +156,7 @@ def clean_up_regions(regions, configuration):
                                     region.get_n_mixed_windows()))
 
     print("{0} Number of GAP windows: {1}".format(INFO,
-                                                    region.count_n_windows()))
+                                                    region.count_gap_windows()))
 
     remove_outliers(region=region, configuration=configuration)
 
