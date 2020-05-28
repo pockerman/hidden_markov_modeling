@@ -132,7 +132,7 @@ def remove_outliers(region, configuration):
 
             print("{0} Number of N windows "
                   "after outlier removal {1}".format(INFO,
-                                                     region.count_n_windows()))
+                                                     region.count_gap_windows()))
   else:
           print("{0} No outlier "
                 "removal performed".format(INFO))
@@ -171,7 +171,7 @@ def create_clusters(regions, configuration):
   windows = []
   for region in regions:
     for window in region:
-      if not window.is_n_window():
+      if not window.is_gap_window():
         windows.append(window)
 
   # create the clusters

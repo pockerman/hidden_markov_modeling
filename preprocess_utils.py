@@ -98,7 +98,7 @@ def zscore_outlier_removal(windows, config):
 
     # we don't want to remove the n_windows
     # as these mark gaps
-    if not window.is_n_window():
+    if not window.is_gap_window():
       mu = window.get_rd_statistic(statistics="mean",
                                    name=WindowType.BOTH)
 

@@ -143,33 +143,27 @@ class Region(object):
 
       f.write("WGA_N_WINDOWS:"+str(self.get_n_windows(type_=WindowType.WGA)) + "\n")
 
-      for window in self._windows[WindowType.WGA]:
-        f.write("WID:"+str(window.idx) + "\n")
-        f.write("Capacity:"+str(window.capacity) + "\n")
-        f.write("Size:"+str(len(window)) + "\n")
-        f.write("N props:" +str(len(window.sam_property_names())) + "\n")
-        for name in window.sam_property_names():
-          f.write(name +":" + str(window.sam_property(name)) + "\n")
+      for window in self._mixed_windows:
+        wga_w = window.get_window(wtype=WindowType.WGA)
+        f.write("WID:"+str(wga_w.idx) + "\n")
+        f.write("Capacity:"+str(wga_w.capacity) + "\n")
 
-        f.write("N statistics" +str(len(window.get_statistics_map())) + "\n")
+        f.write("N props:" +str(len(wga_w.sam_property_names())) + "\n")
+        for name in wga_w.sam_property_names():
+          f.write(name +":" + str(wga_w.sam_property(name)) + "\n")
 
-        for name in window.get_statistics_map():
-          f.write(name +":" + str(window.get_statistics_value(name)) + "\n")
 
       f.write("NO_WGA_N_WINDOWS:"+str(self.get_n_windows(type_=WindowType.NO_WGA)) + "\n")
-      for window in self._windows[WindowType.NO_WGA]:
-        f.write("WID:"+str(window.idx) + "\n")
-        f.write("Capacity:"+str(window.capacity) + "\n")
-        f.write("Size:"+str(len(window)) + "\n")
+      for window in self._mixed_windows:
+        no_wga_w = window.get_window(wtype=WindowType.NO_WGA)
+        f.write("WID:"+str(no_wga_w.idx) + "\n")
+        f.write("Capacity:"+str(no_wga_w.capacity) + "\n")
+
         f.write("N props:" +str(len(window.sam_property_names())) +"\n")
 
-        for name in window.sam_property_names():
-          f.write(name +":" + str(window.sam_property(name)) + "\n")
+        for name in no_wga_w.sam_property_names():
+          f.write(name +":" + str(no_wga_w.sam_property(name)) + "\n")
 
-        f.write("N statistics" +str(len(window.get_statistics_map())) + "\n")
-
-        for name in window.get_statistics_map():
-          f.write(name +":" + str(window.get_statistics_value(name)) + "\n")
 
   def count_gap_windows(self):
 
@@ -314,7 +308,7 @@ class Region(object):
     no_wga_means = array.array('d')
 
     for window in self._mixed_windows:
-          if not window.is_n_window():
+          if not window.is_gap_window():
             wga_means.append(window.get_rd_statistic(statistics="mean", name=WindowType.WGA))
             no_wga_means.append(window.get_rd_statistic(statistics="mean", name=WindowType.NO_WGA))
 
