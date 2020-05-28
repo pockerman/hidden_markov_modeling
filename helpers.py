@@ -169,31 +169,6 @@ class WindowState(Enum):
                                               "NORMAL",
                                               "INSERTION", "TUF", "OTHER"]))
 
-"""
-class WindowIterator(object):
-
-
-    Helper class to allow iteration over the window
-    elements
-
-
-    def __init__(self, data):
-
-        # data over which to iterate
-        self._data = data
-
-        # current index
-        self._counter = 0
-
-    def __next__(self):
-        if self._counter < len(self._data):
-            tmp = self._data[self._counter]
-            self._counter += 1
-            return tmp
-
-        raise StopIteration
-"""
-
 
 class Window(object):
     """
@@ -280,36 +255,6 @@ class Window(object):
         """
         return self._samdata["gapAlert"]
 
-    """
-    def __len__(self):
-        return len(self._samdata)
-
-
-    def __iter__(self):
-
-        Produce an iterator to iterate over the accumulated
-        window observations
-        :return:
-
-        return WindowIterator(data=self._observations)
-
-    def __getitem__(self, item):
-
-        Returns the item-th observation
-        :param item: int the index of the observation to access
-        :return: Observation instance
-
-        return self._observations[item]
-
-    def __setitem__(self, o, value):
-
-        Set the o-th observation to value
-        :param o:
-        :param value:
-        :return:
-
-        self._observations[o] = value
-    """
 
 
 class MixedWindowView(object):
