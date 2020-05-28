@@ -2,6 +2,7 @@ import argparse
 import logging
 import numpy as np
 import time
+import sys
 
 from helpers import read_configuration_file
 from helpers import set_up_logger
@@ -22,6 +23,10 @@ from exceptions import Error
 def make_window_regions(configuration):
 
     print("{0} Creating window regions...".format(INFO))
+
+    if configuration['processing']['type'] == 'multi':
+      from parallel import par_make_window_regions
+      return par_make_window_regions(configuration=configuration)
 
     windowsize = configuration["window_size"]
     chromosome = configuration["chromosome"]
@@ -82,47 +87,42 @@ def make_window_regions(configuration):
                   " windows: {1}".format(INFO,
                                          region.get_n_windows(type_=WindowType.NO_WGA)))
 
+        regions_created.append(region)
+        counter += 1
 
-        if "check_windowing_sanity" in configuration and \
-          configuration["check_windowing_sanity"]:
-            region.check_windows_sanity()
+    return regions_created
 
-        # compute the mixed windows for the region
-        region.get_mixed_windows()
 
-         # filter the windows for GAPs
-        if "remove_windows_with_N" in configuration and\
-          configuration["remove_windows_with_N"]:
+def remove_gaps(region, configuration):
+  # filter the windows for GAPs
+    if "remove_windows_with_gaps" in configuration and\
+          configuration["remove_windows_with_gaps"]:
 
-            print("{0} Filtering windows for Ns...".format(INFO))
+            print("{0} Removing windows with gaps...".format(INFO))
 
             region.remove_windows_with_gaps()
 
             print("{0} Number of wga windows"
-                  " after filtering: {1}".format(INFO,
+                  " after removing GAP windows: {1}".format(INFO,
                                                  region.get_n_windows(type_=WindowType.WGA)))
             print("{0} Number of non-wga windows"
-                  " after filtering: {1}".format(INFO,
+                  " after removing GAP windows: {1}".format(INFO,
                                                  region.get_n_windows(type_=WindowType.NO_WGA)))
             print("{0} Done...".format(INFO))
-        else:
+    else:
             # mark the Gap windows
             print("{0} Marking Gap "
                   " windows with: {1}".format(INFO,
-                                              configuration["mark_for_N_windows"]))
+                                              configuration["mark_for_gap_windows"]))
             counter_ns = \
               region.mark_windows_with_gaps(n_mark=configuration["mark_for_N_windows"])
 
             print("{0} Marked as Gap {1} Windows".format(INFO, counter_ns))
 
-        print("{0} Number of mixed "
-              "windows: {1}".format(INFO,
-                                    region.get_n_mixed_windows()))
 
-        print("{0} Number of GAP windows: {1}".format(INFO,
-                                                    region.count_n_windows()))
+def remove_outliers(region, configuration):
 
-        if "outlier_remove" in configuration and\
+  if "outlier_remove" in configuration and\
           configuration["outlier_remove"]:
 
             region.remove_outliers(configuration=configuration)
@@ -133,16 +133,33 @@ def make_window_regions(configuration):
             print("{0} Number of N windows "
                   "after outlier removal {1}".format(INFO,
                                                      region.count_n_windows()))
-        else:
+  else:
           print("{0} No outlier "
                 "removal performed".format(INFO))
 
-        # save the region statistics
-        region.save_mixed_windows_statistic(statistic="mean")
-        regions_created.append(region)
-        counter += 1
+@timefn
+def clean_up_regions(regions, configuration):
 
-    return regions_created
+  print("{0} Clean up regions".format(INFO))
+  for region in regions:
+
+    if "check_windowing_sanity" in configuration and \
+          configuration["check_windowing_sanity"]:
+            region.check_windows_sanity()
+
+    # compute the mixed windows for the region
+    region.get_mixed_windows()
+    remove_gaps(region=region, configuration=configuration)
+
+    print("{0} Number of mixed "
+              "windows: {1}".format(INFO,
+                                    region.get_n_mixed_windows()))
+
+    print("{0} Number of GAP windows: {1}".format(INFO,
+                                                    region.count_n_windows()))
+
+    remove_outliers(region=region, configuration=configuration)
+
 
 @timefn
 def create_clusters(regions, configuration):
@@ -201,10 +218,13 @@ def main(configuration):
 
     regions = make_window_regions(configuration=configuration)
 
+    clean_up_regions(regions=regions, configuration=configuration)
+
     print("{0} Saving regions...".format(INFO))
     time_start = time.perf_counter()
 
     for region in regions:
+      region.save_mixed_windows_statistic(statistic="mean")
       region.save()
     time_end = time.perf_counter()
     print("{0} Done. Execution time {1} secs".format(INFO, time_end - time_start))

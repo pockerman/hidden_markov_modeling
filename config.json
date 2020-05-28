@@ -15,6 +15,11 @@
   "wga_file":{
     "filename": "data/m605_chopped_1_1000101.bam"
   },
+  "processing":{
+
+    "type": "multi",
+    "n_procs": 5
+  },
   "sam_read_config":{
     "max_depth":1000,
     "ignore_orphans":false,

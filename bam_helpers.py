@@ -65,7 +65,7 @@ def window_sam_file(chromosome, sam_file, fastafile,
                     start, end, **kwargs):
 
   # store the refseq
-  refseq = '' #array.array('u')
+  refseq = ''
 
   # store for the sample
   samseq = array.array('u')
@@ -83,7 +83,6 @@ def window_sam_file(chromosome, sam_file, fastafile,
                          start=start, end=end,
                          truncate=kwargs["sam_read_config"]["truncate"],
                          ignore_orphans=kwargs["sam_read_config"]["ignore_orphans"],
-                         fastafile=fastafile,
                          max_depth=kwargs["sam_read_config"]["max_depth"]):
 
     # if there is a quality threshold then use it
@@ -149,14 +148,12 @@ def window_sam_file(chromosome, sam_file, fastafile,
 
   #Metrics for read depth
   #allmean = nseq
-  rdmean = np.mean(nseq)
-  rdstd  = np.std(nseq)
-  rdmedian = np.median(nseq)
-  rdsum = np.sum(nseq)
+  allmean = np.mean(nseq)
+  allmedian = np.median(nseq)
+  allsum = np.sum(nseq)
 
   #qseq = nalign
   qmean = np.mean(nalign)
-  qstd = np.std(nalign)
   qmedian = np.median(nalign)
   qsum = np.sum(nalign)
 
@@ -164,47 +161,47 @@ def window_sam_file(chromosome, sam_file, fastafile,
   gcr = (refseq.count('G') + refseq.count('g') + refseq.count('C') + refseq.count('c'))/len(refseq)
   gapAlert = True if 'N' in refseq or 'n' in refseq else False
 
-  altseq = array.array('u')
-  for bs in samseq:
-        talt = []
-        for i in range(len(altseq)):
-            for el in bs:
-                alt = altseq[i] + el
-                talt.append(alt)
-        altseq = talt
-
   gcmax = 0
-  gcmin = 1
-  minLen = pos[-1] - pos[0] +1
-  for alt in altseq:
-        minLen = len(re.sub('[\+\-_Nn*]','',alt)) if len(re.sub('[\+\-_Nn*]','',alt)) < minLen else minLen
-
-        try:
-          gct = len(re.sub('[\+\-_Nn*AaTt]','',alt))/len(re.sub('[\+\-_Nn*]','',alt))
-          gcmax = gct if gct > gcmax else gcmax
-          gcmin = gct if gct < gcmin else gcmin
-        except:
-          pass
+  gcmaxlen = 0
+  gcmin = 0
+  gcminlen = 0
+  for bs in samseq:
+          minelgc = None
+          lenminelgc = None
+          maxelgc = None
+          lenmaxelgc = None
+          for el in bs:
+              el = el.split('-')
+              ellen = len(re.sub('[\+\-_Nn*]','',el[0]))
+              elgc = len(re.sub('[\+\-_Nn*AaTt]','',el[0]))
+              if minelgc == None or elgc < minelgc:
+                  minelgc = elgc
+                  lenminelgc = ellen
+              if maxelgc == None or elgc > maxelgc:
+                  maxelgc = elgc
+                  lenmaxelgc = ellen
+          gcmax += maxelgc
+          gcmaxlen += lenmaxelgc
+          gcmin += minelgc
+          gcminlen += lenminelgc
+  gcmax = gcmax/gcmaxlen if gcmaxlen > 0 else None
+  gcmin = gcmin/gcminlen if gcminlen > 0 else None
 
   output={'gcmax': gcmax,
             'gcmin': gcmin,
             'gcr': gcr,
             'gapAlert': gapAlert,
-            #'allmean': nseq,
-            'rdmean': rdmean,
-            'rdstd': rdstd,
-            'rdmedian': rdmedian,
-            'rdsum':rdsum,
-            #'qseq': nalign,
+            'allmean': allmean,
+            'allmedian': allmedian,
+            'allsum': allsum,
             'qmean':qmean,
-            'qstd':qstd,
             'qmedian':qmedian,
             'qsum':qsum,
             'errorAlert':errorAlert,
             'head':head,
             'start':pos[0],
             'end': pos[-1],
-            'minLen':minLen
+            'minLen':gcminlen
             }
 
   return output
