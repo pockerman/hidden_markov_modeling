@@ -52,7 +52,7 @@ def extract_windows(chromosome, ref_filename, bam_filename, **args):
 
               start_idx += windowcapacity
 
-              print("{0} Created window: {1}".format(INFO, wcounter))
+              #print("{0} Created window: {1}".format(INFO, wcounter))
 
               wcounter += 1
               #if wcounter == 1:
@@ -78,9 +78,12 @@ def window_sam_file(chromosome, sam_file, fastafile,
     try:
 
       for pcol in sam_file.pileup(chromosome,start,end,
-                             truncate=True,ignore_orphans=False,
-                             max_depth=1000):
-          pcol.set_min_base_quality(20)
+                             truncate=kwargs['truncate'],
+                             ignore_orphans=kwargs['ignore_orphans'],
+                             max_depth=kwargs['max_depth']):
+
+        if kwargs['quality_threshold'] is not None:
+          pcol.set_min_base_quality(kwargs['quality_threshold'])
 
           #fill in start when there are no reads present
           while pcol.reference_pos != start:
@@ -110,13 +113,13 @@ def window_sam_file(chromosome, sam_file, fastafile,
                   samseq.append('_')
                   refseq+= fastafile.fetch(chromosome,pcol.reference_pos,pcol.reference_pos+1)
               else:
-                  x = pcol.get_query_sequences(add_indels=True)
+                  x = pcol.get_query_sequences(add_indels=kwargs['add_indels'])
                   x = [a.upper() for a in x]
                   samseq.append(set(x)) #store as unique set
                   refseq+= fastafile.fetch(chromosome,pcol.reference_pos,pcol.reference_pos+1)
           except Exception as e: # may fail if large number of reads
               try:
-                  x = pcol.get_query_sequences(add_indels=True)
+                  x = pcol.get_query_sequences(add_indels=kwargs['add_indels'])
                   x = [a.upper() for a in x]
                   samseq.append(set(x)) #store as unique set
                   refseq+= fastafile.fetch(chromosome,pcol.reference_pos,pcol.reference_pos+1)
