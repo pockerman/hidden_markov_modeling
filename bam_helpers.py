@@ -75,15 +75,21 @@ def window_sam_file(chromosome, sam_file, fastafile,
     read2 = 0 #as above for read 2s
     errorAlert = False
 
+    truncate = kwargs['sam_read_config']['truncate']
+    ignore_orphans=kwargs['sam_read_config']['ignore_orphans']
+    max_depth=kwargs['sam_read_config']['max_depth']
+    qual=kwargs['sam_read_config'].get('quality_threshold', None)
+    add_indels=kwargs['sam_read_config']['add_indels']
+
     try:
 
       for pcol in sam_file.pileup(chromosome,start,end,
-                             truncate=kwargs['truncate'],
-                             ignore_orphans=kwargs['ignore_orphans'],
-                             max_depth=kwargs['max_depth']):
+                             truncate=truncate,
+                             ignore_orphans=ignore_orphans,
+                             max_depth=max_depth):
 
-        if kwargs['quality_threshold'] is not None:
-          pcol.set_min_base_quality(kwargs['quality_threshold'])
+        if qual is not None:
+          pcol.set_min_base_quality(qual)
 
           #fill in start when there are no reads present
           while pcol.reference_pos != start:
@@ -113,13 +119,13 @@ def window_sam_file(chromosome, sam_file, fastafile,
                   samseq.append('_')
                   refseq+= fastafile.fetch(chromosome,pcol.reference_pos,pcol.reference_pos+1)
               else:
-                  x = pcol.get_query_sequences(add_indels=kwargs['add_indels'])
+                  x = pcol.get_query_sequences(add_indels=add_indels)
                   x = [a.upper() for a in x]
                   samseq.append(set(x)) #store as unique set
                   refseq+= fastafile.fetch(chromosome,pcol.reference_pos,pcol.reference_pos+1)
           except Exception as e: # may fail if large number of reads
               try:
-                  x = pcol.get_query_sequences(add_indels=kwargs['add_indels'])
+                  x = pcol.get_query_sequences(add_indels=add_indels)
                   x = [a.upper() for a in x]
                   samseq.append(set(x)) #store as unique set
                   refseq+= fastafile.fetch(chromosome,pcol.reference_pos,pcol.reference_pos+1)
