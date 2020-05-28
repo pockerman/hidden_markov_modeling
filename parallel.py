@@ -86,7 +86,7 @@ def par_make_window_regions(configuration):
 
   for i in range(len(regions_list)):
     for p in range(n_procs):
-      windows_dict[i][p] = []
+      windows_dict[i] = {p:[]}
 
   for p in range(n_procs):
     errors_dict[p] = "No error"
