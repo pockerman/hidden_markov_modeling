@@ -12,6 +12,34 @@ WARNING="WARNING:"
 ERROR="ERROR:"
 DEBUG="DEBUG:"
 
+def partition_range(start, end, npieces):
+
+  if npieces == 0:
+    raise Error("Zero number of partitions")
+
+  load = (end - start )// npieces
+  chunks = []
+
+  start_p = start
+
+  # end is inclusive
+  end_p = start_p + load -1
+  for p in range(npieces-1):
+
+    chunks.append((start_p, end_p ))
+    start_p = end_p + 1
+    end_p += load
+
+  if end_p != end:
+    end_p += end - end_p
+
+  #remain = (end - start ) % npieces
+  #if remain != 0:
+  #  end_p += remain
+
+  chunks.append((start_p, end_p ))
+
+  return chunks
 
 def read_configuration_file(config_file):
     """
@@ -231,13 +259,9 @@ class Window(object):
 
     def get_rd_statistic(self, statistic):
 
-      from preprocess_utils import compute_statistic
-
       if statistic== "mean":
         return self._samdata["qmean"]
 
-      elif statistic == "var":
-        self._samdata["qvar"]
       elif statistic == "median":
         self._samdata["qmedian"]
 
