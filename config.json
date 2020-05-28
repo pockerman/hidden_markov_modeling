@@ -2,7 +2,7 @@
 
   "regions":{
       "start":[1000000],
-      "end":[10000000]
+      "end":[1500000]
   },
   "regions_files":["/home/a/ag568/region_0.txt"],
   "chromosome": "chr1",
@@ -17,7 +17,7 @@
   },
   "processing":{
 
-    "type": "multi",
+    "type": "serial",
     "n_procs": 5
   },
   "sam_read_config":{
@@ -32,9 +32,8 @@
   },
   "window_size":100,
   "save_windows":false,
-  "remove_windows_with_N":false,
-  "mark_N_windows":true,
-  "mark_for_N_windows":-999.0,
+  "remove_windows_with_gaps":false,
+  "mark_for_gap_windows":-999.0,
   "save_cluster_dbi":true,
   "n_windows_dist":{
     "name":"uniform",
