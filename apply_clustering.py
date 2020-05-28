@@ -249,7 +249,7 @@ def main(configuration):
           cluster.diameter
 
           for other in clusters:
-            cluster.distance_from_other(other=other)
+            cluster.calculate_distance_from_other(other=other)
 
     for cluster in clusters:
       cluster.save()
