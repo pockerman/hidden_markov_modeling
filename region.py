@@ -271,8 +271,8 @@ class Region(object):
 
 
     # we don't need these anymore
-    #self._windows[WindowType.WGA] = None
-    #self._windows[WindowType.NO_WGA] = None
+    self._windows[WindowType.WGA] = None
+    self._windows[WindowType.NO_WGA] = None
     return self._mixed_windows
 
   def remove_windows_with_gaps(self):
@@ -345,12 +345,12 @@ class Region(object):
       ## Add error if one has N and the other not
       if wga_w.has_gaps() == True and\
         n_wga_w.has_gaps() == False:
-        raise Error("WGA Window {0} has N "
+        raise Error("WGA Window {0} has GAP "
                     "but Non WGA Window {1} does not".format(wga_w.idx,
                                                              n_wga_w.idx))
       elif wga_w.has_gaps() == False and\
         n_wga_w.has_gaps() == True:
-        raise Error("WGA Window {0} does not have N "
+        raise Error("WGA Window {0} does not have GAP "
                     "but Non WGA Window {1} does".format(wga_w.idx,
                                                          n_wga_w.idx))
 
