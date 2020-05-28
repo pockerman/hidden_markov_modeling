@@ -86,7 +86,7 @@ class Cluster(object):
                center_idx, dist_metric):
     self._id = id_
     self._indexes = indexes
-    self._windows = windows,
+    self._windows = windows
     self._center_idx = center_idx
     self._dist_metric = dist_metric
     self._state = WindowState.INVALID
