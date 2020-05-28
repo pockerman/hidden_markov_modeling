@@ -173,22 +173,22 @@ def process_worker(p, start, end, windows_dict, errors_dict, msg_dict):
     sam = pysam.AlignmentFile("/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam", "rb")
 
     c = 'chr1'
-    start = 1000000
-    end = 2000000
     qual = 20
 
     windows = []
     try:
 
       time_start = time.perf_counter()
+      """
       while start < end:
          met = windowAna(c,start,start+100,qual,fas,sam)
          windows.append(met)
          start = start + 100
+      """
       time_end = time.perf_counter()
       windows_dict[p] = windows
-      msg_dict[p] ="Process {0} finished. "
-      "Total time for {1} windows {2} secs".format(p, len(windows), time_end - time_start)
+      msg_dict[p] = ("Process {0} finished. "
+      "Total time for {1} windows {2} secs").format(p, len(windows), time_end - time_start)
 
     except MemoryError as e:
 
@@ -196,13 +196,13 @@ def process_worker(p, start, end, windows_dict, errors_dict, msg_dict):
       #print("MemoryError exception detected in process {0}. "
       #     "Windows memory used is: {1} GB".format(p, total*1e-9))
 
-      errors_dict[p] = "MemoryError exception "
-      "detected in process {0}. Windows constructed {1}".format(p, len(windows))
+      errors_dict[p] = ("MemoryError exception "
+      "detected in process {0}. Windows constructed {1}").format(p, len(windows))
 
       return
     except Exception as e:
-        errors_dict[p] = "An exception detected "
-        "in process {0}. Exception is: {1}".format(p, str(e))
+        errors_dict[p] = ("An exception detected "
+        "in process {0}. Exception is: {1}").format(p, str(e))
 
         return
 
@@ -286,10 +286,10 @@ if __name__ == '__main__':
   counter = 0
   for p in windows_dict:
 
-    if errors_dict[p] != "No error":
+    if errors_dict[p] == "No error":
 
-      print("Process {0} created"
-          " {1} windows ".format(p, len(windows_dict[p])))
+      print("Process {0} created "
+            "{1} windows ".format(p, len(windows_dict[p])))
       sys.stdout.flush()
       counter += len(windows_dict[p])
     else:
