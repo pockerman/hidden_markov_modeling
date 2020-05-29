@@ -1,6 +1,6 @@
 import argparse
 import logging
-import numpy as np
+#import numpy as np
 import time
 import sys
 
@@ -12,7 +12,8 @@ from helpers import timefn
 
 from region import Region
 from analysis_helpers import save_clusters
-from analysis_helpers import save_windows_statistic
+#from analysis_helpers import save_windows_statistic
+from analysis_helpers import save_clusters_gc_content
 
 from cluster import Cluster
 from cluster_utils import build_cluster_mean_and_std
@@ -221,6 +222,10 @@ def create_clusters(regions, configuration):
   print("{0} Saving clusters means".format(INFO))
   sys.stdout.flush()
   save_clusters(clusters=clusters, statistic="mean")
+
+  if 'gc' in configuration['clusterer']['features']:
+    save_clusters_gc_content(clusters=clusters)
+
   print("{0} Done...".format(INFO))
   sys.stdout.flush()
   return clusters
