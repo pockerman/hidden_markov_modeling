@@ -49,8 +49,9 @@ def make_window_regions(configuration):
         end_idx = r[1]
 
         print("{0} Start index: {1}".format(INFO, start_idx))
+        sys.stdout.flush()
         print("{0} End index:   {1}".format(INFO, end_idx))
-
+        sys.stdout.flush()
         region = Region(idx=counter,
                         start=start_idx,
                         end=end_idx,
@@ -62,6 +63,7 @@ def make_window_regions(configuration):
           kwargs["debug"] = configuration["debug"]
 
         print("{0} Creating WGA Windows...".format(INFO))
+        sys.stdout.flush()
         region.make_wga_windows(chromosome=chromosome,
                                 ref_filename=configuration["reference_file"]["filename"],
                                 bam_filename=configuration["wga_file"]["filename"],
@@ -73,8 +75,10 @@ def make_window_regions(configuration):
             print("{0} Number of WGA "
                   "windows: {1}".format(INFO,
                                         region.get_n_windows(type_=WindowType.WGA)))
+            sys.stdout.flush()
 
         print("{0} Creating No WGA Windows...".format(INFO))
+        sys.stdout.flush()
         region.make_no_wga_windows(chromosome=chromosome,
                                    ref_filename=configuration["reference_file"]["filename"],
                                    bam_filename=configuration["no_wga_file"]["filename"],
@@ -86,6 +90,7 @@ def make_window_regions(configuration):
             print("{0} Number of Non WGA"
                   " windows: {1}".format(INFO,
                                          region.get_n_windows(type_=WindowType.NO_WGA)))
+            sys.stdout.flush()
 
         regions_created.append(region)
         counter += 1
@@ -105,19 +110,24 @@ def remove_gaps(region, configuration):
             print("{0} Number of wga windows"
                   " after removing GAP windows: {1}".format(INFO,
                                                  region.get_n_windows(type_=WindowType.WGA)))
+            sys.stdout.flush()
             print("{0} Number of non-wga windows"
                   " after removing GAP windows: {1}".format(INFO,
                                                  region.get_n_windows(type_=WindowType.NO_WGA)))
             print("{0} Done...".format(INFO))
+            sys.stdout.flush()
     else:
             # mark the Gap windows
             print("{0} Marking Gap "
                   " windows with: {1}".format(INFO,
                                               configuration["mark_for_gap_windows"]))
+            sys.stdout.flush()
+
             counter_ns = \
               region.mark_windows_with_gaps(n_mark=configuration["mark_for_gap_windows"])
 
             print("{0} Marked as Gap {1} Windows".format(INFO, counter_ns))
+            sys.stdout.flush()
 
 
 def remove_outliers(region, configuration):
@@ -129,18 +139,22 @@ def remove_outliers(region, configuration):
             print("{0} Number of windows "
                   "after outlier removal: {1}".format(INFO,
                                                       region.get_n_mixed_windows()))
+            sys.stdout.flush()
 
             print("{0} Number of N windows "
                   "after outlier removal {1}".format(INFO,
                                                      region.count_gap_windows()))
+            sys.stdout.flush()
   else:
           print("{0} No outlier "
                 "removal performed".format(INFO))
+          sys.stdout.flush()
 
 @timefn
 def clean_up_regions(regions, configuration):
 
   print("{0} Clean up regions".format(INFO))
+  sys.stdout.flush()
   for region in regions:
 
     if "check_windowing_sanity" in configuration and \
@@ -154,9 +168,11 @@ def clean_up_regions(regions, configuration):
     print("{0} Number of mixed "
               "windows: {1}".format(INFO,
                                     region.get_n_mixed_windows()))
+    sys.stdout.flush()
 
     print("{0} Number of GAP windows: {1}".format(INFO,
                                                     region.count_gap_windows()))
+    sys.stdout.flush()
 
     remove_outliers(region=region, configuration=configuration)
 
@@ -175,6 +191,7 @@ def accumulate_windows(regions):
 def create_clusters(regions, configuration):
 
   print("{0} Start clustering....".format(INFO))
+  sys.stdout.flush()
   kwargs = configuration["clusterer"]
 
   windows = accumulate_windows(regions=regions)
@@ -187,6 +204,7 @@ def create_clusters(regions, configuration):
 
   print("{0} Initial medoids indexes: {1}".format(INFO,
                                                   initial_index_medoids))
+  sys.stdout.flush()
 
   # get the window indexes
   clusters_indexes = clusterer.get_clusters()
@@ -201,31 +219,39 @@ def create_clusters(regions, configuration):
                             dist_metric=kwargs["config"]["metric"]))
 
   print("{0} Saving clusters means".format(INFO))
+  sys.stdout.flush()
   save_clusters(clusters=clusters, statistic="mean")
   print("{0} Done...".format(INFO))
+  sys.stdout.flush()
   return clusters
 
 @timefn
 def make_clusters_mean_and_std(clusters, configuration):
 
   print("{0} Create clusters mean/std...".format(INFO))
+  sys.stdout.flush()
   kwargs = {}
   print("{0} Make clusters mu/std...".format(INFO) )
+  sys.stdout.flush()
   build_cluster_mean_and_std(clusters=clusters, **kwargs)
   print("{0} Done...".format(INFO))
+  sys.stdout.flush()
 
 def main(configuration):
 
     print("{0} Set up logger".format(INFO))
+    sys.stdout.flush()
     set_up_logger(configuration=configuration)
     logging.info("Checking if logger is sane...")
     print("{0} Done...".format(INFO))
+    sys.stdout.flush()
 
     regions = make_window_regions(configuration=configuration)
 
     clean_up_regions(regions=regions, configuration=configuration)
 
     print("{0} Saving regions...".format(INFO))
+    sys.stdout.flush()
     time_start = time.perf_counter()
 
     for region in regions:
@@ -233,6 +259,7 @@ def main(configuration):
       region.save()
     time_end = time.perf_counter()
     print("{0} Done. Execution time {1} secs".format(INFO, time_end - time_start))
+    sys.stdout.flush()
 
     clusters = create_clusters(regions=regions,
                                configuration=configuration)
@@ -241,6 +268,7 @@ def main(configuration):
                                configuration=configuration)
 
     print("{0} Save clusters...".format(INFO))
+    sys.stdout.flush()
     time_start = time.perf_counter()
 
     if "save_cluster_dbi" in configuration and\
@@ -255,7 +283,7 @@ def main(configuration):
       cluster.save()
     time_end = time.perf_counter()
     print("{0} Done. Execution time {1} secs".format(INFO, time_end - time_start))
-
+    sys.stdout.flush()
 
 if __name__ == '__main__':
 
@@ -273,8 +301,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     configuration = read_configuration_file(args.config)
     print("{0} Done...".format(INFO))
+    sys.stdout.flush()
 
     main(configuration=configuration)
     total_end = time.perf_counter()
     print("{0} Finished clustering. "
           "Execution time {1} secs".format(INFO, total_end - total_start))
+    sys.stdout.flush()
