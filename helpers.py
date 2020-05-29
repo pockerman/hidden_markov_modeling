@@ -287,6 +287,53 @@ class MixedWindowView(object):
     return self._windows[wtype]
 
 
+  def get_features(features, name=WindowType.BOTH):
+
+    if name == WindowType.BOTH:
+      vals = [[], []]
+      for feature in features:
+        f1 = get_feature(feature=feature, name=WindowType.WGA)
+        vals[0].append(f1)
+        f2 = get_feature(feature=feature, name=WindowType.NO_WGA)
+        vals[1].append(f2)
+      return vals
+    else:
+      vals = []
+      for feature in features:
+        vals.append(get_feature(feature=feature, name=name))
+      return vals
+
+  def get_feature(feature, name=WindowType.BOTH):
+
+      if feature == "mean":
+        return self.get_rd_statistic(statistics=feature, name=name)
+      elif feature == "gc":
+        return self.get_gc_statistic(name=name)
+
+      raise Error("Invalid feature '{0}' not in ['mean', 'gc']")
+
+
+  def get_gc_statistic(name=name):
+
+        if self.is_gap_window():
+           if name == WindowType.BOTH:
+             return (Window.N_WINDOW_MARKER, Window.N_WINDOW_MARKER)
+           else:
+            return Window.N_WINDOW_MARKER
+
+        if name == WindowType.BOTH:
+          return (self._windows[WindowType.WGA].get_gc_percent(),
+                  self._windows[WindowType.NO_WGA].get_gc_percent())
+        elif name == WindowType.WGA:
+          return self._windows[WindowType.WGA].get_gc_percent()
+        elif name == WindowType.NO_WGA:
+          return self._windows[WindowType.NO_WGA].get_gc_percent()
+
+        raise Error("Windowtype {0}"
+                    " not in {1}".format(name, [WindowType.BOTH.name,
+                                                WindowType.WGA.name,
+                                                WindowType.NO_WGA.name]))
+
   def get_rd_statistic(self, statistics="all", name=WindowType.BOTH):
         """
         Returns a statistical summary as a dictionary

@@ -165,14 +165,7 @@ def build_clusterer(data, nclusters, method, **kwargs):
   print("{0} cluster features used {1}".format(INFO, features))
 
   for window in data:
-
-    window_data = window.get_rd_statistic(statistics="mean")
-    window_values =[]
-
-    for feature in features:
-      window_values.append(window_data[0])
-      window_values.append(window_data[1])
-
+    window_values = window.get_features(features=features)
     windows.append(window_values)
 
   if method == "kmeans":

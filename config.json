@@ -62,7 +62,7 @@
     "config":{
     "init_cluster_idx":"random_from_data",
     "metric":"MANHATAN",
-    "features":["mean"],
+    "features":["mean", "gc"],
     "n_clusters":4
     }
   },
