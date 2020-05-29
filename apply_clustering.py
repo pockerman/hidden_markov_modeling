@@ -223,7 +223,7 @@ def create_clusters(regions, configuration):
   sys.stdout.flush()
   save_clusters(clusters=clusters, statistic="mean")
 
-  if 'gc' in configuration['clusterer']['features']:
+  if 'gc' in kwargs["config"]['features']:
     save_clusters_gc_content(clusters=clusters)
 
   print("{0} Done...".format(INFO))

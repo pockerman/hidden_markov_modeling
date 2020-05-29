@@ -376,7 +376,7 @@ class Cluster(object):
 
       if isinstance(window, MixedWindowView):
         if statistic == 'gc':
-          statistics.append(window.get_feature(feature='gc'),name=kwargs["window_type"])
+          statistics.append(window.get_feature(feature='gc',name=kwargs["window_type"]))
         else:
           statistics.append(window.get_rd_statistic(name=kwargs["window_type"],
                                               statistics=statistic))
