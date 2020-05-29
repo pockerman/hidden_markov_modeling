@@ -10,6 +10,27 @@ from exceptions import Error
 from bam_helpers import extract_windows
 from region import Region
 
+def test_windowing(**args):
+
+  start_idx = args['start_idx']
+  end_idx = args['end_idx']
+  windowcapacity = args["windowsize"]
+  windows = []
+  while start_idx < end_idx:
+
+    end = start_idx + windowcapacity
+    # make sure we stay in bounds
+    if end > end_idx:
+      end = end_idx
+
+    windows.append((start_idx, end))
+
+    if end == end_idx:
+      break
+
+    start_idx += windowcapacity
+  return windows
+
 def regions_worker(worker_id, configuration, regions_chuncks,
                    regions_dict, msg_dict, errors_dict):
 
@@ -61,7 +82,6 @@ def regions_worker(worker_id, configuration, regions_chuncks,
     return
 
 
-
 def par_make_window_regions(configuration):
 
 
@@ -80,6 +100,7 @@ def par_make_window_regions(configuration):
 
   for i, r in enumerate(regions_list):
     chunks_dict[i] = partition_range(start=r[0], end=r[1], npieces=n_procs)
+    print("{0} chuncks for region {1}: {2}".format(INFO, i, chunks_dict[i]))
 
   manager = Manager()
   windows_dict = manager.dict()
@@ -159,8 +180,25 @@ def par_make_window_regions(configuration):
       wga_windows.extend(windows_dict[i][p]["wga_windows"])
       no_wga_windows.extend(windows_dict[i][p]["no_wga_windows"])
 
+
     region.set_windows(wtype=WindowType.WGA, windows=wga_windows)
+
+    if region.get_n_windows(type_=WindowType.WGA) == 0:
+            raise Error("WGA windows have not been created")
+    else:
+            print("{0} Number of WGA "
+                  "windows: {1}".format(INFO,
+                                        region.get_n_windows(type_=WindowType.WGA)))
+
     region.set_windows(wtype=WindowType.NO_WGA, windows=no_wga_windows)
+
+    if region.get_n_windows(type_=WindowType.NO_WGA) == 0:
+            raise Error("Non-WGA windows have not  been created")
+    else:
+            print("{0} Number of Non WGA"
+                  " windows: {1}".format(INFO,
+                                         region.get_n_windows(type_=WindowType.NO_WGA)))
+
     regions.append(region)
 
   return regions
