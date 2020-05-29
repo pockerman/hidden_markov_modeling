@@ -35,23 +35,23 @@ def regions_worker(worker_id, configuration, regions_chuncks,
       args["windowsize"] = windowsize
 
 
-      #wga_windows=[]
-      #no_wga_windows=[]
+      wga_windows=[worker_id]
+      no_wga_windows=[worker_id]
 
       bam_filename=configuration['wga_file']['filename']
-      regions_dict[rid][worker_id]["wga_windows"] = extract_windows(chromosome=chromosome,
-                                    ref_filename=ref_filename,
-                                    bam_filename=bam_filename,
-                                        **args)
+      #extract_windows(chromosome=chromosome,
+      #                              ref_filename=ref_filename,
+      #                              bam_filename=bam_filename,
+      #                                  **args)
 
       bam_filename=configuration['no_wga_file']['filename']
-      regions_dict[rid][worker_id]["no_wga_windows"] = extract_windows(chromosome=chromosome,
-                                       ref_filename=ref_filename,
-                                       bam_filename=bam_filename,
-                                        **args)
+      #extract_windows(chromosome=chromosome,
+      #                                 ref_filename=ref_filename,
+      #                                 bam_filename=bam_filename,
+      #                                  **args)
 
-      #regions_dict[rid][worker_id]={"wga_windows": wga_windows,
-      #                            "no_wga_windows": no_wga_windows}
+      regions_dict[rid][worker_id]={"wga_windows": wga_windows,
+                                    "no_wga_windows": no_wga_windows}
     tend = time.perf_counter()
     msg = ("Process {0} finished in {1} secs").format(worker_id, tend-tstart)
     msg_dict[worker_id] = msg
@@ -88,7 +88,7 @@ def par_make_window_regions(configuration):
 
 
   for i in range(len(regions_list)):
-    windows_dict[i] = {}
+    windows_dict[i] = manager.dict()
     for p in range(n_procs):
       windows_dict[i][p] = {"wga_windows":[],
                             "no_wga_windows":[]}
