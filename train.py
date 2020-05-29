@@ -161,9 +161,9 @@ def hmm_train(hmm_model, regions, configuration):
         for region in regions:
 
           region_sequences = \
-            region.get_region_as_sequences(size=hmm_conf["train_sequence_size"],
-                                           window_type=WindowType.from_string(hmm_conf["train_windowtype"]),
-                                           n_seqs=hmm_conf["train_n_sequences_per_source"])
+            region.get_region_as_rd_mean_sequences(size=hmm_conf["train_sequence_size"],
+                                                   window_type=WindowType.from_string(hmm_conf["train_windowtype"]),
+                                                   n_seqs=hmm_conf["train_n_sequences_per_source"])
 
           for seq in region_sequences:
             observations.append(seq)
@@ -227,44 +227,17 @@ def main(configuration):
     logging.info("Checking if logger is sane...")
     print("{0} Done...".format(INFO))
 
-    #print("{0} Load regions...".format(INFO))
-    #time_start = time.perf_counter()
     regions = load_regions(configuration=configuration)
-    #time_end = time.perf_counter()
-    #print("{0} Done. Execution time"
-    #      " {1} secs".format(INFO, time_end - time_start))
 
-    #print("{0} Load clusters".format(INFO))
-    #time_start = time.perf_counter()
     clusters = load_clusters(configuration=configuration)
-    #time_end = time.perf_counter()
-    #print("{0} Done. Execution time"
-    #      " {1} secs".format(INFO, time_end - time_start))
 
-    #print("{0} Build cluster densities".format(INFO))
-    #time_start = time.perf_counter()
-    #kwargs = configuration["clusters"]
     build_cluster_densities(clusters_lst=clusters, **configuration)
-    #time_end = time.perf_counter()
-    #print("{0} Done. Execution time"
-    #      " {1} secs".format(INFO, time_end - time_start))
 
-    #print("{0} Star HMM initialization...".format(INFO))
-    #time_start = time.perf_counter()
     hmm = init_hmm(clusters=clusters,configuration=configuration)
-    #time_end = time.perf_counter()
-    #print("{0} Done. Execution time"
-    #      " {1} secs".format(INFO, time_end - time_start))
 
-    #print("{0} Star HMM training...".format(INFO))
-    #time_start = time.perf_counter()
     hmm_train(hmm_model=hmm,
               regions=regions,
               configuration=configuration)
-    #time_end = time.perf_counter()
-    #print("{0} Done. Execution time"
-    #      " {1} secs".format(INFO, time_end - time_start))
-
 
 
 if __name__ == '__main__':

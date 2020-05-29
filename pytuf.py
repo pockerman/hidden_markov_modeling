@@ -1,65 +1,21 @@
-"""
-Utilities for working with bam files
-"""
-import math
 import pysam
-import logging
 import numpy as np
+from scipy import stats
 import re
-import array
+import time
+import sys
 
+def total_memory(windows):
 
-from helpers import Window
-from helpers import INFO, WARNING, DEBUG
-from exceptions import Error
+  total = 0
+  for window in windows:
+    total += sys.getsizeof(window.keys())
+    total += sys.getsizeof(window.values())
+    total += sys.getsizeof(window)
 
+  return total
 
-def extract_windows(chromosome, ref_filename, bam_filename, **args):
-
-    """
-    Extract the windows that couple the seq_file and ref_files
-    for the given chromosome
-    :param chromosome: chromosome name (str)
-    :param ref_file: The reference file
-    :param test_file: The sequence file
-    :return:
-    """
-
-    windowcapacity = args["windowsize"]
-    start_idx = args["start_idx"]
-    end_idx = args["end_idx"]
-
-    # the windows list
-    windows = []
-
-    with pysam.FastaFile(ref_filename) as fastafile:
-
-        print("{0} Reference file: {1}".format(INFO, fastafile.filename))
-
-        with pysam.AlignmentFile(bam_filename, "rb") as sam_file:
-            print("{0} Sam file: {1} ".format(INFO, sam_file.filename))
-
-            wcounter = 0
-            while start_idx < end_idx:
-
-              sam_output = window_sam_file(chromosome=chromosome,
-                                       sam_file=sam_file,
-                                       fastafile=fastafile,
-                                       start=start_idx, end=start_idx+windowcapacity,
-                                       **args)
-              windows.append(Window(idx=wcounter,
-                                    capacity=windowcapacity,
-                                    samdata=sam_output))
-
-              start_idx += windowcapacity
-              wcounter += 1
-
-    return windows
-
-
-def window_sam_file(chromosome, sam_file, fastafile,
-                    start, end, **kwargs):
-
+def windowAna(chr,start,end,qual,fas,sam):
     refseq = '' #store for the refseq
     samseq = [] #stote for the sample
     pos = [] #reference pos
@@ -72,26 +28,18 @@ def window_sam_file(chromosome, sam_file, fastafile,
     read2 = 0 #as above for read 2s
     errorAlert = False
 
-    truncate = kwargs['sam_read_config']['truncate']
-    ignore_orphans=kwargs['sam_read_config']['ignore_orphans']
-    max_depth=kwargs['sam_read_config']['max_depth']
-    qual=kwargs['sam_read_config'].get('quality_threshold', None)
-    add_indels=kwargs['sam_read_config']['add_indels']
-
     try:
 
-      for pcol in sam_file.pileup(chromosome,start,end,
-                             truncate=truncate,
-                             ignore_orphans=ignore_orphans,
-                             max_depth=max_depth):
-
-        if qual is not None:
+      time_start = time.perf_counter()
+      for pcol in sam.pileup(chr,start,end,
+                             truncate=True,ignore_orphans=False,
+                             max_depth=1000):
           pcol.set_min_base_quality(qual)
 
           #fill in start when there are no reads present
           while pcol.reference_pos != start:
               samseq.append('_')
-              refseq += fastafile.fetch(chromosome,start,start+1)
+              refseq += fas.fetch(chr,start,start+1)
               pos.append(start)
               nseq.append(0)
               nalign.append(0)
@@ -114,26 +62,33 @@ def window_sam_file(chromosome, sam_file, fastafile,
           try:
               if pcol.get_num_aligned() == 0:
                   samseq.append('_')
-                  refseq+= fastafile.fetch(chromosome,pcol.reference_pos,pcol.reference_pos+1)
+                  refseq+= fas.fetch(chr,pcol.reference_pos,pcol.reference_pos+1)
               else:
-                  x = pcol.get_query_sequences(add_indels=add_indels)
+                  x = pcol.get_query_sequences(add_indels=True)
                   x = [a.upper() for a in x]
                   samseq.append(set(x)) #store as unique set
-                  refseq+= fastafile.fetch(chromosome,pcol.reference_pos,pcol.reference_pos+1)
+                  refseq+= fas.fetch(chr,pcol.reference_pos,pcol.reference_pos+1)
           except Exception as e: # may fail if large number of reads
               try:
-                  x = pcol.get_query_sequences(add_indels=add_indels)
+                  x = pcol.get_query_sequences(add_indels=True)
                   x = [a.upper() for a in x]
                   samseq.append(set(x)) #store as unique set
-                  refseq+= fastafile.fetch(chromosome,pcol.reference_pos,pcol.reference_pos+1)
+                  refseq+= fas.fetch(chr,pcol.reference_pos,pcol.reference_pos+1)
               except Exception as e:
                   errorAlert = True
           start+=1
 
+
+      time_end = time.perf_counter()
+      print("Time for loop over pcol {0}".format(time_end - time_start))
+      sys.stdout.flush()
+
+      time_start = time.perf_counter()
+
       #fill in end if no reads at end of window
       while start < end:
               samseq.append('_')
-              refseq += fastafile.fetch(chromosome,start,start+1)
+              refseq += fas.fetch(chr,start,start+1)
               pos.append(start)
               nseq.append(0)
               nalign.append(0)
@@ -179,6 +134,10 @@ def window_sam_file(chromosome, sam_file, fastafile,
       gcmax = gcmax/gcmaxlen if gcmaxlen > 0 else None
       gcmin = gcmin/gcminlen if gcminlen > 0 else None
 
+      time_end = time.perf_counter()
+      print("Time for remaining function {0}".format(time_end - time_start))
+      sys.stdout.flush()
+
       output={'gcmax':gcmax,
               'gcmin':gcmin,
               'gcr':gcr,
@@ -195,5 +154,51 @@ def window_sam_file(chromosome, sam_file, fastafile,
               }
       return output
     except MemoryError as e:
+      total = sys.getsizeof(refseq)
+      total += sys.getsizeof(samseq)
+      total += sys.getsizeof(pos)
+      total += sys.getsizeof(nseq)
+      total += sys.getsizeof(nalign)
+
+      print("Memory used by function {0} GB".format(total*1e-9))
+      sys.stdout.flush()
       raise
+
+if __name__ == '__main__':
+  fas = pysam.FastaFile("/scratch/spectre/a/ag568/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna")
+  sam = pysam.AlignmentFile("/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam", "rb")
+  #pysam.AlignmentFile("/scratch/spectre/a/ag568/m585_verysensitive_trim_sorted.bam", "rb")
+
+
+  c = 'chr1'
+  start = 1000000
+  end = 1500000
+  qual = 20
+
+  counter = 0
+  windows = []
+  time_start = time.perf_counter()
+  windows = []
+  try:
+    while start < end:
+        met = windowAna(c,start,start+100,qual,fas,sam)
+        windows.append(met)
+        print("Created window: ", counter)
+        print("Window pos: {0}/{1} ".format(met['start'], met['end']))
+
+        counter += 1
+        start = start + 100
+    time_end = time.perf_counter()
+    print("Time to create  {0} windows is {1} secs".format(counter, time_end - time_start))
+    sys.stdout.flush()
+  except MemoryError as e:
+    time_end = time.perf_counter()
+    print("Time to create  {0} windows is {1} secs (Exception case)".format(counter, time_end - time_start))
+    sys.stdout.flush()
+    total = total_memory(windows)
+    print("MemoryError exception detected. "
+          "Windows memory used is: {0} GB".format(total*1e-9))
+    sys.stdout.flush()
+    raise
+
 
