@@ -303,7 +303,7 @@ class MixedWindowView(object):
         vals.append(self.get_feature(feature=feature, name=name))
       return vals
 
-  def get_feature(self,feature, name=WindowType.BOTH):
+  def get_feature(self, feature, name=WindowType.BOTH):
 
       if feature == "mean":
         return self.get_rd_statistic(statistics=feature, name=name)
@@ -312,9 +312,7 @@ class MixedWindowView(object):
 
       raise Error("Invalid feature '{0}' not in ['mean', 'gc']")
 
-
   def get_gc_statistic(self, name):
-
         if self.is_gap_window():
            if name == WindowType.BOTH:
              return (Window.N_WINDOW_MARKER, Window.N_WINDOW_MARKER)
@@ -359,14 +357,4 @@ class MixedWindowView(object):
                     " not in {1}".format(name, [WindowType.BOTH.name,
                                                 WindowType.WGA.name,
                                                 WindowType.NO_WGA.name]))
-
-
-
-
-
-
-
-
-
-
 
