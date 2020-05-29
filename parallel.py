@@ -35,20 +35,20 @@ def regions_worker(worker_id, configuration, regions_chuncks,
       args["windowsize"] = windowsize
 
 
-      wga_windows=[worker_id]
-      no_wga_windows=[worker_id]
+      wga_windows=[]
+      no_wga_windows=[]
 
       bam_filename=configuration['wga_file']['filename']
-      #extract_windows(chromosome=chromosome,
-      #                              ref_filename=ref_filename,
-      #                              bam_filename=bam_filename,
-      #                                  **args)
+      wga_windows = extract_windows(chromosome=chromosome,
+                                    ref_filename=ref_filename,
+                                    bam_filename=bam_filename,
+                                        **args)
 
       bam_filename=configuration['no_wga_file']['filename']
-      #extract_windows(chromosome=chromosome,
-      #                                 ref_filename=ref_filename,
-      #                                 bam_filename=bam_filename,
-      #                                  **args)
+      no_wga_windows = extract_windows(chromosome=chromosome,
+                                       ref_filename=ref_filename,
+                                       bam_filename=bam_filename,
+                                        **args)
 
       regions_dict[rid][worker_id]={"wga_windows": wga_windows,
                                     "no_wga_windows": no_wga_windows}
@@ -147,8 +147,6 @@ def par_make_window_regions(configuration):
 
 
   regions=[]
-
-  print("Windows dict computed: ", windows_dict[0])
 
   # now bring together the pieces of the regions
   for i, r in enumerate(regions_list):
