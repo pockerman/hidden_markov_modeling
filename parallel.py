@@ -101,7 +101,7 @@ def par_make_window_regions(configuration):
   for i, r in enumerate(regions_list):
     chunks_dict[i] = partition_range(start=r[0], end=r[1], npieces=n_procs)
     print("{0} chuncks for region {1}: {2}".format(INFO, i, chunks_dict[i]))
-
+    sys.stdout.flush()
   manager = Manager()
   windows_dict = manager.dict()
   errors_dict = manager.dict()
@@ -189,6 +189,7 @@ def par_make_window_regions(configuration):
             print("{0} Number of WGA "
                   "windows: {1}".format(INFO,
                                         region.get_n_windows(type_=WindowType.WGA)))
+            sys.stdout.flush()
 
     region.set_windows(wtype=WindowType.NO_WGA, windows=no_wga_windows)
 
@@ -198,6 +199,7 @@ def par_make_window_regions(configuration):
             print("{0} Number of Non WGA"
                   " windows: {1}".format(INFO,
                                          region.get_n_windows(type_=WindowType.NO_WGA)))
+            sys.stdout.flush()
 
     regions.append(region)
 
