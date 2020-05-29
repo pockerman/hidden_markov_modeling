@@ -2,7 +2,7 @@
 
   "regions":{
       "start":[1000000],
-      "end":[1500000]
+      "end":[10000000]
   },
   "regions_files":["/home/a/ag568/region_0.txt"],
   "chromosome": "chr1",
@@ -17,7 +17,7 @@
   },
   "processing":{
 
-    "type": "serial",
+    "type": "multi",
     "n_procs": 5
   },
   "sam_read_config":{
