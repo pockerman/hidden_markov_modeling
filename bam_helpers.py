@@ -41,6 +41,7 @@ def extract_windows(chromosome, ref_filename, bam_filename, **args):
 
             wcounter = 0
             while start_idx < end_idx:
+
               sam_output = window_sam_file(chromosome=chromosome,
                                        sam_file=sam_file,
                                        fastafile=fastafile,
@@ -51,12 +52,8 @@ def extract_windows(chromosome, ref_filename, bam_filename, **args):
                                     samdata=sam_output))
 
               start_idx += windowcapacity
-
-              #print("{0} Created window: {1}".format(INFO, wcounter))
-
               wcounter += 1
-              #if wcounter == 1:
-              #  break
+
     return windows
 
 
