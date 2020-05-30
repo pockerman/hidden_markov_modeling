@@ -17,11 +17,11 @@ def partition_range(start, end, npieces):
   if npieces == 0:
     raise Error("Zero number of partitions")
 
-
   load = (end - start)// npieces
 
-  chunks = []
+  print("{0} Load per process: {1}".format(INFO, load))
 
+  chunks = []
   start_p = start
 
   end_p = start_p + load
@@ -245,11 +245,7 @@ class Window(object):
         Window.set_window_marker(marker=mark)
 
     def has_gaps(self):
-        """
-        Returns true if the window contains gaps.
-        """
         return self._samdata["gapAlert"]
-
 
 
 class MixedWindowView(object):
@@ -285,7 +281,6 @@ class MixedWindowView(object):
 
   def get_window(self, wtype):
     return self._windows[wtype]
-
 
   def get_features(self, features, name=WindowType.BOTH):
 

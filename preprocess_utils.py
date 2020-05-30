@@ -5,6 +5,7 @@ Preprocessing utilities
 from pomegranate import*
 from scipy import stats
 import numpy as np
+import copy
 from pyclustering.utils.metric import type_metric
 from pyclustering.utils.metric import  distance_metric
 
@@ -159,13 +160,21 @@ def build_clusterer(data, nclusters, method, **kwargs):
   argumens are expected in the kwargs dict.
   """
 
-  features = kwargs["config"]["features"]
+  print("{0} cluster features used {1}".format(INFO, features))
+
+  features = deepcopy(kwargs["config"]["features"])
   windows = []
 
-  print("{0} cluster features used {1}".format(INFO, features))
+  has_gc = False
+  if 'gc' in features:
+    features.pop(features.index('gc'))
+    has_gc = True
 
   for window in data:
     window_values = window.get_features(features=features)
+
+    if has_gc:
+      window_values.append(window.get_feature(feature='gc')[0])
     windows.append(window_values)
 
   if method == "kmeans":

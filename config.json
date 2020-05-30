@@ -50,13 +50,6 @@
       "sigma_factor":2
     }
   },
-  "label_clusters": true,
-  "labeler":{
-    "name":"mean_diff",
-    "tuf_mean_min": 1.5,
-    "tuf_mean_max": 8.5,
-    "states":["DELETE", "OTHER", "OTHER", "TUF"]
-  },
   "clusterer":{
     "name":"kmedoids",
     "config":{
