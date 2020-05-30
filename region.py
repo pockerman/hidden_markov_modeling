@@ -64,8 +64,6 @@ class Region(object):
            rd = float(f.readline().split(":")[1].rstrip("\n"))
            base = list(f.readline().split(":")[1].rstrip("\n"))
 
-           #obs = Observation(position=pos, read_depth=rd, base=base)
-           #window.add(observation=obs)
          windows.append(window)
 
        region.set_windows(wtype=WindowType.WGA, windows=windows)
@@ -84,8 +82,6 @@ class Region(object):
            rd = float(f.readline().split(":")[1].rstrip("\n"))
            base = list(f.readline().split(":")[1].rstrip("\n"))
 
-           #obs = Observation(position=pos, read_depth=rd, base=base)
-           #window.add(observation=obs)
          windows.append(window)
        region.set_windows(wtype=WindowType.NO_WGA, windows=windows)
        return region
@@ -203,8 +199,10 @@ class Region(object):
                               bam_filename=bam_filename,
                                       **args)
 
-    print("{0} Region Start Window Coords: Start/End idx {1}".format(INFO, windows[0].start_end_pos))
-    print("{0} Region End Window Coords: Start/End idx {1}".format(INFO, windows[-1].start_end_pos))
+    print("{0} Region Start Window "
+          "Coords: Start/End idx {1}".format(INFO, windows[0].start_end_pos))
+    print("{0} Region End Window "
+          "Coords: Start/End idx {1}".format(INFO, windows[-1].start_end_pos))
     self._windows[WindowType.WGA] = windows
 
   def make_no_wga_windows(self, chromosome,
@@ -225,8 +223,10 @@ class Region(object):
                               bam_filename=bam_filename,
                               **args)
 
-    print("{0} Start Window: Start/End idx {1}".format(INFO, windows[0].start_end_pos))
-    print("{0} End Window: Start/End idx {1}".format(INFO, windows[-1].start_end_pos))
+    print("{0} Region Start Window "
+          "Coords: Start/End idx {1}".format(INFO, windows[0].start_end_pos))
+    print("{0} Region End Window "
+          "Coords: Start/End idx {1}".format(INFO, windows[-1].start_end_pos))
     self._windows[WindowType.NO_WGA] = windows
 
   def check_windows_sanity(self):
@@ -290,6 +290,7 @@ class Region(object):
 
      self._windows[WindowType.WGA] = wga_filter_windows
      self._windows[WindowType.NO_WGA] = no_wga_filter_windows
+     self.get_mixed_windows()
 
   def save_mixed_windows_statistic(self, statistic):
 
@@ -311,8 +312,10 @@ class Region(object):
 
     for window in self._mixed_windows:
           if not window.is_gap_window():
-            wga_means.append(window.get_rd_statistic(statistics="mean", name=WindowType.WGA))
-            no_wga_means.append(window.get_rd_statistic(statistics="mean", name=WindowType.NO_WGA))
+            wga_means.append(window.get_rd_statistic(statistics="mean",
+                                                     name=WindowType.WGA))
+            no_wga_means.append(window.get_rd_statistic(statistics="mean",
+                                                        name=WindowType.NO_WGA))
 
 
     if len(wga_means) == 0 or len(no_wga_means) == 0:
@@ -369,13 +372,13 @@ class Region(object):
 
   def get_rd_mean_sequence(self, size, window_type):
 
-
     sequence =[]
 
     if size < len(self._mixed_windows):
         counter = 0
         for window in self._mixed_windows:
-          sequence.append(window.get_rd_statistic(statistics="mean", name=window_type))
+          sequence.append(window.get_rd_statistic(statistics="mean",
+                                                  name=window_type))
           counter +=1
 
           if counter == size:
@@ -384,7 +387,8 @@ class Region(object):
 
       print("{0} Region size is less than {1}".format(WARNING, size))
       for window in self._mixed_windows:
-          sequence.append(window.get_rd_statistic(statistics="mean",name=window_type))
+          sequence.append(window.get_rd_statistic(statistics="mean",
+                                                  name=window_type))
 
     return sequence
 

@@ -1,18 +1,16 @@
 import argparse
 import logging
-#import numpy as np
 import time
 import sys
 
 from helpers import read_configuration_file
 from helpers import set_up_logger
 from helpers import WindowType
-from helpers import INFO
+from helpers import INFO, WARNING
 from helpers import timefn
 
 from region import Region
 from analysis_helpers import save_clusters
-#from analysis_helpers import save_windows_statistic
 from analysis_helpers import save_clusters_gc_content
 
 from cluster import Cluster
@@ -24,6 +22,7 @@ from exceptions import Error
 def make_window_regions(configuration):
 
     print("{0} Creating window regions...".format(INFO))
+    print("{0} Processing type is: {1}".format(INFO, configuration['processing']['type']))
 
     if configuration['processing']['type'] == 'multi':
       from parallel import par_make_window_regions
@@ -161,6 +160,8 @@ def clean_up_regions(regions, configuration):
     if "check_windowing_sanity" in configuration and \
           configuration["check_windowing_sanity"]:
             region.check_windows_sanity()
+    else:
+      print("{0} Window sanity check is disabled".format(WARNING))
 
     # compute the mixed windows for the region
     region.get_mixed_windows()
@@ -224,10 +225,10 @@ def create_clusters(regions, configuration):
   save_clusters(clusters=clusters, statistic="mean")
 
   if 'gc' in kwargs["config"]['features']:
+    print("{0} Saving clusters GC".format(INFO))
+    sys.stdout.flush()
     save_clusters_gc_content(clusters=clusters)
 
-  print("{0} Done...".format(INFO))
-  sys.stdout.flush()
   return clusters
 
 @timefn
@@ -236,12 +237,9 @@ def make_clusters_mean_and_std(clusters, configuration):
   print("{0} Create clusters mean/std...".format(INFO))
   sys.stdout.flush()
   kwargs = {}
-  print("{0} Make clusters mu/std...".format(INFO) )
-  sys.stdout.flush()
   build_cluster_mean_and_std(clusters=clusters, **kwargs)
-  print("{0} Done...".format(INFO))
-  sys.stdout.flush()
 
+@timefn
 def main(configuration):
 
     print("{0} Set up logger".format(INFO))
@@ -286,9 +284,6 @@ def main(configuration):
 
     for cluster in clusters:
       cluster.save()
-    time_end = time.perf_counter()
-    print("{0} Done. Execution time {1} secs".format(INFO, time_end - time_start))
-    sys.stdout.flush()
 
 if __name__ == '__main__':
 
@@ -311,5 +306,5 @@ if __name__ == '__main__':
     main(configuration=configuration)
     total_end = time.perf_counter()
     print("{0} Finished clustering. "
-          "Execution time {1} secs".format(INFO, total_end - total_start))
+          "Total execution time {1} secs".format(INFO, total_end - total_start))
     sys.stdout.flush()
