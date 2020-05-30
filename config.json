@@ -2,7 +2,7 @@
 
   "regions":{
       "start":[1000000],
-      "end":[1500000]
+      "end":[10000000]
   },
   "regions_files":["/home/a/ag568/region_0.txt"],
   "chromosome": "chr1",
@@ -34,7 +34,7 @@
   "save_windows":false,
   "remove_windows_with_gaps":false,
   "mark_for_gap_windows":-999.0,
-  "save_cluster_dbi":true,
+  "save_cluster_dbi":false,
   "n_windows_dist":{
     "name":"uniform",
     "config":{
@@ -60,9 +60,9 @@
   "clusterer":{
     "name":"kmedoids",
     "config":{
-    "init_cluster_idx":"random_from_data",
+    "init_cluster_idx":[18420, 21303, 60069, 40279],
     "metric":"MANHATAN",
-    "features":["mean", "gc"],
+    "features":["mean"],
     "n_clusters":4
     }
   },
