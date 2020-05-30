@@ -74,7 +74,7 @@ class Region(object):
              except:
                pass
 
-           samdata = {name:val}
+           samdata[name] = val
 
          window = Window(idx=wid, capacity=cap, samdata=samdata)
          windows.append(window)
@@ -104,7 +104,7 @@ class Region(object):
              except:
                pass
 
-           samdata = {name:val}
+           samdata[name] = val
 
          window = Window(idx=wid, capacity=cap, samdata=samdata)
          windows.append(window)
