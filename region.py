@@ -42,28 +42,30 @@ class Region(object):
   @staticmethod
   def load(filename):
      with open(filename, 'r') as f:
+
        idx = int(f.readline().split(":")[1].rstrip("\n"))
        start = int(f.readline().split(":")[1].rstrip("\n"))
        end = int(f.readline().split(":")[1].rstrip("\n"))
        w_size = int(f.readline().split(":")[1].rstrip("\n"))
 
        region = Region(idx=idx, start=start,
-                       end=end,window_size=w_size)
+                       end=end, window_size=w_size)
 
        n_wag_wins = int(f.readline().split(":")[1].rstrip("\n"))
        windows = []
        for w in range(n_wag_wins):
          wid = int(f.readline().split(":")[1].rstrip("\n"))
          cap = int(f.readline().split(":")[1].rstrip("\n"))
-         size = int(f.readline().split(":")[1].rstrip("\n"))
 
-         window = Window(idx=wid, capacity=cap)
+         n_props = int(f.readline().split(":")[1].rstrip("\n"))
+         samdata={}
+         for prop in range(n_props):
+           line = f.readline().split(":")
+           name = line[0]
+           val = float(line[1].rstrip("\n"))
+           samdata = {name:val}
 
-         for obs in range(size):
-           pos = int(f.readline().split(":")[1].rstrip("\n"))
-           rd = float(f.readline().split(":")[1].rstrip("\n"))
-           base = list(f.readline().split(":")[1].rstrip("\n"))
-
+         window = Window(idx=wid, capacity=cap, samdata=samdata)
          windows.append(window)
 
        region.set_windows(wtype=WindowType.WGA, windows=windows)
@@ -73,15 +75,16 @@ class Region(object):
        for w in range(n_no_wag_wins):
          wid = int(f.readline().split(":")[1].rstrip("\n"))
          cap = int(f.readline().split(":")[1].rstrip("\n"))
-         size = int(f.readline().split(":")[1].rstrip("\n"))
 
-         window = Window(idx=wid, capacity=cap)
+         n_props = int(f.readline().split(":")[1].rstrip("\n"))
+         samdata={}
+         for prop in range(n_props):
+           line = f.readline().split(":")
+           name = line[0]
+           val = float(line[1].rstrip("\n"))
+           samdata = {name:val}
 
-         for obs in range(size):
-           pos = int(f.readline().split(":")[1].rstrip("\n"))
-           rd = float(f.readline().split(":")[1].rstrip("\n"))
-           base = list(f.readline().split(":")[1].rstrip("\n"))
-
+         window = Window(idx=wid, capacity=cap, samdata=samdata)
          windows.append(window)
        region.set_windows(wtype=WindowType.NO_WGA, windows=windows)
        return region
