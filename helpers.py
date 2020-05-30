@@ -219,6 +219,7 @@ class Window(object):
 
     @property
     def start_end_pos(self):
+      print(self._samdata)
       return self.sam_property("start"), self.sam_property("end")
 
     def sam_property_names(self):
