@@ -160,9 +160,9 @@ def build_clusterer(data, nclusters, method, **kwargs):
   argumens are expected in the kwargs dict.
   """
 
+  features = deepcopy(kwargs["config"]["features"])
   print("{0} cluster features used {1}".format(INFO, features))
 
-  features = deepcopy(kwargs["config"]["features"])
   windows = []
 
   has_gc = False
