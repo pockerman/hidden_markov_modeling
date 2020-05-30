@@ -260,12 +260,12 @@ def main(configuration):
     errors_dict[0] = "No error"
     msg_dict = manager.dict()
 
-    #procs.append(Process(target=load_regions_worker,
-    #                     args=(0, configuration, regions_list,
-    #                           msg_dict, errors_dict)))
-    #procs[0].start()
+    procs.append(Process(target=load_regions_worker,
+                         args=(0, configuration, regions_list,
+                               msg_dict, errors_dict)))
+    procs[0].start()
 
-    regions_list = load_regions(configuration=configuration)
+    #regions_list = load_regions(configuration=configuration)
 
     # load the clusters whilst waiting
     # for the regions to load
@@ -274,7 +274,7 @@ def main(configuration):
     hmm = init_hmm(clusters=clusters, configuration=configuration)
 
     # join here
-    #procs[0].join()
+    procs[0].join()
 
     if errors_dict[0] != "No error":
       raise Error(errors_dict[0])
