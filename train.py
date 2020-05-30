@@ -2,6 +2,8 @@ import argparse
 import logging
 import time
 import json
+from multiprocessing import Process
+from multiprocessing import Manager
 from pomegranate import*
 
 from helpers import read_configuration_file
@@ -20,7 +22,7 @@ from region import Region
 from cluster import Cluster
 from cluster_utils import build_cluster_densities
 
-from preprocess_utils import get_distributions_list_from_names
+from preprocess_utils import get_distributions_list_from_names as get_dist_list
 from exceptions import Error
 
 @timefn
@@ -64,8 +66,9 @@ def init_hmm(clusters, configuration):
   n_state_dist = None
   states = []
 
-  if "mark_N_windows" in configuration and\
-    configuration["mark_N_windows"]:
+  # gap windows have not been removed
+  if "remove_windows_with_gaps" in configuration and\
+    configuration["remove_windows_with_gaps"] == False:
 
       # uniform distribution for gaps
       # so that E[X] = -999 and PDF = 1.0
@@ -73,16 +76,16 @@ def init_hmm(clusters, configuration):
       if WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.BOTH:
 
-          n_state_dist = get_distributions_list_from_names(dists_name=[configuration["n_windows_dist"]["name"],
-                                                                      configuration["n_windows_dist"]["name"]],
-                                                           params={"uniform_params":configuration["n_windows_dist"]["config"]["parameters"]})
+          n_state_dist = get_dist_list(dists_name=[configuration["n_windows_dist"]["name"],
+                                                   configuration["n_windows_dist"]["name"]],
+                                       params={"uniform_params":configuration["n_windows_dist"]["config"]["parameters"]})
 
           n_state = \
             State(IndependentComponentsDistribution(n_state_dist), name="GAP_STATE")
       else:
-        n_state_dist = get_distributions_list_from_names(dists_name=[configuration["n_windows_dist"]["name"],
-                                                                      configuration["n_windows_dist"]["name"]],
-                                                         params={"uniform_params":configuration["n_windows_dist"]["config"]["parameters"]})
+        n_state_dist = get_dist_list(dists_name=[configuration["n_windows_dist"]["name"],
+                                                 configuration["n_windows_dist"]["name"]],
+                                     params={"uniform_params":configuration["n_windows_dist"]["config"]["parameters"]})
         n_state = \
           State(n_state_dist[0], name="GAP_STATE")
 
@@ -184,14 +187,12 @@ def hmm_train(hmm_model, regions, configuration):
         raise Error("Training sequence type has not been specified")
 
       print("{0} Done...".format(INFO))
-
-      print("{0} HMM transition matrix (before fit): ".format(INFO))
-      print(hmm_model.dense_transition_matrix())
-
       print("{0} Fit HMM...".format(INFO))
       print("{0} Number of training sequences {1}".format(INFO,
                                                           len(observations)))
 
+      print("{0} HMM transition matrix (before fit): ".format(INFO))
+      print(hmm_model.dense_transition_matrix())
       print("{0} Training solver is: {1}".format(INFO,
                                                  configuration["HMM"]["train_solver"]))
       hmm_model, history = \
@@ -220,6 +221,30 @@ def hmm_train(hmm_model, regions, configuration):
     print("{0} Done...".format(INFO))
 
 
+def load_regions_worker(p, configuration, region_list,
+                        msg_dict, errors_dict):
+
+  try:
+      region_list.extend(load_regions(configuration=configuration))
+      msg_dict[p] = "Load regions worker finished"
+  except Exception as e:
+    msg = "An exception occured in load_region_worker." + str(e)
+    errors_dict[p] = msg
+    return
+
+def load_clusters_worker(p, configuration, cluster_list,
+                         msg_dict, errors_dict):
+
+  try:
+      cluster_list.extend(load_clusters(configuration=configuration))
+      build_cluster_densities(clusters_lst=clusters, **configuration)
+      msg_dict[p] = "Load clusters worker finished"
+  except Exception as e:
+    msg = "An exception occured in load_clusters_worker. "+str(e)
+    errors_dict[p] = msg
+    return
+
+@timefn
 def main(configuration):
 
     print("{0} Set up logger".format(INFO))
@@ -227,16 +252,38 @@ def main(configuration):
     logging.info("Checking if logger is sane...")
     print("{0} Done...".format(INFO))
 
-    regions = load_regions(configuration=configuration)
 
+    procs = []
+    manager = Manager()
+    regions_list = manager.list()
+    errors_dict = manager.dict()
+    errors_dict[0] = "No error"
+    msg_dict = manager.dict()
+
+    procs.append(Process(target=load_regions_worker,
+                         args=(0, configuration, regions_list,
+                               msg_dict, errors_dict)))
+    procs[0].start()
+
+    #regions = load_regions(configuration=configuration)
+
+    # load the clusters whilst waiting
+    # for the regions to load
     clusters = load_clusters(configuration=configuration)
-
     build_cluster_densities(clusters_lst=clusters, **configuration)
+    hmm = init_hmm(clusters=clusters, configuration=configuration)
 
-    hmm = init_hmm(clusters=clusters,configuration=configuration)
+    # join here
+    procs[0].join()
+
+    if errors_dict[0] != "No error":
+      raise Error(errors_dict[0])
+
+    if len(regions_list) == 0:
+      raise Error("Regions have not been loaded correctly")
 
     hmm_train(hmm_model=hmm,
-              regions=regions,
+              regions=regions_list,
               configuration=configuration)
 
 
