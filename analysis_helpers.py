@@ -36,6 +36,7 @@ def save_clusters_gc_content(clusters):
     save_cluster(filename=no_wga_file, cluster=cluster,
                  statistic=statistic, wtype=WindowType.NO_WGA)
 
+
 def save_windows_statistic(windows, statistic, region_id=None):
 
   window_stats = \
