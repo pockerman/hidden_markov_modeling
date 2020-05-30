@@ -62,7 +62,18 @@ class Region(object):
          for prop in range(n_props):
            line = f.readline().split(":")
            name = line[0]
-           val = float(line[1].rstrip("\n"))
+           val = line[1].rstrip("\n")
+
+           if val == 'False':
+             val = False
+           elif val == 'True':
+             val = True
+           else:
+             try:
+               val = float(val)
+             except:
+               pass
+
            samdata = {name:val}
 
          window = Window(idx=wid, capacity=cap, samdata=samdata)
@@ -81,7 +92,18 @@ class Region(object):
          for prop in range(n_props):
            line = f.readline().split(":")
            name = line[0]
-           val = float(line[1].rstrip("\n"))
+           val = line[1].rstrip("\n")
+
+           if val == 'False':
+             val = False
+           elif val == 'True':
+             val = True
+           else:
+             try:
+               val = float(val)
+             except:
+               pass
+
            samdata = {name:val}
 
          window = Window(idx=wid, capacity=cap, samdata=samdata)
