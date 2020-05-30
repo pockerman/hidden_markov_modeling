@@ -18,9 +18,8 @@ def save_clusters(clusters, statistic):
     save_cluster(filename=wga_file, cluster=cluster,
                  statistic=statistic, wtype=WindowType.WGA)
 
-    if statistic != 'gc':
-      no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic + ".txt"
-      save_cluster(filename=no_wga_file, cluster=cluster,
+    no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic + ".txt"
+    save_cluster(filename=no_wga_file, cluster=cluster,
                    statistic=statistic, wtype=WindowType.NO_WGA)
 
 
@@ -32,9 +31,9 @@ def save_clusters_gc_content(clusters):
     save_cluster(filename=wga_file, cluster=cluster,
                  statistic=statistic, wtype=WindowType.WGA)
 
-    no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic + ".txt"
-    save_cluster(filename=no_wga_file, cluster=cluster,
-                 statistic=statistic, wtype=WindowType.NO_WGA)
+    #no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic + ".txt"
+    #save_cluster(filename=no_wga_file, cluster=cluster,
+    #             statistic=statistic, wtype=WindowType.NO_WGA)
 
 
 def save_windows_statistic(windows, statistic, region_id=None):
