@@ -107,6 +107,25 @@ def build_cluster_densities(clusters_lst, **kwargs):
             'uniform' in kwargs['clusters'][name]["distributions"]["no_wga"]['names']:
               uniform_params = kwargs['clusters'][name]["distributions"]["no_wga"]["uniform"]["params"]
               no_wga_params["uniform_params"] = uniform_params
+        else:
+          if 'names' in kwargs['clusters'][name]["distributions"]["wga"] and \
+          'uniform' in kwargs['clusters'][name]["distributions"]["wga"]['names']:
+            uniform_params = kwargs['clusters'][name]["distributions"]["wga"]["uniform"]["params"]
+            wga_params["uniform_params"] = uniform_params
+          elif 'name' in kwargs['clusters'][name]["distributions"]["wga"] and \
+            kwargs['clusters'][name]["distributions"]["wga"]['name'] == 'uniform':
+            uniform_params = kwargs['clusters'][name]["distributions"]["wga"]["uniform"]["params"]
+            wga_params["uniform_params"] = uniform_params
+
+          if 'names' in kwargs['clusters'][name]["distributions"]["no_wga"] and \
+            'uniform' in kwargs['clusters'][name]["distributions"]["no_wga"]['names']:
+              uniform_params = kwargs['clusters'][name]["distributions"]["no_wga"]["uniform"]["params"]
+              no_wga_params["uniform_params"] = uniform_params
+          elif 'name' in kwargs['clusters'][name]["distributions"]["no_wga"] and \
+            kwargs['clusters'][name]["distributions"]["no_wga"]['name'] == 'uniform':
+              uniform_params = kwargs['clusters'][name]["distributions"]["no_wga"]["uniform"]["params"]
+              no_wga_params["uniform_params"] = uniform_params
+
 
         type_ = kwargs['clusters'][name]["distributions"]["wga"]["type"]
         if type_ == "gmm":
