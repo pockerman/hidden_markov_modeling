@@ -11,9 +11,15 @@ def save_cluster(filename, cluster, statistic, wtype):
                                                  window_type=wtype)))
 
 
-def save_clusters(clusters, statistic):
+def save_clusters(clusters, statistic, tip):
 
   for cluster in clusters:
+
+    if tip is not None:
+      wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + "_" + tip + ".txt"
+    else:
+      wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + ".txt"
+
     wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + ".txt"
     save_cluster(filename=wga_file, cluster=cluster,
                  statistic=statistic, wtype=WindowType.WGA)
@@ -23,17 +29,17 @@ def save_clusters(clusters, statistic):
                    statistic=statistic, wtype=WindowType.NO_WGA)
 
 
-def save_clusters_gc_content(clusters):
+def save_clusters_gc_content(clusters, tip):
   statistic = 'gc'
   for cluster in clusters:
-    wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + ".txt"
+
+    if tip is not None:
+      wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + "_" + tip + ".txt"
+    else:
+      wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + ".txt"
 
     save_cluster(filename=wga_file, cluster=cluster,
                  statistic=statistic, wtype=WindowType.WGA)
-
-    #no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic + ".txt"
-    #save_cluster(filename=no_wga_file, cluster=cluster,
-    #             statistic=statistic, wtype=WindowType.NO_WGA)
 
 
 def save_windows_statistic(windows, statistic, region_id=None):
