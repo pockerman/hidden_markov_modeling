@@ -41,6 +41,8 @@ class Region(object):
 
   @staticmethod
   def load(filename):
+
+     print("{0} Loading region from file: {1}".format(INFO, filename))
      with open(filename, 'r') as f:
 
        idx = int(f.readline().split(":")[1].rstrip("\n"))
