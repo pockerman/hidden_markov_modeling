@@ -97,7 +97,11 @@ def init_hmm(clusters, configuration):
                                 start=None, end=None)
 
   for cluster in clusters:
-    name = cluster.state.name.lower()
+
+    if isinstance(cluster.state, str):
+          name = cluster.state.lower()
+    else:
+          name = cluster.state.name.lower()
 
 
     if WindowType.from_string(hmm_config["train_windowtype"]) ==\
