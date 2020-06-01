@@ -419,6 +419,17 @@ class Region(object):
 
   def get_region_as_rd_mean_sequences(self, size, window_type, n_seqs):
 
+
+    if size == None:
+      # return the whole region
+      sequences = []
+
+      for window in self._mixed_windows:
+        sequences.append(window.get_rd_statistic(statistics="mean",
+                                                 name=window_type))
+
+      return sequences
+
     sequences = []
     sequence_local=[]
     for window in self._mixed_windows:
@@ -433,6 +444,8 @@ class Region(object):
         break
 
     return sequences
+
+
 
   def __len__(self):
         return self.get_n_mixed_windows()
