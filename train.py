@@ -258,7 +258,6 @@ def main(configuration):
     logging.info("Checking if logger is sane...")
     print("{0} Done...".format(INFO))
 
-
     procs = []
     manager = Manager()
     regions_list = manager.list()
