@@ -79,7 +79,10 @@ def build_cluster_densities(clusters_lst, **kwargs):
 
       for cluster in clusters_lst:
 
-        state = cluster.state.name.lower()
+        if isinstance(cluster.state, str):
+          state = cluster.state.lower()
+        else:
+          state = cluster.state.name.lower()
 
         print("{0} Cluster state: {1}".format(INFO, state))
         name = find_name_from_state(state, **kwargs)
