@@ -291,7 +291,7 @@ def main(configuration):
     hmm = hmm_train(hmm_model=hmm,
                     regions=regions_list,
                     configuration=configuration)
-    return hmm
+    return hmm, regions_list
 
 
 if __name__ == '__main__':
