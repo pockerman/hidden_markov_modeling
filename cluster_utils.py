@@ -30,51 +30,6 @@ def similar_to_cluster(data, clusters):
   return cluster_ids
 
 
-
-
-"""
-def label_clusters(clusters, method, **kwargs):
-
-    labeler = kwargs["labeler"]
-    if method == "mean_diff":
-
-        print("{0} Labeler: {1}".format(INFO, method))
-
-        for cluster in clusters:
-
-            print("{0} Cluster {1}".format(INFO, cluster.cidx))
-
-            mu_wga = cluster.get_statistics(statistic="mean",
-                                            window_type=WindowType.WGA)
-
-
-            mu_no_wga = cluster.get_statistics(statistic="mean",
-                                               window_type=WindowType.NO_WGA)
-
-            print("{0} Cluster WGA mean: {1}".format(INFO, mu_wga))
-            print("{0} Cluster NO WGA mean: {1}".format(INFO, mu_no_wga))
-
-            if mu_wga >= labeler["tuf_mean_min"] and mu_wga <= labeler["tuf_mean_max"]:
-
-                # this is potential tuf
-                if np.fabs(mu_no_wga - mu_wga) > 5.0:
-                    cluster.state = WindowState.TUF
-                else:
-                    cluster.state = WindowState.OTHER
-
-            elif mu_wga < labeler["tuf_mean_min"] and mu_no_wga < labeler["tuf_mean_min"]:
-                cluster.state = WindowState.DELETE
-
-            else:
-                cluster.state = WindowState.OTHER
-
-            print("{0} Cluster state is {1}".format(INFO, cluster.state.name))
-
-    return clusters
-"""
-
-
-
 def build_cluster_mean_and_std(clusters, **kwargs):
 
     for cluster in clusters:
@@ -115,6 +70,8 @@ def find_name_from_state(state, **kwargs):
       return clst
 
   raise Error("No cluster with state {0} found".format(state))
+
+
 @timefn
 def build_cluster_densities(clusters_lst, **kwargs):
 

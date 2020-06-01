@@ -234,13 +234,13 @@ def create_clusters(regions, configuration):
 
   from analysis_helpers import save_clusters
 
-  save_clusters(clusters=clusters, statistic="mean")
+  save_clusters(clusters=clusters, statistic="mean", tip=kwargs["config"]["metric"].upper())
 
   if 'gc' in kwargs["config"]['features']:
     print("{0} Saving clusters GC".format(INFO))
     sys.stdout.flush()
     from analysis_helpers import save_clusters_gc_content
-    save_clusters_gc_content(clusters=clusters)
+    save_clusters_gc_content(clusters=clusters, tip=kwargs["config"]["metric"].upper())
 
   return clusters
 
