@@ -32,7 +32,6 @@ def partition_range(start, end, npieces):
     end_p += load
 
   chunks.append((start_p, end ))
-
   return chunks
 
 
@@ -219,8 +218,6 @@ class Window(object):
 
     @property
     def start_end_pos(self):
-      #print(self._id)
-      #print(self._samdata)
       return self.sam_property("start"), self.sam_property("end")
 
     def sam_property_names(self):
