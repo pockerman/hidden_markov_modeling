@@ -2,7 +2,7 @@
 
   "regions":{
       "start":[1000000],
-      "end":[10000000]
+      "end":[20000000]
   },
   "regions_files":["/home/a/ag568/region_0.txt"],
   "chromosome": "chr1",
@@ -53,9 +53,9 @@
   "clusterer":{
     "name":"kmedoids",
     "config":{
-    "init_cluster_idx":[18420, 21303, 60069, 40279],
+    "init_cluster_idx":"random_from_data",
     "metric":"MANHATAN",
-    "features":["mean"],
+    "features":["mean","gc"],
     "n_clusters":4
     }
   },
