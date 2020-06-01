@@ -2,12 +2,15 @@
 Module cluster
 """
 import sys
+from pomegranate import*
+
 from helpers import WindowState
 from helpers import flat_windows_rd_from_indexes
 from helpers import MixedWindowView
-from pomegranate import*
 from helpers import WindowType
 from helpers import WARNING
+from exceptions import Error
+
 from preprocess_utils import compute_statistic
 from preprocess_utils import get_distance_metric
 
@@ -21,10 +24,13 @@ class Cluster(object):
       idx = int(f.readline().split(":")[1].rstrip("\n"))
       indices = list(f.readline().split(":")[1].rstrip("\n"))
       center = int(f.readline().split(":")[1].rstrip("\n"))
+      dist_metric = f.readline().split(":")[1].rstrip("\n")
+      dist_features = list(f.readline().split(":")[1].rstrip("\n"))
 
       cluster = Cluster(id_=idx, indexes=indices,
                         windows=None, center_idx=center,
-                        dist_metric=None)
+                        dist_metric=dist_metric,
+                        dist_features=dist_features)
 
       diameter = f.readline().split(":")[1].rstrip("\n")
       if diameter != '-inf':
@@ -83,12 +89,13 @@ class Cluster(object):
     return sum(maxs)/len(clusters)
 
   def __init__(self, id_, indexes, windows,
-               center_idx, dist_metric):
+               center_idx, dist_metric, dist_features):
     self._id = id_
     self._indexes = indexes
     self._windows = windows
     self._center_idx = center_idx
     self._dist_metric = dist_metric
+    self._dist_features = dist_features
     self._state = WindowState.INVALID
     self._wga_density = None
     self._wga_mean = 0.0
@@ -280,6 +287,31 @@ class Cluster(object):
     self.set_distance_from_other(other=other, dist=distance)
     return distance
 
+  def distance_from(self, item):
+
+    import copy
+
+    cluster_center = self.center
+    features = copy.deepcopy(self._dist_features)
+
+    has_gc = False
+    if 'gc' in features:
+      features.pop(features.index('gc'))
+      has_gc = True
+
+
+    item_values = item.get_features(features=features)
+    center_values = cluster_center.get_features(features=features)
+
+    if has_gc:
+      item_values.append(item.get_feature(feature='gc')[0])
+      center_values.append(cluster_center.get_feature(feature='gc')[0])
+
+    from preprocess_utils import get_distance_metric
+    metric = get_distance_metric(dist_metric=self._dist_metric)
+    distance = metric(item_values, center_values)
+    return distance
+
   def merge(self, cluster):
     self._indexes.extend(cluster.indexes)
 
@@ -289,6 +321,9 @@ class Cluster(object):
       f.write("ID:"+str(self.cidx) +"\n")
       f.write("Indices:" + str(self.indexes) +"\n")
       f.write("Center:"  + str(self._center_idx) +"\n")
+      f.write("Dist Metric: " + self._dist_metric + "\n")
+      f.write("Dist Features: " + str(self._dist_features) + "\n")
+
       diam =  str(self._diameter) if self._diameter is not None else '-inf'
       f.write("Diameter: " + diam + "\n")
       f.write("WGA_MEAN:"+str(self.wga_mean) +"\n")

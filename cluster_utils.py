@@ -1,5 +1,8 @@
+import sys
 import numpy as np
 from pomegranate import *
+
+
 from exceptions import Error
 from helpers import INFO, WARNING
 from helpers import timefn
@@ -7,6 +10,29 @@ from helpers import WindowType,  WindowState
 from preprocess_utils import get_distributions_list_from_names
 
 
+def similar_to_cluster(data, clusters):
+
+  cluster_ids = []
+
+  for item in data:
+
+    dist = sys.float_info.max
+    cidx = -1
+    for cluster in clusters:
+
+      dist_clst = cluster.distance_from(item)
+
+      if dist_clst < dist:
+        dist = dist_clst
+        cidx = cluster.cidx
+
+    cluster_ids.append((item, cidx))
+  return cluster_ids
+
+
+
+
+"""
 def label_clusters(clusters, method, **kwargs):
 
     labeler = kwargs["labeler"]
@@ -45,6 +71,7 @@ def label_clusters(clusters, method, **kwargs):
             print("{0} Cluster state is {1}".format(INFO, cluster.state.name))
 
     return clusters
+"""
 
 
 

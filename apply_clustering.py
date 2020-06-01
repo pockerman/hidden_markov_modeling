@@ -226,7 +226,8 @@ def create_clusters(regions, configuration):
                             indexes=clusters_indexes[i],
                             windows=windows,
                             center_idx=centers[i],
-                            dist_metric=kwargs["config"]["metric"]))
+                            dist_metric=kwargs["config"]["metric"],
+                            dist_features=kwargs["config"]["features"]))
 
   print("{0} Saving clusters means".format(INFO))
   sys.stdout.flush()
