@@ -10,8 +10,6 @@ from helpers import INFO, WARNING
 from helpers import timefn
 
 from region import Region
-from analysis_helpers import save_clusters
-from analysis_helpers import save_clusters_gc_content
 
 from cluster import Cluster
 from cluster_utils import build_cluster_mean_and_std
@@ -98,7 +96,7 @@ def make_window_regions(configuration):
     return regions_created
 
 
-def remove_gaps(region, configuration):
+def remove_or_mark_gaps(region, configuration):
   # filter the windows for GAPs
     if "remove_windows_with_gaps" in configuration and\
           configuration["remove_windows_with_gaps"]:
@@ -165,7 +163,7 @@ def clean_up_regions(regions, configuration):
 
     # compute the mixed windows for the region
     region.get_mixed_windows()
-    remove_gaps(region=region, configuration=configuration)
+    remove_or_mark_gaps(region=region, configuration=configuration)
 
     print("{0} Number of mixed "
               "windows: {1}".format(INFO,
@@ -177,6 +175,16 @@ def clean_up_regions(regions, configuration):
     sys.stdout.flush()
 
     remove_outliers(region=region, configuration=configuration)
+
+@timefn
+def save_regions(regions, configuration):
+
+    print("{0} Saving regions".format(INFO))
+    sys.stdout.flush()
+
+    for region in regions:
+      region.save_mixed_windows_statistic(statistic="mean")
+      region.save()
 
 
 def accumulate_windows(regions):
@@ -218,15 +226,20 @@ def create_clusters(regions, configuration):
                             indexes=clusters_indexes[i],
                             windows=windows,
                             center_idx=centers[i],
-                            dist_metric=kwargs["config"]["metric"]))
+                            dist_metric=kwargs["config"]["metric"],
+                            dist_features=kwargs["config"]["features"]))
 
   print("{0} Saving clusters means".format(INFO))
   sys.stdout.flush()
+
+  from analysis_helpers import save_clusters
+
   save_clusters(clusters=clusters, statistic="mean")
 
   if 'gc' in kwargs["config"]['features']:
     print("{0} Saving clusters GC".format(INFO))
     sys.stdout.flush()
+    from analysis_helpers import save_clusters_gc_content
     save_clusters_gc_content(clusters=clusters)
 
   return clusters
@@ -238,6 +251,24 @@ def make_clusters_mean_and_std(clusters, configuration):
   sys.stdout.flush()
   kwargs = {}
   build_cluster_mean_and_std(clusters=clusters, **kwargs)
+
+
+@timefn
+def save_clusters(clusters, configuration):
+   print("{0} Save clusters...".format(INFO))
+   sys.stdout.flush()
+
+   if "save_cluster_dbi" in configuration and\
+      configuration["save_cluster_dbi"]:
+        for cluster in clusters:
+          cluster.diameter
+
+          for other in clusters:
+            cluster.calculate_distance_from_other(other=other)
+
+   for cluster in clusters:
+      cluster.save()
+
 
 @timefn
 def main(configuration):
@@ -253,16 +284,7 @@ def main(configuration):
 
     clean_up_regions(regions=regions, configuration=configuration)
 
-    print("{0} Saving regions...".format(INFO))
-    sys.stdout.flush()
-    time_start = time.perf_counter()
-
-    for region in regions:
-      region.save_mixed_windows_statistic(statistic="mean")
-      region.save()
-    time_end = time.perf_counter()
-    print("{0} Done. Execution time {1} secs".format(INFO, time_end - time_start))
-    sys.stdout.flush()
+    save_regions(regions, configuration=configuration)
 
     clusters = create_clusters(regions=regions,
                                configuration=configuration)
@@ -270,20 +292,9 @@ def main(configuration):
     make_clusters_mean_and_std(clusters=clusters,
                                configuration=configuration)
 
-    print("{0} Save clusters...".format(INFO))
-    sys.stdout.flush()
-    time_start = time.perf_counter()
+    save_clusters(clusters=clusters,
+                  configuration=configuration)
 
-    if "save_cluster_dbi" in configuration and\
-      configuration["save_cluster_dbi"]:
-        for cluster in clusters:
-          cluster.diameter
-
-          for other in clusters:
-            cluster.calculate_distance_from_other(other=other)
-
-    for cluster in clusters:
-      cluster.save()
 
 if __name__ == '__main__':
 

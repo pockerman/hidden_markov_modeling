@@ -372,7 +372,7 @@ class Region(object):
       wga_w = window.get_window(wtype=WindowType.WGA)
       n_wga_w = window.get_window(wtype=WindowType.NO_WGA)
 
-      ## Add error if one has N and the other not
+      ## Add error if one has gap and the other not
       if wga_w.has_gaps() == True and\
         n_wga_w.has_gaps() == False:
         raise Error("WGA Window {0} has GAP "
