@@ -155,6 +155,8 @@ class WindowState(Enum):
       return WindowState.TUF
     elif string.upper() == "OTHER":
       return WindowState.OTHER
+    elif "STATE" in string.upper():
+      return string
 
     raise Error("Invalid WindowState. "
                 "Type '{0}' not in {1}".format(string,
