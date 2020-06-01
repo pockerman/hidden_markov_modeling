@@ -253,21 +253,53 @@ def make_clusters_mean_and_std(clusters, configuration):
   build_cluster_mean_and_std(clusters=clusters, **kwargs)
 
 
+def save_cluster_worker(p, clusters, configuration):
+
+  if "save_cluster_dbi" in configuration and\
+      configuration["save_cluster_dbi"]:
+
+          clusters[p].diameter
+
+          for other in clusters:
+            clusters[p].calculate_distance_from_other(other=other)
+
+  clusters[p].save()
+
+
 @timefn
 def save_clusters(clusters, configuration):
    print("{0} Save clusters...".format(INFO))
    sys.stdout.flush()
 
-   if "save_cluster_dbi" in configuration and\
-      configuration["save_cluster_dbi"]:
-        for cluster in clusters:
-          cluster.diameter
+   if configuration['processing']['type'] == 'multi':
 
-          for other in clusters:
-            cluster.calculate_distance_from_other(other=other)
+     from multiprocessing import Process
 
-   for cluster in clusters:
-      cluster.save()
+     n_procs = configuration['processing']['n_procs']
+     procs = []
+
+     for p in range(n_procs - 1):
+       procs.append(Process(target=save_cluster_worker,
+                            args=(p, clusters, configuration)))
+       procs[p].start()
+     save_cluster_worker(p=n_procs-1,
+                         clusters=clusters,
+                         configuration=configuration)
+
+     for p in range(n_procs - 1):
+       procs[p].join()
+   else:
+
+     if "save_cluster_dbi" in configuration and\
+        configuration["save_cluster_dbi"]:
+          for cluster in clusters:
+            cluster.diameter
+
+            for other in clusters:
+              cluster.calculate_distance_from_other(other=other)
+
+     for cluster in clusters:
+        cluster.save()
 
 
 @timefn
@@ -284,7 +316,14 @@ def main(configuration):
 
     clean_up_regions(regions=regions, configuration=configuration)
 
-    save_regions(regions, configuration=configuration)
+    proc = None
+    if configuration['processing'] == 'multi':
+      from multiprocessing import Process
+      proc = Process(target=save_regions,
+                     args=(regions, configuration))
+      proc.start()
+    else:
+      save_regions(regions, configuration=configuration)
 
     clusters = create_clusters(regions=regions,
                                configuration=configuration)
@@ -294,6 +333,9 @@ def main(configuration):
 
     save_clusters(clusters=clusters,
                   configuration=configuration)
+
+    if proc is not None:
+      proc.join()
 
 
 if __name__ == '__main__':
