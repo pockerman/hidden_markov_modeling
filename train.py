@@ -220,6 +220,8 @@ def hmm_train(hmm_model, regions, configuration):
                    win_interval_length=0)
     print("{0} Done...".format(INFO))
 
+  return hmm_model
+
 
 def load_regions_worker(p, configuration, region_list,
                         msg_dict, errors_dict):
@@ -282,9 +284,10 @@ def main(configuration):
     if len(regions_list) == 0:
       raise Error("Regions have not been loaded correctly")
 
-    hmm_train(hmm_model=hmm,
-              regions=regions_list,
-              configuration=configuration)
+    hmm = hmm_train(hmm_model=hmm,
+                    regions=regions_list,
+                    configuration=configuration)
+    return hmm
 
 
 if __name__ == '__main__':
