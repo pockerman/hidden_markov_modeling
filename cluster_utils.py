@@ -192,8 +192,9 @@ def build_cluster_densities(clusters_lst, **kwargs):
       return clusters_lst
 
 
+"""
 def clusters_statistics(clusters):
-  """
+
   Claculate various statistics for the windows
   clustered in clusters
 
@@ -210,7 +211,7 @@ def clusters_statistics(clusters):
   a map with the calculated statistics for each
   cluster
 
-  """
+
 
   statistics = {}
 
@@ -218,4 +219,4 @@ def clusters_statistics(clusters):
 
     statistics[c] = clusters[c].get_statistics(statistic="all")
   return statistics
-
+"""
