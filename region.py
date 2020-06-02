@@ -399,6 +399,9 @@ class Region(object):
 
   def get_rd_mean_sequence(self, size, window_type):
 
+    if self._mixed_windows is None:
+      raise Error("Mixed windows have not been computed")
+
     sequence =[]
 
     if size < len(self._mixed_windows):
@@ -421,6 +424,9 @@ class Region(object):
 
   def get_region_as_rd_mean_sequences(self, size, window_type, n_seqs):
 
+
+    if self._mixed_windows is None:
+      raise Error("Mixed windows have not been computed")
 
     if size == None:
       # return the whole region

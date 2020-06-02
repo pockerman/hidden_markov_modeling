@@ -186,7 +186,6 @@ def save_regions(regions, configuration):
       region.save_mixed_windows_statistic(statistic="mean")
       region.save()
 
-
 def accumulate_windows(regions):
   # assemble all the windows
   windows = []
@@ -369,18 +368,6 @@ def save_clusters(clusters, configuration):
      for p in range(len(procs)):
        procs[p].join()
 
-     """
-     for p in range(n_procs - 1):
-       procs.append(Process(target=save_cluster_worker,
-                            args=(p, clusters, configuration)))
-       procs[p].start()
-     save_cluster_worker(p=n_procs-1,
-                         clusters=clusters,
-                         configuration=configuration)
-
-     for p in range(n_procs - 1):
-       procs[p].join()
-    """
    else:
 
      if "save_cluster_dbi" in configuration and\
@@ -411,6 +398,8 @@ def main(configuration):
 
     proc = None
     if configuration['processing'] == 'multi':
+      # create a process to save the regions
+      # and keep on doing what we have to do
       from multiprocessing import Process
       proc = Process(target=save_regions,
                      args=(regions, configuration))
