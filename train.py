@@ -234,7 +234,7 @@ def load_regions_worker(p, configuration, region_list,
       region_list.extend(load_regions(configuration=configuration))
       msg_dict[p] = "Load regions worker finished"
   except Exception as e:
-    msg = "An exception occured in load_region_worker." + str(e)
+    msg = "An exception occured in load_region_worker. Exception string: " + str(e)
     errors_dict[p] = msg
     return
 
@@ -246,7 +246,7 @@ def load_clusters_worker(p, configuration, cluster_list,
       build_cluster_densities(clusters_lst=clusters, **configuration)
       msg_dict[p] = "Load clusters worker finished"
   except Exception as e:
-    msg = "An exception occured in load_clusters_worker. "+str(e)
+    msg = "An exception occured in load_clusters_worker. Exception string: " + str(e)
     errors_dict[p] = msg
     return
 
