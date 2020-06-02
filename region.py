@@ -453,6 +453,38 @@ class Region(object):
 
     return sequences
 
+  def get_region_as_rd_mean_sequences_with_windows(self, size, window_type, n_seqs):
+
+    if self._mixed_windows is None:
+      raise Error("Mixed windows have not been computed")
+
+    if size == None:
+      # return the whole region
+      sequences = []
+
+      for window in self._mixed_windows:
+        sequences.append((window.get_rd_statistic(statistics="mean",
+                                                 name=window_type), window.start_end_pos))
+
+      return sequences
+
+    sequences = []
+    sequence_local=[]
+    for window in self._mixed_windows:
+      sequence_local.append((window.get_rd_statistic(statistics="mean",
+                                                    name=window_type),
+                                                    window.start_end_pos))
+
+      if len(sequence_local) == size:
+        sequences.append(sequence_local)
+        sequence_local=[]
+
+      if n_seqs is not None and len(sequences) == n_seqs:
+        break
+
+    return sequences
+
+
 
 
   def __len__(self):
