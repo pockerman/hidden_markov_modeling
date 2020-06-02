@@ -194,6 +194,9 @@ class Window(object):
         # the state of the window
         self._state = WindowState.INVALID
 
+        if self._samdata["gapAlert"] == True:
+          self._state = WindowState.N_WIN
+
     @property
     def idx(self):
       return self._id
