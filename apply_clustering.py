@@ -232,17 +232,81 @@ def create_clusters(regions, configuration):
   print("{0} Saving clusters means".format(INFO))
   sys.stdout.flush()
 
-  from analysis_helpers import save_clusters
+  if configuration['processing']['type'] == 'multi':
+    from multiprocessing import Process
 
-  save_clusters(clusters=clusters, statistic="mean", tip=kwargs["config"]["metric"].upper())
+    procs = []
+    n_procs = configuration['processing']['n_procs']
+
+    if len(clusters) < n_procs:
+      for p in range(len(clusters)):
+        procs.append(Process(target=save_clusters_content_worker,
+                             args=(p, clusters[p], kwargs)))
+        procs[p].start()
+    elif len(clusters) == n_procs:
+      for p in range(len(clusters) - 1):
+        procs.append(Process(target=save_clusters_content_worker,
+                             args=(p, clusters[p], kwargs)))
+        procs[p].start()
+
+      save_clusters_content_worker(p=len(clusters) - 1,
+                                   cluster=clusters[len(clusters) - 1],
+                                   kwrags=kwargs)
+    else:
+
+      for p in range(n_procs - 1):
+        procs.append(Process(target=save_clusters_content_worker,
+                             args=(p, clusters[p], kwargs)))
+        procs[p].start()
+
+      for c in range(n_procs - 1, len(clusters)):
+        save_clusters_content_worker(p=c,
+                                     cluster=clusters[c],
+                                     kwrags=kwargs)
+
+    for p in range(len(procs)):
+       procs[p].join()
+
+  else:
+    from analysis_helpers import save_clusters
+
+    save_clusters(clusters=clusters, statistic="mean",
+                  tip=kwargs["config"]["metric"].upper())
+
+    if 'gc' in kwargs["config"]['features']:
+      print("{0} Saving clusters GC".format(INFO))
+      sys.stdout.flush()
+      from analysis_helpers import save_clusters_gc_content
+      save_clusters_gc_content(clusters=clusters,
+                               tip=kwargs["config"]["metric"].upper())
+
+  return clusters
+
+@timefn
+def save_clusters_content_worker(p, cluster, kwargs):
+
+  from analysis_helpers import save_cluster
+  statistic='mean'
+  tip = kwargs["config"]["metric"].upper()
+  wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + "_" + tip + ".txt"
+
+  save_cluster(filename=wga_file,
+               cluster=cluster,
+               statistic=statistic, wtype=WindowType.WGA)
+
+  no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic + "_" + tip + ".txt"
+  save_cluster(filename=no_wga_file,
+               cluster=cluster,
+               statistic=statistic, wtype=WindowType.NO_WGA)
 
   if 'gc' in kwargs["config"]['features']:
     print("{0} Saving clusters GC".format(INFO))
     sys.stdout.flush()
-    from analysis_helpers import save_clusters_gc_content
-    save_clusters_gc_content(clusters=clusters, tip=kwargs["config"]["metric"].upper())
+    statistic = 'gc'
+    wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + "_" + tip + ".txt"
+    save_cluster(filename=wga_file, cluster=cluster,
+                 statistic=statistic, wtype=WindowType.WGA)
 
-  return clusters
 
 @timefn
 def make_clusters_mean_and_std(clusters, configuration):
@@ -278,6 +342,34 @@ def save_clusters(clusters, configuration):
      n_procs = configuration['processing']['n_procs']
      procs = []
 
+     if len(clusters) < n_procs:
+      for p in range(len(clusters)):
+        procs.append(Process(target=save_cluster_worker,
+                             args=(p, clusters, configuration)))
+        procs[p].start()
+     elif len(clusters) == n_procs:
+      for p in range(len(clusters) - 1):
+        procs.append(Process(target=save_cluster_worker,
+                             args=(p, clusters, configuration)))
+        procs[p].start()
+
+      save_cluster_worker(p=len(clusters) - 1,
+                          clusters=clusters,
+                          configuration=configuration)
+     else:
+
+      for p in range(n_procs - 1):
+        procs.append(Process(target=save_cluster_worker,
+                             args=(p, clusters[p], configuration)))
+        procs[p].start()
+
+      for c in range(n_procs - 1, len(clusters)):
+        save_cluster_worker(p=c, clusters=clusters, configuration=configuration)
+
+     for p in range(len(procs)):
+       procs[p].join()
+
+     """
      for p in range(n_procs - 1):
        procs.append(Process(target=save_cluster_worker,
                             args=(p, clusters, configuration)))
@@ -288,6 +380,7 @@ def save_clusters(clusters, configuration):
 
      for p in range(n_procs - 1):
        procs[p].join()
+    """
    else:
 
      if "save_cluster_dbi" in configuration and\
