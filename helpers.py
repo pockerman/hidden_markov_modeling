@@ -194,6 +194,9 @@ class Window(object):
         # the state of the window
         self._state = WindowState.INVALID
 
+        if self._samdata["gapAlert"] == True:
+          self._state = WindowState.N_WIN
+
     @property
     def idx(self):
       return self._id
@@ -274,8 +277,8 @@ class MixedWindowView(object):
 
   def is_gap_window(self):
 
-    if self._windows[WindowType.WGA].state == WindowType.N_WIN or\
-      self._windows[WindowType.NO_WGA].state == WindowType.N_WIN:
+    if self._windows[WindowType.WGA].has_gaps() or\
+      self._windows[WindowType.NO_WGA].has_gaps():
         return True
 
     return False
