@@ -17,14 +17,15 @@ def save_clusters(clusters, statistic, tip):
 
     if tip is not None:
       wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + "_" + tip + ".txt"
+      no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic + "_" + tip + ".txt"
     else:
       wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + ".txt"
+      no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic + ".txt"
 
-    wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + ".txt"
+
     save_cluster(filename=wga_file, cluster=cluster,
                  statistic=statistic, wtype=WindowType.WGA)
 
-    no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic + ".txt"
     save_cluster(filename=no_wga_file, cluster=cluster,
                    statistic=statistic, wtype=WindowType.NO_WGA)
 
