@@ -214,7 +214,11 @@ def hmm_train(hmm_model, regions, configuration):
   hmm_model.bake(verbose=True)
   print("{0} Done...".format(INFO))
 
-  print("{0} HMM transition matrix (after fit): ".format(INFO))
+  if configuration["HMM"]["train"] == True:
+    print("{0} HMM transition matrix (after fit): ".format(INFO))
+  else:
+    print("{0} HMM transition matrix: ".format(INFO))
+
   print(hmm_model.dense_transition_matrix())
 
   if configuration["HMM"]["save_model"]:
