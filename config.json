@@ -2,7 +2,7 @@
 
   "regions":{
       "start":[1000000],
-      "end":[1500000]
+      "end":[20000000]
   },
   "regions_files":["/home/a/ag568/region_0.txt"],
   "chromosome": "chr1",
@@ -33,7 +33,7 @@
   "save_windows":false,
   "remove_windows_with_gaps":false,
   "mark_for_gap_windows":-999.0,
-  "save_cluster_dbi":true,
+  "save_cluster_dbi":false,
   "n_windows_dist":{
     "name":"uniform",
     "config":{
@@ -54,15 +54,15 @@
     "name":"kmedoids",
     "config":{
     "init_cluster_idx":"random_from_data",
-    "metric":"MANHATAN",
-    "features":["mean", "gc"],
+    "metric":"EUCLIDEAN",
+    "features":["mean","gc"],
     "n_clusters":4
     }
   },
   "clusters":{
       "cluster_0":{
         "filename":"/home/a/ag568/cluster_0.txt",
-        "state": "normal",
+        "state": "state_0",
          "distributions":{
           "wga":{
             "type":"distribution",
@@ -76,26 +76,52 @@
       },
       "cluster_1":{
         "filename":"/home/a/ag568/cluster_1.txt",
-        "state": "tuf",
+        "state": "state_1",
         "distributions":{
           "wga":{
-            "type":"gmm",
-            "uniform":{
-              "params":[2.0, 8.0]
-            },
-            "names":["normal", "uniform"],
+            "type":"distribution",
+            "name":"normal",
             "weights":null
           },
           "no_wga":{
-            "type":"gmm",
-            "uniform":{
-              "params":[2.0, 8.0]
-            },
-            "names":["normal", "uniform"],
+            "type":"distribution",
+            "name":"normal",
             "weights":null
           }
         }
-      }
+      },
+      "cluster_2":{
+		"filename":"/home/a/ag568/cluster_2.txt",
+		"state": "state_2",
+		"distributions":{
+			"wga":{
+				"type":"gmm",
+				"uniform":{
+             			 "params":[2.0, 8.0]
+           			 },
+            			"names":["normal", "uniform"],
+            			"weights":null
+			},
+			"no_wga":{
+				"type":"distribution",
+				"name":"normal"
+			}
+		}
+	},
+	"cluster_3":{
+		"filename":"/home/a/ag568/cluster_3.txt",
+		"state":"state_3",
+		"distributions":{
+			"wga":{
+				"type":"distribution",
+				"name":"normal"
+			},
+			"no_wga":{
+				"type":"distribution",
+				"name":"normal"
+			}
+		}
+	}
   },
 
   "HMM": {
@@ -108,30 +134,51 @@
     "save_model":true,
     "save_hmm_filename":"/home/a/ag568/HMM_Model",
     "states":{
-      "tuf":{
-         "start_prob":0.48
+      "state_0":{
+         "start_prob":0.20
       },
-      "normal":{
-         "start_prob":0.48
+      "state_1":{
+         "start_prob":0.20
+      },
+      "state_2":{
+          "start_prob":0.20
+      },
+      "state_3":{
+          "start_prob":0.20
       },
       "gap_state":{
-          "start_prob":0.04
+	"start_prob":0.20
       }
     },
     "transitions":{
-        "tuf-tuf":0.95,
-        "normal-normal":0.95,
-        "tuf-normal":0.05,
-        "normal-tuf":0.05,
-        "gap_state-gap_state":0.95,
-        "gap_state-tuf":0.05,
-        "tuf-gap_state":0.05,
-        "normal-gap_state":0.05,
-        "gap_state-normal":0.05
+        "state_0-state_0":0.95,
+        "state_0-state_1":0.0125,
+	"state_0-state_2":0.0125,
+	"state_0-state_3":0.0125,
+	"state_0-gap_state":0.0125,
+        "state_1-state_1":0.95,
+        "state_1-state_0":0.0125,
+	"state_1-state_2":0.0125,
+	"state_1-state_3":0.0125,
+	"state_1-gap_state":0.0125,
+        "state_2-state_0":0.0125,
+        "state_2-state_1":0.0125,
+	"state_2-state_2":0.95,
+	"state_2-state_3":0.0125,
+	"state_2-gap_state":0.0125,
+	"state_3-state_0":0.0125,
+        "state_3-state_1":0.0125,
+	"state_3-state_2":0.0125,
+	"state_3-state_3":0.95,
+	"gap_state-gap_state":0.95,
+	"gap_state-state_0":0.0125,
+        "gap_state-state_1":0.0125,
+	"gap_state-state_2":0.0125,
+	"gap_state-state_3":0.0125
      },
     "train_sequence_size":100,
     "train_sequence_source":"region",
-    "train_n_sequences_per_source":10000,
+    "train_n_sequences_per_source":190000,
     "train_windowtype":"both"
   },
   "logger_file":"tuf.log",
