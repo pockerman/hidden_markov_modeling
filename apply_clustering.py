@@ -287,7 +287,7 @@ def save_clusters_content_worker(p, cluster, kwargs):
 
   from analysis_helpers import save_cluster
   statistic='mean'
-  tips = kwargs["config"]["tips"]
+  tips = kwargs["plot_tips"]
 
   wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic
 
