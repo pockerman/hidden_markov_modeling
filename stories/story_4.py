@@ -24,7 +24,10 @@ def main():
   configuration=read_configuration_file("../config.json")
   configuration["HMM"]["train"]=False
   configuration["regions_files"]=["/home/a/ag568/region_0_MANHATAN_2.txt"]
-  clusters = configuration["clusters"]
+  clusters = {
+    "cluster_0":{"filename":"EMPTY", "distributions":{} },
+    "cluster_1":{"filename":"EMPTY", "distributions":{}}
+    }
 
   clusters["cluster_0"]["filename"]="/home/a/ag568/cluster_0_MANHATAN_2.txt"
   clusters["cluster_0"]["distributions"]["no_wga"] = {"type":"distribution", "name":"normal"}
@@ -33,6 +36,8 @@ def main():
   clusters["cluster_1"]["filename"]="/home/a/ag568/cluster_1_MANHATAN_2.txt"
   clusters["cluster_1"]["distributions"]["no_wga"] = {"type":"distribution", "name":"normal"}
   clusters["cluster_1"]["distributions"]["wga"] = {"type":"distribution", "name":"normal"}
+
+  configuration["clusters"] = clusters
 
   hmm_config = configuration["HMM"]
   hmm_config["states"]= {"state_0":{ "start_prob":0.20},
