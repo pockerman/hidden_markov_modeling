@@ -315,8 +315,15 @@ class Cluster(object):
   def merge(self, cluster):
     self._indexes.extend(cluster.indexes)
 
-  def save(self):
-    with open("cluster_" + str(self.cidx) + ".txt", 'w') as f:
+  def save(self, tips):
+    filename = "cluster_" + str(self.cidx)
+    if tips is not None:
+      for tip in tips:
+        filename += "_" + tip
+
+    filename += ".txt"
+
+    with open(filename, 'w') as f:
 
       f.write("ID:"+str(self.cidx) +"\n")
       f.write("Indices:" + str(self.indexes) +"\n")

@@ -11,13 +11,21 @@ def save_cluster(filename, cluster, statistic, wtype):
                                                  window_type=wtype)))
 
 
-def save_clusters(clusters, statistic, tip):
+def save_clusters(clusters, statistic, tips):
 
   for cluster in clusters:
 
-    if tip is not None:
-      wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + "_" + tip + ".txt"
-      no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic + "_" + tip + ".txt"
+    if tips is not None:
+      wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic
+      no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic
+
+      for tip in tips:
+        wga_file += "_" + tip
+        no_wga_file += "_" + tip
+
+      wga_file += ".txt"
+      no_wga_file += ".txt"
+
     else:
       wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + ".txt"
       no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic + ".txt"
@@ -30,12 +38,17 @@ def save_clusters(clusters, statistic, tip):
                    statistic=statistic, wtype=WindowType.NO_WGA)
 
 
-def save_clusters_gc_content(clusters, tip):
+def save_clusters_gc_content(clusters, tips):
   statistic = 'gc'
   for cluster in clusters:
 
-    if tip is not None:
-      wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + "_" + tip + ".txt"
+    if tips is not None:
+      wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic
+
+      for tip in tips:
+        wga_file += "_" + tip
+      wga_file += ".txt"
+
     else:
       wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + ".txt"
 
@@ -43,7 +56,7 @@ def save_clusters_gc_content(clusters, tip):
                  statistic=statistic, wtype=WindowType.WGA)
 
 
-def save_windows_statistic(windows, statistic, region_id=None):
+def save_windows_statistic(windows, statistic, region_id=None, tips=None):
 
   window_stats = \
     [window.get_rd_statistic(statistics=statistic,
@@ -51,9 +64,19 @@ def save_windows_statistic(windows, statistic, region_id=None):
        for window in windows if not window.is_gap_window()]
 
   if region_id is not None:
-    filename = "no_wga_windows_" + statistic + "_" + str(region_id) + ".txt"
+    filename = "no_wga_windows_" + statistic + "_" + str(region_id)
+
+    if tips is not None:
+      for tip in tips:
+        filename += "_" + tip
+      filename += ".txt"
   else:
-    filename = "no_wga_windows_" + statistic + ".txt"
+    filename = "no_wga_windows_" + statistic
+
+    if tips is not None:
+      for tip in tips:
+        filename += "_" + tip
+      filename += ".txt"
 
   with open(filename, 'w') as file:
     file.write(str(window_stats))
@@ -64,9 +87,18 @@ def save_windows_statistic(windows, statistic, region_id=None):
      for window in windows if not window.is_gap_window()]
 
   if region_id is not None:
-    filename = "wga_windows_" + statistic + "_" + str(region_id) + ".txt"
+    filename = "wga_windows_" + statistic + "_" + str(region_id)
+    if tips is not None:
+      for tip in tips:
+        filename += "_" + tip
+      filename += ".txt"
   else:
-    filename = "wga_windows_" + statistic + ".txt"
+    filename = "wga_windows_" + statistic
+
+    if tips is not None:
+      for tip in tips:
+        filename += "_" + tip
+      filename += ".txt"
 
   with open(filename, 'w') as file:
     file.write(str(window_stats))
