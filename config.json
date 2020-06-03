@@ -47,7 +47,8 @@
 
     "name":"zscore",
     "config":{
-      "sigma_factor":2
+      "sigma_factor":2,
+      "use_both_ends":false
     }
   },
   "clusterer":{
