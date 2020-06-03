@@ -42,21 +42,21 @@ def main():
   configuration["clusters"] = clusters
 
   hmm_config = configuration["HMM"]
-  hmm_config["states"]= {"state_0":{ "start_prob":0.20},
-                         "state_1":{ "start_prob":0.20},
-                         "gap_state": {"start_prob":0.20}
+  hmm_config["states"]= {"state_0":{ "start_prob":0.333},
+                         "state_1":{ "start_prob":0.333},
+                         "gap_state": {"start_prob":0.333}
                          }
 
   hmm_config["transitions"]={
       "state_0-state_0":0.95,
-      "state_0-state_1":0.0125,
-	  "state_0-gap_state":0.0125,
+      "state_0-state_1":0.025,
+	  "state_0-gap_state":0.025,
       "state_1-state_1":0.95,
-      "state_1-state_0":0.0125,
-      "state_1-gap_state":0.0125,
+      "state_1-state_0":0.025,
+      "state_1-gap_state":0.025,
       "gap_state-gap_state":0.95,
-	  "gap_state-state_0":0.0125,
-      "gap_state-state_1":0.0125,
+	  "gap_state-state_0":0.025,
+      "gap_state-state_1":0.025,
     }
 
   # now we can train
