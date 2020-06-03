@@ -53,8 +53,8 @@
   "clusterer":{
     "name":"kmedoids",
     "config":{
-    "init_cluster_idx":"random_from_data",
-    "metric":"EUCLIDEAN",
+    "init_cluster_idx":[117624, 151419, 171284, 121443],
+    "metric":"MANHATAN",
     "features":["mean","gc"],
     "n_clusters":4
     }
