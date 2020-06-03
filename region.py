@@ -158,9 +158,17 @@ class Region(object):
 
     return len(self._mixed_windows)
 
-  def save(self):
+  def save(self, tips):
 
-    with open("region_" + str(self.ridx) + ".txt", 'w') as f:
+    filename = "region_" + str(self.ridx)
+
+    if tips is not None:
+      for tip in tips:
+        filename += "_" + tip
+
+    filename += ".txt"
+
+    with open(filename, 'w') as f:
       f.write("ID:"+str(self.ridx) + "\n")
       f.write("Start:"+str(self.start) + "\n")
       f.write("End:"+str(self.end) + "\n")
@@ -319,13 +327,13 @@ class Region(object):
      self._windows[WindowType.NO_WGA] = no_wga_filter_windows
      self.get_mixed_windows()
 
-  def save_mixed_windows_statistic(self, statistic):
+  def save_mixed_windows_statistic(self, statistic, tips):
 
     if self._mixed_windows is None:
       raise Error("Mixed windows have not been computed")
 
     save_windows_statistic(windows=self._mixed_windows,
-                           statistic="mean", region_id=self._idx)
+                           statistic="mean", region_id=self._idx, tips=tips)
 
   def remove_outliers(self, configuration):
 
@@ -483,9 +491,6 @@ class Region(object):
         break
 
     return sequences
-
-
-
 
   def __len__(self):
         return self.get_n_mixed_windows()

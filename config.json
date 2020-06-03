@@ -16,7 +16,6 @@
     "filename": "/scratch/spectre/a/ag568/m605_verysensitive_trim_sorted.bam"
   },
   "processing":{
-
     "type": "multi",
     "n_procs": 5
   },
@@ -41,13 +40,14 @@
       "parameters":[-999.5, -998.5]
     }
   },
+  "plot_tips":[],
   "windows_filename":"hmm_windows.json",
   "check_windowing_sanity":true,
   "outlier_remove":{
-
     "name":"zscore",
     "config":{
-      "sigma_factor":2
+      "sigma_factor":2,
+      "use_both_ends":false
     }
   },
   "clusterer":{

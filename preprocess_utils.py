@@ -107,16 +107,15 @@ def zscore_outlier_removal(windows, config):
       zscore_no_wga = (mu[1] - statistics[WindowType.NO_WGA]["mean"])/sigma_no_wga
 
 
-      if zscore_wga < - config["sigma_factor"] or\
-        zscore_wga > config["sigma_factor"]:
-          continue
-      elif zscore_no_wga < - config["sigma_factor"] or\
-        zscore_no_wga > config["sigma_factor"]:
-          continue
-      else:
-        newwindows.append(window)
+    if zscore_wga > config["sigma_factor"] or \
+      zscore_no_wga > config["sigma_factor"]:
+        continue
+    elif config["use_both_ends"] == True and \
+      (zscore_wga < - config["sigma_factor"] or\
+        zscore_no_wga < - config["sigma_factor"]):
+        continue
     else:
-      newwindows.append(window)
+        newwindows.append(window)
 
   return newwindows
 

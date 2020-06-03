@@ -183,8 +183,8 @@ def save_regions(regions, configuration):
     sys.stdout.flush()
 
     for region in regions:
-      region.save_mixed_windows_statistic(statistic="mean")
-      region.save()
+      region.save_mixed_windows_statistic(statistic="mean", tips=configuration["plot_tips"])
+      region.save(tips=configuration["plot_tips"])
 
 def accumulate_windows(regions):
   # assemble all the windows
@@ -202,6 +202,7 @@ def create_clusters(regions, configuration):
   print("{0} Start clustering....".format(INFO))
   sys.stdout.flush()
   kwargs = configuration["clusterer"]
+  kwargs["plot_tips"] = configuration["plot_tips"]
 
   windows = accumulate_windows(regions=regions)
 
@@ -270,14 +271,14 @@ def create_clusters(regions, configuration):
     from analysis_helpers import save_clusters
 
     save_clusters(clusters=clusters, statistic="mean",
-                  tip=kwargs["config"]["metric"].upper())
+                  tips= kwargs["plot_tips"])
 
     if 'gc' in kwargs["config"]['features']:
       print("{0} Saving clusters GC".format(INFO))
       sys.stdout.flush()
       from analysis_helpers import save_clusters_gc_content
       save_clusters_gc_content(clusters=clusters,
-                               tip=kwargs["config"]["metric"].upper())
+                               tips= kwargs["plot_tips"])
 
   return clusters
 
@@ -286,14 +287,28 @@ def save_clusters_content_worker(p, cluster, kwargs):
 
   from analysis_helpers import save_cluster
   statistic='mean'
-  tip = kwargs["config"]["metric"].upper()
-  wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + "_" + tip + ".txt"
+  tips = kwargs["config"]["tips"]
+
+  wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic
+
+  if tips is not None:
+    for tip in tips:
+      wga_file += "_" + tip
+
+  wga_file += ".txt"
 
   save_cluster(filename=wga_file,
                cluster=cluster,
                statistic=statistic, wtype=WindowType.WGA)
 
-  no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic + "_" + tip + ".txt"
+  no_wga_file = "cluster_"+str(cluster.cidx) +"_no_wga_w_" + statistic
+
+  if tips is not None:
+    for tip in tips:
+      no_wga_file += "_" + tip
+
+  no_wga_file += ".txt"
+
   save_cluster(filename=no_wga_file,
                cluster=cluster,
                statistic=statistic, wtype=WindowType.NO_WGA)
@@ -302,7 +317,14 @@ def save_clusters_content_worker(p, cluster, kwargs):
     print("{0} Saving clusters GC".format(INFO))
     sys.stdout.flush()
     statistic = 'gc'
-    wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic + "_" + tip + ".txt"
+    wga_file = "cluster_"+str(cluster.cidx) +"_wga_w_" + statistic
+
+    if tips is not None:
+      for tip in tips:
+        wga_file += "_" + tip
+
+    wga_file +=  ".txt"
+
     save_cluster(filename=wga_file, cluster=cluster,
                  statistic=statistic, wtype=WindowType.WGA)
 
@@ -326,7 +348,7 @@ def save_cluster_worker(p, clusters, configuration):
           for other in clusters:
             clusters[p].calculate_distance_from_other(other=other)
 
-  clusters[p].save()
+  clusters[p].save(tips=configuration["plot_tips"])
 
 
 @timefn
@@ -379,7 +401,7 @@ def save_clusters(clusters, configuration):
               cluster.calculate_distance_from_other(other=other)
 
      for cluster in clusters:
-        cluster.save()
+        cluster.save(tips=configuration["plot_tips"])
 
 
 @timefn
