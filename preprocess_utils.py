@@ -169,11 +169,21 @@ def build_clusterer(data, nclusters, method, **kwargs):
     features.pop(features.index('gc'))
     has_gc = True
 
+  has_mean_ratio = False
+  if 'mean_ratio' in features:
+    features.pop(features.index('mean_ratio'))
+    has_mean_ratio = True
+
+
   for window in data:
     window_values = window.get_features(features=features)
 
     if has_gc:
       window_values.append(window.get_feature(feature='gc')[0])
+
+    if has_mean_ratio:
+      ratio = (window_values[0] + 1)/(window_values[1] + 1)
+      window_values.append(ratio)
     windows.append(window_values)
 
   if method == "kmeans":
