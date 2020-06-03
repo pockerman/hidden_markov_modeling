@@ -9,7 +9,7 @@ import seaborn as sns
 
 
 from helpers import read_configuration_file
-from train import main
+from train import main as train_main
 from train import load_regions
 from hmm_helpers import build_hmm
 from helpers import WindowType
@@ -53,7 +53,7 @@ def main():
     }
 
   # now we can train
-  hmm, regions = main(configuration=configuration)
+  hmm, regions = train_main(configuration=configuration)
   print("Number of regions: ", len(regions))
 
   for region in regions:
