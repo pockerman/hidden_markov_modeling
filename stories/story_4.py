@@ -35,7 +35,7 @@ def main():
   clusters["cluster_0"]["distributions"]["wga"] = {"type":"distribution", "name":"normal"}
 
   clusters["cluster_1"]["filename"]="/home/a/ag568/cluster_1_MANHATAN_2.txt"
-  clusters["cluster_0"]["state"]="state_1"
+  clusters["cluster_1"]["state"]="state_1"
   clusters["cluster_1"]["distributions"]["no_wga"] = {"type":"distribution", "name":"normal"}
   clusters["cluster_1"]["distributions"]["wga"] = {"type":"distribution", "name":"normal"}
 
