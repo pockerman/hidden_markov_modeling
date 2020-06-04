@@ -38,7 +38,7 @@ class Cluster(object):
       diameter = f.readline().split(":")[1].rstrip("\n")
       if diameter != '-inf':
         diameter = float(diameter)
-      cluster.diameter = diameter
+        cluster.diameter = diameter
       mean = float(f.readline().split(":")[1].rstrip("\n"))
       std = float(f.readline().split(":")[1].rstrip("\n"))
       cluster.wga_mean = mean
