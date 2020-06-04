@@ -36,6 +36,7 @@ class Cluster(object):
                         dist_features=dist_features)
 
       diameter = f.readline().split(":")[1].rstrip("\n")
+      diameter = diameter.strip()
       if diameter != '-inf':
         diameter = float(diameter)
         cluster.diameter = diameter
@@ -344,7 +345,7 @@ class Cluster(object):
       f.write("Dist Features: " + str(self._dist_features) + "\n")
 
       diam =  str(self._diameter) if self._diameter is not None else '-inf'
-      f.write("Diameter: " + diam + "\n")
+      f.write("Diameter:" + diam + "\n")
       f.write("WGA_MEAN:"+str(self.wga_mean) +"\n")
       f.write("WGA_STD:" + str(self.wga_std) +"\n")
       f.write("NO_WGA_MEAN:" + str(self.no_wga_mean) +"\n")
