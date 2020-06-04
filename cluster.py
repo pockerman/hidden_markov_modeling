@@ -182,6 +182,11 @@ class Cluster(object):
   def windows(self):
     return self._windows
 
+  @windows.setter
+  def windows(self, value):
+    self._windows = value
+
+
   @property
   def diameter(self):
     if self._diameter is not None:
