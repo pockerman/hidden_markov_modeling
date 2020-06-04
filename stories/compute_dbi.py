@@ -12,6 +12,7 @@ from train import main as train_main
 from train import load_regions
 from hmm_helpers import build_hmm
 from helpers import WindowType
+from helpers import INFO
 from cluster import Cluster
 from region import Region
 
@@ -36,6 +37,12 @@ def compute_dbi(cluster_files, regionfile):
 
      for other in clusters:
        cluster.calculate_distance_from_other(other=other)
+
+  for cluster in clusters:
+     print("{0} Cluster {1}".format(INFO, cluster.cidx))
+     print("{0} Cluster diameter ".format(INFO, cluster.diameter))
+     print("{0} Cluster other distance ".format(INFO, cluster.distance_from_others))
+
 
   dbi = Cluster.dbi(clusters)
   print("Dbi index is: {0}".format(dbi))
