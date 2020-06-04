@@ -40,8 +40,8 @@ def compute_dbi(cluster_files, regionfile):
 
   for cluster in clusters:
      print("{0} Cluster {1}".format(INFO, cluster.cidx))
-     print("{0} Cluster diameter ".format(INFO, cluster.diameter))
-     print("{0} Cluster other distance ".format(INFO, cluster.distance_from_others))
+     print("{0} Cluster diameter {1}".format(INFO, cluster.diameter))
+     print("{0} Cluster other distance {1}".format(INFO, cluster.distance_from_others))
 
 
   dbi = Cluster.dbi(clusters)
