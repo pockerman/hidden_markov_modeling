@@ -46,8 +46,8 @@ def main():
               "cluster_1_MANHATAN_3_MEAN_RATIO.txt",
               "cluster_2_MANHATAN_3_MEAN_RATIO.txt"]
 
-  for cluster in clusters:
-    cluster = path + "/" + cluster
+  for clst in range(len(clusters)):
+    clusters[clst] = path + "/" + clusters[clst]
 
   region = path + "/" + "region_0_MANHATAN_3_MEAN_RATIO.txt"
   compute_dbi(cluster_files=clusters, regionfile=region)
@@ -58,8 +58,8 @@ def main():
               "cluster_1_MANHATAN_2_MEAN_RATIO.txt",
               ]
 
-  for cluster in clusters:
-    cluster = path + "/" + cluster
+  for clst in range(len(clusters)):
+    clusters[clst] = path + "/" + clusters[clst]
 
   region = path + "/" + "region_0_MANHATAN_2_MEAN_RATIO.txt"
   compute_dbi(cluster_files=clusters, regionfile=region)

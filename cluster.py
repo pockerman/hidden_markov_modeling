@@ -20,6 +20,9 @@ class Cluster(object):
 
   @staticmethod
   def load(filename):
+
+    print("{0} Loading cluster from file: {1}".format(INFO, filename))
+
     with open(filename, 'r') as f:
       idx = int(f.readline().split(":")[1].rstrip("\n"))
       indices = list(f.readline().split(":")[1].rstrip("\n"))
