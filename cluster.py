@@ -74,10 +74,14 @@ class Cluster(object):
 
     for ci in clusters:
       for cj in clusters:
-        si = ci.diameter
-        sj = cj.diameter
-        dij =  ci.get_distance_from_other(other=cj)
-        r[(ci.cidx, cj.cidx)] = (si+sj)/dij
+
+        if ci.cidx == cj.cidx:
+          r[(ci.cidx, cj.cidx)] = 0.0
+        else:
+          si = ci.diameter
+          sj = cj.diameter
+          dij =  ci.get_distance_from_other(other=cj)
+          r[(ci.cidx, cj.cidx)] = (si+sj)/dij
 
     # for each cluster find the maximum
     maxs = []
