@@ -26,11 +26,12 @@ class Cluster(object):
     with open(filename, 'r') as f:
       idx = int(f.readline().split(":")[1].rstrip("\n"))
       indices = list(f.readline().split(":")[1].rstrip("\n"))
+      indices = indices[1:-1]
       center = int(f.readline().split(":")[1].rstrip("\n"))
       dist_metric = f.readline().split(":")[1].rstrip("\n")
       dist_features = list(f.readline().split(":")[1].rstrip("\n"))
 
-      cluster = Cluster(id_=idx, indexes=indices,
+      cluster = Cluster(id_=idx, indexes=[int(idx) for idx in indices],
                         windows=None, center_idx=center,
                         dist_metric=dist_metric,
                         dist_features=dist_features)
