@@ -29,12 +29,14 @@ class Cluster(object):
       indices = indices[1:-1].split(',')
       center = int(f.readline().split(":")[1].rstrip("\n"))
       dist_metric = f.readline().split(":")[1].rstrip("\n")
-      dist_features = list(f.readline().split(":")[1].rstrip("\n"))
+      dist_features = f.readline().split(":")[1].rstrip("\n")
+      dist_features = dist_features.strip()
+      dist_features = dist_features[1:-1].split(",")
 
       cluster = Cluster(id_=idx, indexes=[int(idx) for idx in indices],
                         windows=None, center_idx=center,
-                        dist_metric=dist_metric,
-                        dist_features=dist_features)
+                        dist_metric=dist_metric.strip(),
+                        dist_features=[ feature.strip().strip("'") for feature in dist_features])
 
       diameter = f.readline().split(":")[1].rstrip("\n")
       diameter = diameter.strip()
