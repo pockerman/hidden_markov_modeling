@@ -25,8 +25,8 @@ class Cluster(object):
 
     with open(filename, 'r') as f:
       idx = int(f.readline().split(":")[1].rstrip("\n"))
-      indices = list(f.readline().split(":")[1].rstrip("\n"))
-      indices = indices[1:-1]
+      indices = f.readline().split(":")[1].rstrip("\n")
+      indices = indices[1:-1].split(',')
       center = int(f.readline().split(":")[1].rstrip("\n"))
       dist_metric = f.readline().split(":")[1].rstrip("\n")
       dist_features = list(f.readline().split(":")[1].rstrip("\n"))
