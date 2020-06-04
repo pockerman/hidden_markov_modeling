@@ -31,6 +31,12 @@ def compute_dbi(cluster_files, regionfile):
      clusters.append(cluster)
 
 
+  for cluster in clusters:
+     cluster.diameter
+
+     for other in clusters:
+       cluster.calculate_distance_from_other(other=other)
+
   dbi = Cluster.dbi(clusters)
   print("Dbi index is: {0}".format(dbi))
 

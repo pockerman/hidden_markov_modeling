@@ -8,7 +8,7 @@ from helpers import WindowState
 from helpers import flat_windows_rd_from_indexes
 from helpers import MixedWindowView
 from helpers import WindowType
-from helpers import WARNING,INFO
+from helpers import WARNING, INFO
 from exceptions import Error
 
 from preprocess_utils import compute_statistic
