@@ -23,18 +23,18 @@ def main():
   # load the configuration
   configuration=read_configuration_file("../config.json")
   configuration["HMM"]["train"]=False
-  configuration["regions_files"]=["/home/a/ag568/region_0_MANHATAN_2.txt"]
+  configuration["regions_files"]=["/home/a/ag568/region_0_MANHATAN_2_MEAN_RATIO.txt"]
   clusters = {
     "cluster_0":{"filename":"EMPTY", "state":"EMPTY", "distributions":{} },
     "cluster_1":{"filename":"EMPTY", "state":"EMPTY", "distributions":{}}
     }
 
-  clusters["cluster_0"]["filename"]="/home/a/ag568/cluster_0_MANHATAN_2.txt"
+  clusters["cluster_0"]["filename"]="/home/a/ag568/cluster_0_MANHATAN_2_MEAN_RATIO.txt"
   clusters["cluster_0"]["state"]="state_0"
   clusters["cluster_0"]["distributions"]["no_wga"] = {"type":"distribution", "name":"normal"}
   clusters["cluster_0"]["distributions"]["wga"] = {"type":"distribution", "name":"normal"}
 
-  clusters["cluster_1"]["filename"]="/home/a/ag568/cluster_1_MANHATAN_2.txt"
+  clusters["cluster_1"]["filename"]="/home/a/ag568/cluster_1_MANHATAN_2_MEAN_RATIO.txt"
   clusters["cluster_1"]["state"]="state_1"
   clusters["cluster_1"]["distributions"]["no_wga"] = {"type":"distribution", "name":"normal"}
   clusters["cluster_1"]["distributions"]["wga"] = {"type":"distribution", "name":"normal"}

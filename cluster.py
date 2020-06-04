@@ -8,7 +8,7 @@ from helpers import WindowState
 from helpers import flat_windows_rd_from_indexes
 from helpers import MixedWindowView
 from helpers import WindowType
-from helpers import WARNING
+from helpers import WARNING,INFO
 from exceptions import Error
 
 from preprocess_utils import compute_statistic
@@ -76,7 +76,7 @@ class Cluster(object):
       for cj in clusters:
         si = ci.diameter
         sj = cj.diameter
-        dij =  ci.distance_from_other(other=cj)
+        dij =  ci.get_distance_from_other(other=cj)
         r[(ci.cidx, cj.cidx)] = (si+sj)/dij
 
     # for each cluster find the maximum

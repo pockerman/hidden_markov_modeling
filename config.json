@@ -40,7 +40,7 @@
       "parameters":[-999.5, -998.5]
     }
   },
-  "plot_tips":[],
+  "plot_tips":["MANHATAN", "3", "NO_WGA_MEAN","MEAN_RATIO"],
   "windows_filename":"hmm_windows.json",
   "check_windowing_sanity":true,
   "outlier_remove":{
@@ -53,10 +53,10 @@
   "clusterer":{
     "name":"kmedoids",
     "config":{
-    "init_cluster_idx":[117624, 151419, 171284, 121443],
+    "init_cluster_idx":"random_from_data",
     "metric":"MANHATAN",
-    "features":["mean","gc"],
-    "n_clusters":4
+    "features":["no_wga_mean","mean_ratio"],
+    "n_clusters":3
     }
   },
   "clusters":{
