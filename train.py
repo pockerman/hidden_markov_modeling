@@ -385,8 +385,15 @@ def main(configuration):
       for region in regions_list:
         region.get_mixed_windows()
 
+      windows=[]
+
+      for w in regions_list[0].get_mixed_window():
+        if w.is_gap_window():
+          continue
+        windows.append(w)
+
       for cluster in clusters:
-        cluster.windows = regions_list[0].get_mixed_windows()
+        cluster.windows = windows
 
       hmm = init_hmm_2d(clusters=clusters,config=configuration)
     else:
