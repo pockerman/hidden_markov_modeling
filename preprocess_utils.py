@@ -149,6 +149,55 @@ def get_distance_metric(dist_metric, degree=4):
   return metric
 
 
+def get_data_for_clustering(data, features):
+
+  features = copy.deepcopy(kwargs["config"]["features"])
+  print("{0} cluster features used {1}".format(INFO, features))
+
+  windows = []
+
+  has_gc = False
+  if 'gc' in features:
+    features.pop(features.index('gc'))
+    has_gc = True
+
+  has_mean_ratio = False
+  if 'mean_ratio' in features:
+    features.pop(features.index('mean_ratio'))
+    has_mean_ratio = True
+
+  has_wga_mean = False
+  if 'wga_mean' in features:
+    features.pop(features.index('wga_mean'))
+    has_wga_mean = True
+
+  has_no_wga_mean = False
+  if 'no_wga_mean' in features:
+    features.pop(features.index('no_wga_mean'))
+    has_no_wga_mean = True
+
+
+  for window in data:
+
+    if has_wga_mean:
+      window_values =[ window.get_feature(feature='mean', name=WindowType.WGA) ]
+    elif has_no_wga_mean:
+      window_values = [ window.get_feature(feature='mean', name=WindowType.NO_WGA) ]
+    else:
+      window_values = window.get_features(features=features)
+
+    if has_gc:
+      window_values.append(window.get_feature(feature='gc', name=WindowType.WGA))
+
+    if has_mean_ratio:
+      means = window.get_features(features=['mean'])
+      ratio = (means[0] + 1)/(means[1] + 1)
+      window_values.append(ratio)
+
+    windows.append(window_values)
+  return windows
+
+
 def build_clusterer(data, nclusters, method, **kwargs):
 
   """

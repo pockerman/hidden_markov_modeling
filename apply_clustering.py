@@ -197,6 +197,27 @@ def accumulate_windows(regions):
 
 
 @timefn
+def test_num_clusters(regions, configuration):
+
+  print("{0} Start test clustering....".format(INFO))
+  sys.stdout.flush()
+
+  from pyclustering.cluster.silhouette import silhouette_ksearch_type, silhouette_ksearch
+  from preprocess_utils import get_data_for_clustering
+
+  kwargs = configuration["clusterer"]
+
+  windows = accumulate_windows(regions=regions)
+
+  sample = get_data_for_clustering(data=windows, features=configuration["clusterer"]["config"]["features"])
+  search_instance = silhouette_ksearch(sample, 2, 10,
+                                       algorithm=silhouette_ksearch_type.KMEDOIDS).process()
+
+  scores = search_instance.get_scores()
+  print("{0} Scores: {1}".format(INFO, scores))
+
+
+@timefn
 def create_clusters(regions, configuration):
 
   print("{0} Start clustering....".format(INFO))
@@ -428,6 +449,10 @@ def main(configuration):
       proc.start()
     else:
       save_regions(regions, configuration=configuration)
+
+
+    num_clusters = test_num_clusters(regions=regions,
+                                     configuration=configuration)
 
     clusters = create_clusters(regions=regions,
                                configuration=configuration)
