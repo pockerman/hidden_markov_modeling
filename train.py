@@ -2,6 +2,7 @@ import argparse
 import logging
 import time
 import json
+import numpy as np
 from multiprocessing import Process
 from multiprocessing import Manager
 from pomegranate import*
