@@ -369,6 +369,8 @@ def main(configuration):
 
     if configuration["HMM"]["use_multivariate"]:
 
+      print("{0} Using Multivariate PDFs".format(INFO))
+
       # make sure the region has been loaded
       procs[0].join()
 
