@@ -4,9 +4,6 @@ import sys
 
 sys.path.append("../")
 import json
-import matplotlib.pyplot as plt
-import seaborn as sns
-
 
 from helpers import read_configuration_file
 from train import main as train_main
