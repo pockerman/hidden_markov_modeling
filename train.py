@@ -368,18 +368,35 @@ def main(configuration):
     build_cluster_densities(clusters_lst=clusters, **configuration)
 
     if configuration["HMM"]["use_multivariate"]:
+
+      # make sure the region has been loaded
+      procs[0].join()
+
+      if errors_dict[0] != "No error":
+        raise Error(errors_dict[0])
+
+      if len(regions_list) == 0:
+        raise Error("Regions have not been loaded correctly")
+
+      # assign the windows to the clusters
+      for region in regions_list:
+        region.get_mixed_windows()
+
+      for cluster in clusters:
+        cluster.windows = regions_list[0].get_mixed_windows()
+
       hmm = init_hmm_2d(clusters=clusters,config=configuration)
     else:
       hmm = init_hmm(clusters=clusters, configuration=configuration)
 
-    # join here
-    procs[0].join()
+      # join here
+      procs[0].join()
 
-    if errors_dict[0] != "No error":
-      raise Error(errors_dict[0])
+      if errors_dict[0] != "No error":
+        raise Error(errors_dict[0])
 
-    if len(regions_list) == 0:
-      raise Error("Regions have not been loaded correctly")
+      if len(regions_list) == 0:
+        raise Error("Regions have not been loaded correctly")
 
     hmm = hmm_train(hmm_model=hmm,
                     regions=regions_list,
