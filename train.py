@@ -77,9 +77,9 @@ def init_hmm_2d(clusters, config):
   if config["remove_windows_with_gaps"] == False:
     # we have a gap state then add it
 
-    n_state_dist = get_dist_list(dists_name=[config["n_windows_dist"]["name"],
-                                             config["n_windows_dist"]["name"]],
-                                       params={"uniform_params":config["n_windows_dist"]["config"]["parameters"]})
+    n_state_dist = get_dist_list(dists_name=[config["gap_windows_dist"]["name"],
+                                             config["gap_windows_dist"]["name"]],
+                                       params={"uniform_params":config["gap_windows_dist"]["config"]["parameters"]})
 
     gap_state = \
             State(IndependentComponentsDistribution(n_state_dist), name="GAP_STATE")
@@ -98,11 +98,11 @@ def init_hmm_2d(clusters, config):
 
     kwargs={"exclude_gaps":True}
     mu1, mu2 = cluster.get_rd_statistics(statistic='mean',
-                                         wtype=WindowType.BOTH
+                                         wtype=WindowType.BOTH,
                                          **kwargs)
 
     cov = cluster.get_rd_statistics(statistic='cov',
-                                           wtype=WindowType.BOTH
+                                           wtype=WindowType.BOTH,
                                            **kwargs)
     state = State(MultivariateGaussianDistribution(means=np.array([mu1, mu2]),
                                                          covariance=cov), name=name)
@@ -162,16 +162,16 @@ def init_hmm(clusters, configuration):
       if WindowType.from_string(hmm_config["train_windowtype"]) ==\
         WindowType.BOTH:
 
-          n_state_dist = get_dist_list(dists_name=[configuration["n_windows_dist"]["name"],
-                                                   configuration["n_windows_dist"]["name"]],
-                                       params={"uniform_params":configuration["n_windows_dist"]["config"]["parameters"]})
+          n_state_dist = get_dist_list(dists_name=[configuration["gap_windows_dist"]["name"],
+                                                   configuration["gap_windows_dist"]["name"]],
+                                       params={"uniform_params":configuration["gap_windows_dist"]["config"]["parameters"]})
 
           n_state = \
             State(IndependentComponentsDistribution(n_state_dist), name="GAP_STATE")
       else:
-        n_state_dist = get_dist_list(dists_name=[configuration["n_windows_dist"]["name"],
-                                                 configuration["n_windows_dist"]["name"]],
-                                     params={"uniform_params":configuration["n_windows_dist"]["config"]["parameters"]})
+        n_state_dist = get_dist_list(dists_name=[configuration["gap_windows_dist"]["name"],
+                                                 configuration["gap_windows_dist"]["name"]],
+                                     params={"uniform_params":configuration["gap_windows_dist"]["config"]["parameters"]})
         n_state = \
           State(n_state_dist[0], name="GAP_STATE")
 
