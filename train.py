@@ -387,7 +387,7 @@ def main(configuration):
 
       windows=[]
 
-      for w in regions_list[0].get_mixed_window():
+      for w in regions_list[0].get_mixed_windows():
         if w.is_gap_window():
           continue
         windows.append(w)
