@@ -433,10 +433,10 @@ class Cluster(object):
         if wtype != WindowType.BOTH:
           raise Error("Calculating covariance requires both samples")
 
-        wdata_wga = self.get_rd_sequnce(statistic=statistic,
+        wdata_wga = self.get_rd_sequnce(statistic="mean",
                                         wtype=WindowType.WGA,
                                         exclude_gaps=kwargs["exclude_gaps"])
-        wdata_no_wga = self.get_rd_sequnce(statistic=statistic,
+        wdata_no_wga = self.get_rd_sequnce(statistic="mean",
                                            wtype=WindowType.NO_WGA,
                                            exclude_gaps=kwargs["exclude_gaps"])
 
