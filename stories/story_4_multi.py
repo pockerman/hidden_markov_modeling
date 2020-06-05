@@ -35,8 +35,8 @@ def main():
   clusters["cluster_1"]["filename"]="/home/a/ag568/cluster_1_MANHATAN_3_MEAN_RATIO.txt"
   clusters["cluster_1"]["state"]="state_1"
 
-  clusters["cluster_1"]["filename"]="/home/a/ag568/cluster_2_MANHATAN_3_MEAN_RATIO.txt"
-  clusters["cluster_1"]["state"]="state_2"
+  clusters["cluster_2"]["filename"]="/home/a/ag568/cluster_2_MANHATAN_3_MEAN_RATIO.txt"
+  clusters["cluster_2"]["state"]="state_2"
 
 
   configuration["clusters"] = clusters
