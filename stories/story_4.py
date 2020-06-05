@@ -69,8 +69,9 @@ def main():
 
   # load a sequence
   sequence = regions[0].get_region_as_rd_mean_sequences_with_windows(size=None,
-                                                                   window_type=WindowType.from_string(configuration["HMM"]["train_windowtype"]),
-                                                                   n_seqs=configuration["HMM"]["train_n_sequences_per_source"])
+                                                                   window_type=WindowType.from_string(hmm_config["train_windowtype"]),
+                                                                   n_seqs=hmm_config["train_n_sequences_per_source"],
+                                                                   exclude_gaps=False)
 
   observations = []
   for i in range(len(sequence)):
