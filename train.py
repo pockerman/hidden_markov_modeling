@@ -365,7 +365,6 @@ def main(configuration):
     # load the clusters whilst waiting
     # for the regions to load
     clusters = load_clusters(configuration=configuration)
-    build_cluster_densities(clusters_lst=clusters, **configuration)
 
     if configuration["HMM"]["use_multivariate"]:
 
@@ -389,6 +388,8 @@ def main(configuration):
 
       hmm = init_hmm_2d(clusters=clusters,config=configuration)
     else:
+
+      build_cluster_densities(clusters_lst=clusters, **configuration)
       hmm = init_hmm(clusters=clusters, configuration=configuration)
 
       # join here
