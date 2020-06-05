@@ -3,10 +3,10 @@ Module cluster
 """
 import sys
 import array
-from pomegranate import*
+import numpy as np
+#from pomegranate import*
 
 from helpers import WindowState
-from helpers import flat_windows_rd_from_indexes
 from helpers import MixedWindowView
 from helpers import WindowType
 from helpers import WARNING, INFO
