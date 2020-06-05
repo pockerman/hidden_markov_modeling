@@ -125,6 +125,7 @@
   },
 
   "HMM": {
+    "use_multivariate":true,
     "name":"HMM_Model",
     "train":true,
     "train_solver": "baum-welch",

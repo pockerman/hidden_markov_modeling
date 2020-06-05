@@ -2,6 +2,7 @@
 Module cluster
 """
 import sys
+import array
 from pomegranate import*
 
 from helpers import WindowState
@@ -403,26 +404,75 @@ class Cluster(object):
 
     return sequences
 
-  def get_statistics(self, statistic, window_type, **kwargs):
 
+  def get_rd_sequnce(self, statistic, wtype, exclude_gaps):
 
-      if window_type == WindowType.BOTH:
+    if self._indexes is None:
+      raise Error("No indexes have been given to the cluster")
 
-        for index in self._indexes:
+    if self._windows is None:
+      raise Error("No windows have been given to the cluster")
+
+    sequence = array.array('d')
+
+    for index in self._indexes:
           window = self._windows[index]
 
-          statistic1, statistic2 = \
-            window.get_rd_statistic(statistics=statistic)
-          return statistic1, statistic2
+          if "exclude_gaps" in kwargs and\
+            kwargs["exclude_gaps"]:
+              if window.is_gap_window():
+                continue
+
+          stat = window.get_rd_statistic(statistics=statistic, name=wtype)
+          sequence.append(stat)
+    return sequence
+
+
+  def get_rd_statistics(self, statistic, wtype, **kwargs):
+
+      if statistic == 'cov':
+
+        if wtype != WindowType.BOTH:
+          raise Error("Calculating covariance requires both samples")
+
+        wdata_wga = self.get_rd_sequnce(statistic=statistic,
+                                        wtype=WindowType.WGA,
+                                        exclude_gaps=kwargs["exclude_gaps"])
+        wdata_no_wga = self.get_rd_sequnce(statistic=statistic,
+                                           wtype=WindowType.NO_WGA,
+                                           exclude_gaps=kwargs["exclude_gaps"])
+
+        X = np.stack((wdata_wga, wdata_no_wga), axis=0)
+        return np.cov(X)
+
+
+      if wtype == WindowType.BOTH:
+
+        wdata_wga = self.get_rd_sequnce(statistic=statistic,
+                                        wtype=WindowType.WGA,
+                                        exclude_gaps=kwargs["exclude_gaps"])
+        wdata_no_wga = self.get_rd_sequnce(statistic=statistic,
+                                           wtype=WindowType.NO_WGA,
+                                           exclude_gaps=kwargs["exclude_gaps"])
+
+        stat1 = compute_statistic(data=wdata_wga, statistics=statistic)
+        stat2 = compute_statistic(data=wdata_no_wga, statistics=statistic)
+        return stat1, stat2
+
+      raise Error("Invalid operation in cluster")
+
+      """
       else:
 
-        wga_windows = [window.get_window(window_type)
+
+        windows = [window.get_window(wtype)
                        for window in self._windows]
 
         window_data = flat_windows_rd_from_indexes(indexes=self._indexes,
-                                                   windows=wga_windows)
+                                                   windows=windows)
 
-        return compute_statistic(data=window_data,statistics=statistic)
+      return compute_statistic(data=window_data, statistics=statistic)
+      """
 
   def get_window_statistics(self, statistic, **kwargs):
 
