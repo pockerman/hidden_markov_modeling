@@ -418,9 +418,7 @@ class Cluster(object):
     for index in self._indexes:
           window = self._windows[index]
 
-          if "exclude_gaps" in kwargs and\
-            kwargs["exclude_gaps"]:
-              if window.is_gap_window():
+          if exclude_gaps and window.is_gap_window():
                 continue
 
           stat = window.get_rd_statistic(statistics=statistic, name=wtype)
