@@ -405,7 +405,7 @@ class Region(object):
 
     return counter
 
-  def get_rd_mean_sequence(self, size, window_type):
+  def get_rd_mean_sequence(self, size, window_type, exclude_gaps):
 
     if self._mixed_windows is None:
       raise Error("Mixed windows have not been computed")
@@ -415,6 +415,10 @@ class Region(object):
     if size < len(self._mixed_windows):
         counter = 0
         for window in self._mixed_windows:
+
+          if exclude_gaps and window.is_gap_window():
+            continue
+
           sequence.append(window.get_rd_statistic(statistics="mean",
                                                   name=window_type))
           counter +=1
@@ -425,12 +429,15 @@ class Region(object):
 
       print("{0} Region size is less than {1}".format(WARNING, size))
       for window in self._mixed_windows:
-          sequence.append(window.get_rd_statistic(statistics="mean",
+
+        if exclude_gaps and window.is_gap_window():
+          continue
+        sequence.append(window.get_rd_statistic(statistics="mean",
                                                   name=window_type))
 
     return sequence
 
-  def get_region_as_rd_mean_sequences(self, size, window_type, n_seqs):
+  def get_region_as_rd_mean_sequences(self, size, window_type, n_seqs, exclude_gaps):
 
 
     if self._mixed_windows is None:
@@ -441,6 +448,10 @@ class Region(object):
       sequences = []
 
       for window in self._mixed_windows:
+
+        if exclude_gaps and window.is_gap_window():
+          continue
+
         sequences.append(window.get_rd_statistic(statistics="mean",
                                                  name=window_type))
 
@@ -449,6 +460,10 @@ class Region(object):
     sequences = []
     sequence_local=[]
     for window in self._mixed_windows:
+
+      if exclude_gaps and window.is_gap_window():
+          continue
+
       sequence_local.append(window.get_rd_statistic(statistics="mean",
                                                     name=window_type))
 
@@ -461,7 +476,8 @@ class Region(object):
 
     return sequences
 
-  def get_region_as_rd_mean_sequences_with_windows(self, size, window_type, n_seqs):
+  def get_region_as_rd_mean_sequences_with_windows(self, size, window_type,
+                                                   n_seqs, exclude_gaps):
 
     if self._mixed_windows is None:
       raise Error("Mixed windows have not been computed")
@@ -471,6 +487,10 @@ class Region(object):
       sequences = []
 
       for window in self._mixed_windows:
+
+        if exclude_gaps == True and window.is_gap_window():
+          continue
+
         sequences.append((window.get_rd_statistic(statistics="mean",
                                                  name=window_type), window.start_end_pos))
 
@@ -479,6 +499,10 @@ class Region(object):
     sequences = []
     sequence_local=[]
     for window in self._mixed_windows:
+
+      if exclude_gaps and window.is_gap_window():
+          continue
+
       sequence_local.append((window.get_rd_statistic(statistics="mean",
                                                     name=window_type),
                                                     window.start_end_pos))
