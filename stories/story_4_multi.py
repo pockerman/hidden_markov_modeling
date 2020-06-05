@@ -42,10 +42,12 @@ def main():
   configuration["clusters"] = clusters
 
   hmm_config = configuration["HMM"]
-  hmm_config["states"]= {"state_0":{ "start_prob":0.25},
-                         "state_1":{ "start_prob":0.25},
-                         "state_2":{ "start_prob":0.25},
-                         "gap_state": {"start_prob":0.25}
+
+  start_prob = 0.25
+  hmm_config["states"]= {"state_0":{ "start_prob":start_prob},
+                         "state_1":{ "start_prob":start_prob},
+                         "state_2":{ "start_prob":start_prob},
+                         "gap_state": {"start_prob":start_prob}
                          }
 
   self_trans = 0.95
