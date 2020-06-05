@@ -387,22 +387,22 @@ class Cluster(object):
 
     return sequence
 
-  def get_region_as_sequences(self, size, window_type, n_seqs):
+  def get_n_gap_windows(self):
 
-    sequences = []
-    sequence_local=[]
-    for idx in self._indexes:
-      window = self._windows[idx]
-      sequence_local.append(window.get_rd_statistic(statistics="mean", name=window_type))
+    if self._indexes is None:
+      raise Error("No indexes have been given to the cluster")
 
-      if len(sequence_local) == size:
-        sequences.append(sequence_local)
-        sequence_local=[]
+    if self._windows is None:
+      raise Error("No windows have been given to the cluster")
 
-      if n_seqs is not None and len(sequences) == n_seqs:
-        break
+    counter = 0
 
-    return sequences
+    for index in self._indexes:
+          window = self._windows[index]
+
+          if window.is_gap_window():
+            counter += 1
+    return counter
 
 
   def get_rd_sequnce(self, statistic, wtype, exclude_gaps):
