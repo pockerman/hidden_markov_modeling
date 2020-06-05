@@ -77,9 +77,10 @@ def init_hmm_2d(clusters, config):
   if config["remove_windows_with_gaps"] == False:
     # we have a gap state then add it
 
-    n_state_dist = get_dist_list(dists_name=[config["gap_windows_dist"]["name"],
-                                             config["gap_windows_dist"]["name"]],
-                                       params={"uniform_params":config["gap_windows_dist"]["config"]["parameters"]})
+    gap_windows_dist = config["gap_windows_dist"]
+    n_state_dist = get_dist_list(dists_name=[gap_windows_dist["name"],
+                                             gap_windows_dist["name"]],
+                                       params={"uniform_params":gap_windows_dist["config"]["parameters"]})
 
     gap_state = \
             State(IndependentComponentsDistribution(n_state_dist), name="GAP_STATE")
