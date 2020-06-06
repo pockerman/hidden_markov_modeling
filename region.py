@@ -314,6 +314,19 @@ class Region(object):
 
   def remove_windows_with_gaps(self):
 
+    if self._mixed_windows is None:
+      raise Error("Mixed windows have not been computed")
+
+    mixed_windows = []
+    for w in self._mixed_windows:
+
+      if w.is_gap_window():
+        continue
+      mixed_windows.append(w)
+
+    self._mixed_windows = mixed_windows
+
+    """
      # filter the windows for N's
      wga_filter_windows = [window
                            for window in self._windows[WindowType.WGA]
@@ -326,6 +339,21 @@ class Region(object):
      self._windows[WindowType.WGA] = wga_filter_windows
      self._windows[WindowType.NO_WGA] = no_wga_filter_windows
      self.get_mixed_windows()
+    """
+
+  def remove_windows_with_errors(self):
+
+     if self._mixed_windows is None:
+      raise Error("Mixed windows have not been computed")
+
+     mixed_windows = []
+     for w in self._mixed_windows:
+
+      if w.is_error_window():
+        continue
+      mixed_windows.append(w)
+
+     self._mixed_windows = mixed_windows
 
   def save_mixed_windows_statistic(self, statistic, tips):
 
