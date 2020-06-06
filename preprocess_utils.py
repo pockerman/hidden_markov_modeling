@@ -151,29 +151,29 @@ def get_distance_metric(dist_metric, degree=4):
 
 def get_data_for_clustering(data, features):
 
-  features = copy.deepcopy(kwargs["config"]["features"])
-  print("{0} cluster features used {1}".format(INFO, features))
+  cfeatures = copy.deepcopy(features)
+  print("{0} cluster features used {1}".format(INFO, cfeatures))
 
   windows = []
 
   has_gc = False
-  if 'gc' in features:
-    features.pop(features.index('gc'))
+  if 'gc' in cfeatures:
+    cfeatures.pop(cfeatures.index('gc'))
     has_gc = True
 
   has_mean_ratio = False
-  if 'mean_ratio' in features:
-    features.pop(features.index('mean_ratio'))
+  if 'mean_ratio' in cfeatures:
+    cfeatures.pop(cfeatures.index('mean_ratio'))
     has_mean_ratio = True
 
   has_wga_mean = False
-  if 'wga_mean' in features:
-    features.pop(features.index('wga_mean'))
+  if 'wga_mean' in cfeatures:
+    cfeatures.pop(cfeatures.index('wga_mean'))
     has_wga_mean = True
 
   has_no_wga_mean = False
-  if 'no_wga_mean' in features:
-    features.pop(features.index('no_wga_mean'))
+  if 'no_wga_mean' in cfeatures:
+    cfeatures.pop(cfeatures.index('no_wga_mean'))
     has_no_wga_mean = True
 
 
@@ -184,7 +184,7 @@ def get_data_for_clustering(data, features):
     elif has_no_wga_mean:
       window_values = [ window.get_feature(feature='mean', name=WindowType.NO_WGA) ]
     else:
-      window_values = window.get_features(features=features)
+      window_values = window.get_features(features=cfeatures)
 
     if has_gc:
       window_values.append(window.get_feature(feature='gc', name=WindowType.WGA))
