@@ -163,6 +163,12 @@ def clean_up_regions(regions, configuration):
 
     # compute the mixed windows for the region
     region.get_mixed_windows()
+
+    print("{0} Number of windows for region: {1}".format(INFO, len(region)))
+    print("{0} Removing windows with errors".format(INFO))
+    region.remove_windows_with_errors()
+    print("{0} Number of windows after removing errors: {1}".format(INFO, len(region)))
+    print("{0} Remove/Mark GAP windows: ".format(INFO))
     remove_or_mark_gaps(region=region, configuration=configuration)
 
     print("{0} Number of mixed "
