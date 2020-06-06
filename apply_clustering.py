@@ -211,12 +211,12 @@ def test_num_clusters(regions, configuration):
   from pyclustering.cluster.silhouette import silhouette_ksearch_type, silhouette_ksearch
   from preprocess_utils import get_data_for_clustering
 
-  kwargs = configuration["clusterer"]
+  #kwargs = configuration["clusterer"]
 
   windows = accumulate_windows(regions=regions)
 
   sample = get_data_for_clustering(data=windows, features=configuration["clusterer"]["config"]["features"])
-  search_instance = silhouette_ksearch(sample, 2, 10,
+  search_instance = silhouette_ksearch(sample, 2, 5,
                                        algorithm=silhouette_ksearch_type.KMEDOIDS).process()
 
   scores = search_instance.get_scores()
