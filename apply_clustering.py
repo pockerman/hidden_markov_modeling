@@ -457,8 +457,8 @@ def main(configuration):
       save_regions(regions, configuration=configuration)
 
 
-    num_clusters = test_num_clusters(regions=regions,
-                                     configuration=configuration)
+    #num_clusters = test_num_clusters(regions=regions,
+    #                                 configuration=configuration)
 
     clusters = create_clusters(regions=regions,
                                configuration=configuration)
