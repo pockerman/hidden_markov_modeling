@@ -278,7 +278,7 @@ def create_clusters(regions, configuration):
 
       save_clusters_content_worker(p=len(clusters) - 1,
                                    cluster=clusters[len(clusters) - 1],
-                                   kwrags=kwargs)
+                                   kwargs=kwargs)
     else:
 
       for p in range(n_procs - 1):
