@@ -181,7 +181,7 @@ class SignificanceTestLabeler(object):
         # get the cluster statistics
         cluster_stats = cluster.get_statistics(windows=self._windows,
                                                statistic="all",
-                                               window_type="wga_w")
+                                               wtype="wga_w")
 
         h0 = \
           Equal(parameter_name=test_config["statistic_parameter"],

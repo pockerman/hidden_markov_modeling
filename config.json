@@ -34,7 +34,7 @@
   "remove_windows_with_gaps":false,
   "mark_for_gap_windows":-999.0,
   "save_cluster_dbi":false,
-  "n_windows_dist":{
+  "gap_windows_dist":{
     "name":"uniform",
     "config":{
       "parameters":[-999.5, -998.5]
@@ -125,6 +125,7 @@
   },
 
   "HMM": {
+    "use_multivariate":true,
     "name":"HMM_Model",
     "train":true,
     "train_solver": "baum-welch",

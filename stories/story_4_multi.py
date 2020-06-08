@@ -4,9 +4,6 @@ import sys
 
 sys.path.append("../")
 import json
-import matplotlib.pyplot as plt
-import seaborn as sns
-
 
 from helpers import read_configuration_file
 from train import main as train_main
@@ -20,43 +17,56 @@ def main():
   # load the configuration
   configuration=read_configuration_file("../config.json")
   configuration["HMM"]["train"]=False
-  # load the configuration
-  configuration=read_configuration_file("../config.json")
-  configuration["HMM"]["train"]=False
-  configuration["regions_files"]=["/home/a/ag568/region_0_MANHATAN_2_MEAN_RATIO.txt"]
+
+
+  configuration["regions_files"]=["/home/a/ag568/region_0_MANHATAN_3_MEAN_RATIO.txt"]
   clusters = {
     "cluster_0":{"filename":"EMPTY", "state":"EMPTY", "distributions":{} },
-    "cluster_1":{"filename":"EMPTY", "state":"EMPTY", "distributions":{}}
+    "cluster_1":{"filename":"EMPTY", "state":"EMPTY", "distributions":{}},
+    "cluster_2":{"filename":"EMPTY", "state":"EMPTY", "distributions":{}}
     }
 
-  clusters["cluster_0"]["filename"]="/home/a/ag568/cluster_0_MANHATAN_2_MEAN_RATIO.txt"
+  clusters["cluster_0"]["filename"]="/home/a/ag568/cluster_0_MANHATAN_3_MEAN_RATIO.txt"
   clusters["cluster_0"]["state"]="state_0"
-  clusters["cluster_0"]["distributions"]["no_wga"] = {"type":"distribution", "name":"normal"}
-  clusters["cluster_0"]["distributions"]["wga"] = {"type":"distribution", "name":"normal"}
 
-  clusters["cluster_1"]["filename"]="/home/a/ag568/cluster_1_MANHATAN_2_MEAN_RATIO.txt"
+  clusters["cluster_1"]["filename"]="/home/a/ag568/cluster_1_MANHATAN_3_MEAN_RATIO.txt"
   clusters["cluster_1"]["state"]="state_1"
-  clusters["cluster_1"]["distributions"]["no_wga"] = {"type":"distribution", "name":"normal"}
-  clusters["cluster_1"]["distributions"]["wga"] = {"type":"distribution", "name":"normal"}
+
+  clusters["cluster_2"]["filename"]="/home/a/ag568/cluster_2_MANHATAN_3_MEAN_RATIO.txt"
+  clusters["cluster_2"]["state"]="state_2"
+
 
   configuration["clusters"] = clusters
 
   hmm_config = configuration["HMM"]
-  hmm_config["states"]= {"state_0":{ "start_prob":0.333},
-                         "state_1":{ "start_prob":0.333},
-                         "gap_state": {"start_prob":0.333}
+
+  start_prob = 0.25
+  hmm_config["states"]= {"state_0":{ "start_prob":start_prob},
+                         "state_1":{ "start_prob":start_prob},
+                         "state_2":{ "start_prob":start_prob},
+                         "gap_state": {"start_prob":start_prob}
                          }
 
+  self_trans = 0.95
+  off_trans = 0.016
   hmm_config["transitions"]={
-      "state_0-state_0":0.95,
-      "state_0-state_1":0.025,
-	  "state_0-gap_state":0.025,
-      "state_1-state_1":0.95,
-      "state_1-state_0":0.025,
-      "state_1-gap_state":0.025,
-      "gap_state-gap_state":0.95,
-	  "gap_state-state_0":0.025,
-      "gap_state-state_1":0.025,
+      "state_0-state_0":self_trans,
+      "state_0-state_1":off_trans,
+	  "state_0-state_2":off_trans,
+      "state_0-gap_state":off_trans,
+      "state_1-state_0":off_trans,
+      "state_1-state_1":self_trans,
+      "state_1-state_2":off_trans,
+      "state_1-gap_state":off_trans,
+      "state_2-state_0":off_trans,
+      "state_2-state_1":off_trans,
+      "state_2-state_2":self_trans,
+      "state_2-gap_state":off_trans,
+      "gap_state-state_0":off_trans,
+      "gap_state-state_1":off_trans,
+      "gap_state-state_2":off_trans,
+      "gap_state-gap_state":self_trans,
+
     }
 
   # now we can train
@@ -67,7 +77,7 @@ def main():
       print("Number of gaps in region: {0} is {1}".format(region.ridx, region.count_gap_windows()))
 
 
-  # load a sequence
+  # load a sequence including the gaps
   sequence = regions[0].get_region_as_rd_mean_sequences_with_windows(size=None,
                                                                    window_type=WindowType.from_string(hmm_config["train_windowtype"]),
                                                                    n_seqs=hmm_config["train_n_sequences_per_source"],

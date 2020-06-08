@@ -248,6 +248,9 @@ class Window(object):
     def has_gaps(self):
         return self._samdata["gapAlert"]
 
+    def has_errors(self):
+      return self._samdata["errorAlert"]
+
 
 class MixedWindowView(object):
   """
@@ -280,6 +283,13 @@ class MixedWindowView(object):
 
     if self._windows[WindowType.WGA].has_gaps() or\
       self._windows[WindowType.NO_WGA].has_gaps():
+        return True
+
+    return False
+
+  def is_error_window(self):
+    if self._windows[WindowType.WGA].has_errors() or\
+      self._windows[WindowType.NO_WGA].has_errors():
         return True
 
     return False

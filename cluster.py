@@ -2,10 +2,11 @@
 Module cluster
 """
 import sys
-from pomegranate import*
+import array
+import numpy as np
+#from pomegranate import*
 
 from helpers import WindowState
-from helpers import flat_windows_rd_from_indexes
 from helpers import MixedWindowView
 from helpers import WindowType
 from helpers import WARNING, INFO
@@ -386,43 +387,90 @@ class Cluster(object):
 
     return sequence
 
-  def get_region_as_sequences(self, size, window_type, n_seqs):
+  def get_n_gap_windows(self):
 
-    sequences = []
-    sequence_local=[]
-    for idx in self._indexes:
-      window = self._windows[idx]
-      sequence_local.append(window.get_rd_statistic(statistics="mean", name=window_type))
+    if self._indexes is None:
+      raise Error("No indexes have been given to the cluster")
 
-      if len(sequence_local) == size:
-        sequences.append(sequence_local)
-        sequence_local=[]
+    if self._windows is None:
+      raise Error("No windows have been given to the cluster")
 
-      if n_seqs is not None and len(sequences) == n_seqs:
-        break
+    counter = 0
 
-    return sequences
-
-  def get_statistics(self, statistic, window_type, **kwargs):
-
-
-      if window_type == WindowType.BOTH:
-
-        for index in self._indexes:
+    for index in self._indexes:
           window = self._windows[index]
 
-          statistic1, statistic2 = \
-            window.get_rd_statistic(statistics=statistic)
-          return statistic1, statistic2
+          if window.is_gap_window():
+            counter += 1
+    return counter
+
+
+  def get_rd_sequnce(self, statistic, wtype, exclude_gaps):
+
+    if self._indexes is None:
+      raise Error("No indexes have been given to the cluster")
+
+    if self._windows is None:
+      raise Error("No windows have been given to the cluster")
+
+    sequence = array.array('d')
+
+    for index in self._indexes:
+          window = self._windows[index]
+
+          if exclude_gaps and window.is_gap_window():
+                continue
+
+          stat = window.get_rd_statistic(statistics=statistic, name=wtype)
+          sequence.append(stat)
+    return sequence
+
+
+  def get_rd_statistics(self, statistic, wtype, **kwargs):
+
+      if statistic == 'cov':
+
+        if wtype != WindowType.BOTH:
+          raise Error("Calculating covariance requires both samples")
+
+        wdata_wga = self.get_rd_sequnce(statistic="mean",
+                                        wtype=WindowType.WGA,
+                                        exclude_gaps=kwargs["exclude_gaps"])
+        wdata_no_wga = self.get_rd_sequnce(statistic="mean",
+                                           wtype=WindowType.NO_WGA,
+                                           exclude_gaps=kwargs["exclude_gaps"])
+
+        X = np.stack((wdata_wga, wdata_no_wga), axis=0)
+        return np.cov(X)
+
+
+      if wtype == WindowType.BOTH:
+
+        wdata_wga = self.get_rd_sequnce(statistic=statistic,
+                                        wtype=WindowType.WGA,
+                                        exclude_gaps=kwargs["exclude_gaps"])
+        wdata_no_wga = self.get_rd_sequnce(statistic=statistic,
+                                           wtype=WindowType.NO_WGA,
+                                           exclude_gaps=kwargs["exclude_gaps"])
+
+        stat1 = compute_statistic(data=wdata_wga, statistics=statistic)
+        stat2 = compute_statistic(data=wdata_no_wga, statistics=statistic)
+        return stat1, stat2
+
+      raise Error("Invalid operation in cluster")
+
+      """
       else:
 
-        wga_windows = [window.get_window(window_type)
+
+        windows = [window.get_window(wtype)
                        for window in self._windows]
 
         window_data = flat_windows_rd_from_indexes(indexes=self._indexes,
-                                                   windows=wga_windows)
+                                                   windows=windows)
 
-        return compute_statistic(data=window_data,statistics=statistic)
+      return compute_statistic(data=window_data, statistics=statistic)
+      """
 
   def get_window_statistics(self, statistic, **kwargs):
 
