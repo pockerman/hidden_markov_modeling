@@ -133,6 +133,7 @@ def remove_outliers(region, configuration):
   if "outlier_remove" in configuration and\
           configuration["outlier_remove"]:
 
+            print("{0} Remove outliers...".format(INFO))
             region.remove_outliers(configuration=configuration)
             print("{0} Number of windows "
                   "after outlier removal: {1}".format(INFO,
@@ -190,6 +191,7 @@ def save_regions(regions, configuration):
 
     for region in regions:
       region.save_mixed_windows_statistic(statistic="mean", tips=configuration["plot_tips"])
+      region.save_mixed_windows_gc_content(tips=configuration["plot_tips"])
       region.save(tips=configuration["plot_tips"])
 
 def accumulate_windows(regions):
@@ -201,7 +203,7 @@ def accumulate_windows(regions):
         windows.append(window)
   return windows
 
-
+"""
 @timefn
 def test_num_clusters(regions, configuration):
 
@@ -221,6 +223,7 @@ def test_num_clusters(regions, configuration):
 
   scores = search_instance.get_scores()
   print("{0} Scores: {1}".format(INFO, scores))
+"""
 
 
 @timefn
@@ -457,9 +460,10 @@ def main(configuration):
       save_regions(regions, configuration=configuration)
 
 
-    num_clusters = test_num_clusters(regions=regions,
-                                     configuration=configuration)
+    #num_clusters = test_num_clusters(regions=regions,
+    #                                 configuration=configuration)
 
+    """
     clusters = create_clusters(regions=regions,
                                configuration=configuration)
 
@@ -468,6 +472,7 @@ def main(configuration):
 
     save_clusters(clusters=clusters,
                   configuration=configuration)
+    """
 
     if proc is not None:
       proc.join()

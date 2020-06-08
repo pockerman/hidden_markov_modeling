@@ -355,6 +355,28 @@ class Region(object):
 
      self._mixed_windows = mixed_windows
 
+  def save_mixed_windows_gc_content(self, tips):
+    if self._mixed_windows is None:
+      raise Error("Mixed windows have not been computed")
+
+    window_gc = \
+        [window.get_gc_statistic(name=WindowType.WGA)
+         for window in self._mixed_windows if not window.is_gap_window()]
+
+    statistic = 'gc'
+    filename = "windows_" + statistic + "_" + str(self.ridx)
+
+    if tips is not None:
+      for tip in tips:
+        filename += "_" + tip
+      filename += ".txt"
+    else:
+      filename = "windows_" + statistic
+
+    with open(filename, 'w') as file:
+      file.write(str(window_gc))
+
+
   def save_mixed_windows_statistic(self, statistic, tips):
 
     if self._mixed_windows is None:
