@@ -3,6 +3,7 @@ Helpers for HMM
 """
 
 import json
+import array
 from pomegranate import*
 
 from helpers import INFO
@@ -24,6 +25,19 @@ class HMMCallback(object):
 
   def on_training_end(self, logs):
     pass
+
+
+def get_window_ids_from_viterbi_path(path, wstate, limit_state):
+
+  indices = []
+  for i, item in enumerate(path):
+
+    if item[1].name == wstate:
+      indices.append((i, item[1].name))
+    elif item[1].name == limit_state:
+      indices.append((i, item[1].name))
+
+  return indices
 
 
 def save_hmm(hmm_model, configuration, win_interval_length):
