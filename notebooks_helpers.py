@@ -605,3 +605,76 @@ def plot_hmm_label_state(hmm_states_to_labels, hmm_labels, no_wga_obs, wga_obs, 
         else:
             print("For state: {0} could not plot empty observations".format(label))
 
+
+def plot_hmm_cluster_contours(state_colors, state_vars, obs_state, nbins, ncontours, state_min_max):
+
+    for state in state_colors:
+
+        min_x = state_min_max[state]['min_x']
+        max_x = state_min_max[state]['max_x']
+        min_y = state_min_max[state]['min_y']
+        max_y = state_min_max[state]['max_y']
+
+        if state != 'TUF':
+
+            params = state_vars[state]
+            state_dist = MultivariateGaussianDistribution(means=np.array(params[0]),
+                                                          covariance=np.array(params[1]))
+
+            state_wga_obs = [item[0] for item in obs_state[state]]
+            state_no_wga_obs = [item[1] for item in obs_state[state]]
+
+            # plot the observations
+            plt.scatter(state_no_wga_obs, state_wga_obs, color=state_colors[state])
+
+            xi, yi = np.mgrid[min([min_x]):max([max_x]):nbins * 1j,
+                                  min([min_y]):max([max_y]):nbins * 1j]
+            zi = []
+            valsxi = xi[:, [0]]
+
+            for obs_no_wga in valsxi:
+                for obs_wga in yi[0]:
+                    zi.append(state_dist.probability((obs_wga, obs_no_wga)))
+
+            zi = np.array(zi)
+            zi = zi.reshape(yi.shape)
+            plt.contour(xi, yi, zi, ncontours, colors='black')
+
+        elif state == 'TUF':
+
+            params = state_vars[state]
+            comp1 = MultivariateGaussianDistribution(means=np.array(params["comp0"][0]),
+                                                     covariance=np.array(params["comp0"][1]))
+
+            comp2 = MultivariateGaussianDistribution(means=np.array(params["comp1"][0]),
+                                                     covariance=np.array(params["comp1"][1]))
+
+            tuf_mixture = GeneralMixtureModel([comp1, comp2], weights=params["weights"])
+
+            state_wga_obs = [item[0] for item in obs_state[state]]
+            state_no_wga_obs = [item[1] for item in obs_state[state]]
+
+            # plot the observations
+            plt.scatter(state_no_wga_obs, state_wga_obs, color=state_colors[state])
+
+            xi, yi = np.mgrid[min([min_x]):max([max_x]):nbins * 1j,
+                              min([min_y]):max([max_y]):nbins * 1j]
+
+            zi = []
+            valsxi = xi[:, [0]]
+
+            for obs_no_wga in valsxi:
+                for obs_wga in yi[0]:
+                    prob = tuf_mixture.probability(np.array([[obs_wga, obs_no_wga]], dtype='object'))
+                    zi.append(prob)
+
+            zi = np.array(zi)
+            zi = zi.reshape(yi.shape)
+            plt.contour(xi, yi, zi, 14, colors='black')
+
+    plt.xlabel("NO-WGA ")
+    plt.ylabel("WGA")
+    plt.grid(True)
+    plt.show()
+
+
