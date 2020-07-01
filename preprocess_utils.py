@@ -90,34 +90,44 @@ def compute_statistic(data, statistics):
 
 def zscore_outlier_removal(windows, config):
 
-  newwindows = []
+    new_windows = []
 
-  statistics = config["statistics"]
-  sigma_wga = np.sqrt(statistics[WindowType.WGA]["var"])
-  sigma_no_wga = np.sqrt(statistics[WindowType.NO_WGA]["var"])
-  for window in windows:
+    statistics = config["statistics"]
+    sigma_wga = np.sqrt(statistics[WindowType.WGA]["var"])
+    sigma_no_wga = np.sqrt(statistics[WindowType.NO_WGA]["var"])
 
-    # we don't want to remove the n_windows
-    # as these mark gaps
-    if not window.is_gap_window():
-      mu = window.get_rd_statistic(statistics="mean",
-                                   name=WindowType.BOTH)
+    gap_counter = 0
+    remove_window_counter = 0
+    for window in windows:
+        # we don't want to remove the n_windows
+        # as these mark gaps
+        if not window.is_gap_window():
+            mu = window.get_rd_statistic(statistics="mean",
+                                        name=WindowType.BOTH)
 
-      zscore_wga = (mu[0] - statistics[WindowType.WGA]["mean"])/sigma_wga
-      zscore_no_wga = (mu[1] - statistics[WindowType.NO_WGA]["mean"])/sigma_no_wga
+            zscore_wga = (mu[0] - statistics[WindowType.WGA]["mean"])/sigma_wga
+            zscore_no_wga = (mu[1] - statistics[WindowType.NO_WGA]["mean"])/sigma_no_wga
 
+            if zscore_wga > config["sigma_factor"] or \
+              zscore_no_wga > config["sigma_factor"]:
+                remove_window_counter += 1
+                continue
+            elif config["use_both_ends"] == True and \
+              (zscore_wga < - config["sigma_factor"] or\
+                zscore_no_wga < - config["sigma_factor"]):
 
-    if zscore_wga > config["sigma_factor"] or \
-      zscore_no_wga > config["sigma_factor"]:
-        continue
-    elif config["use_both_ends"] == True and \
-      (zscore_wga < - config["sigma_factor"] or\
-        zscore_no_wga < - config["sigma_factor"]):
-        continue
-    else:
-        newwindows.append(window)
+                remove_window_counter += 1
+                continue
+            else:
+                new_windows.append(window)
+        else:
 
-  return newwindows
+            gap_counter += 1
+            new_windows.append(window)
+
+    print("{0} Removed {1} windows ".format(INFO, remove_window_counter))
+    print("{0} There are {1} GAP windows ".format(INFO, gap_counter))
+    return new_windows
 
 
 def means_cutoff_outlier_removal(windows, config):
@@ -138,12 +148,13 @@ def means_cutoff_outlier_removal(windows, config):
                 remove_window_counter += 1
                 continue
             elif mu[1] > limits['no_wga_mu']:
-                remove_window_counter +=1
+                remove_window_counter += 1
                 continue
             else:
                 new_windows.append(window)
         else:
             gap_counter += 1
+            new_windows.append(window)
 
     print("{0} Removed {1} windows ".format(INFO, remove_window_counter))
     print("{0} There are {1} GAP windows ".format(INFO, gap_counter))

@@ -278,7 +278,6 @@ class MixedWindowView(object):
   def start_end_pos(self):
     return self._windows[WindowType.WGA].start_end_pos
 
-
   def is_gap_window(self):
 
     if self._windows[WindowType.WGA].has_gaps() or\
