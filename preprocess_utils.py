@@ -120,10 +120,32 @@ def zscore_outlier_removal(windows, config):
   return newwindows
 
 
+def means_cutoff_outlier_removal(windows, config):
+    new_windows = []
+    limits = config['mu_limits']
+    for window in windows:
+
+        # we don't want to remove the n_windows
+        # as these mark gaps
+        if not window.is_gap_window():
+            mu = window.get_rd_statistic(statistics="mean",
+                                         name=WindowType.BOTH)
+
+            if mu[0] > limits['wga_mu']:
+                continue
+            elif mu[1] > limits['no_wga_mu']:
+                continue
+            else:
+                new_windows.append(window)
+    return new_windows
+
+
 def remove_outliers(windows, removemethod, config):
 
   if removemethod == "zscore":
     return zscore_outlier_removal(windows=windows, config=config)
+  elif removemethod == "means_cutoff":
+    return means_cutoff_outlier_removal(windows=windows, config=config)
 
   raise Error("Unknown outlier removal method: {0}".format(removemethod))
 

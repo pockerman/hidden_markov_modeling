@@ -1,8 +1,8 @@
 {
 
   "regions":{
-      "start":[100000000],
-      "end":[120000000]
+      "start":[1000000],
+      "end":[20000000]
   },
   "regions_files":["/home/a/ag568/region_0.txt"],
   "chromosome": "chr1",
@@ -40,14 +40,14 @@
       "parameters":[-999.5, -998.5]
     }
   },
-  "plot_tips":["REGION_5_5S","KEEP_OUTLIERS"],
+  "plot_tips":["REGION_1_MEAN_CUTOFF"],
   "windows_filename":"hmm_windows.json",
   "check_windowing_sanity":true,
+  "do_remove_outliers": true,
   "outlier_remove":{
-    "name":"zscore",
+    "name": "means_cutoff",
     "config":{
-      "sigma_factor":5,
-      "use_both_ends":false
+      "mu_limits":{"wga_mu": 140.0, "no_wga_mu": 120.0}
     }
   },
   "clusterer":{

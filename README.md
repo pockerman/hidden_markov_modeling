@@ -54,9 +54,18 @@ in the ```logger_file``` .
 
     "name":"zscore",
     "config":{
-      "sigma_factor":2
-    }
+      "sigma_factor":5,
+      "use_both_ends":false
+    },
   },
+
+  "outlier_remove":{
+   "name": "means_cutoff",
+    "config":{
+      "mu_limits":{"wga_mu": 140.0, "no_wga_mu": 120.0},
+    }
+ }
+
 ```
 - ```"clusterer"```: A map with the properties of the clustering method to be used
 

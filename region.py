@@ -390,8 +390,7 @@ class Region(object):
     if self._mixed_windows is None:
       raise Error("Mixed windows have not been computed")
 
-    # compute the statistis
-
+    # compute the statistics
     wga_means = array.array('d')
     no_wga_means = array.array('d')
 
@@ -401,7 +400,6 @@ class Region(object):
                                                      name=WindowType.WGA))
             no_wga_means.append(window.get_rd_statistic(statistics="mean",
                                                         name=WindowType.NO_WGA))
-
 
     if len(wga_means) == 0 or len(no_wga_means) == 0:
       print("{0} Cannot remove outliers for region. "
@@ -418,9 +416,9 @@ class Region(object):
                             WindowType.WGA:wga_statistics}
 
     self._mixed_windows = \
-      remove_outliers(windows=self._mixed_windows,
-                      removemethod=configuration["outlier_remove"]["name"],
-                      config=config)
+        remove_outliers(windows=self._mixed_windows,
+                        removemethod=configuration["outlier_remove"]["name"],
+                        config=config)
 
   def mark_windows_with_gaps(self, n_mark):
 

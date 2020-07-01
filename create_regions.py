@@ -130,8 +130,7 @@ def remove_or_mark_gaps(region, configuration):
 
 def remove_outliers(region, configuration):
 
-  if "outlier_remove" in configuration and\
-          configuration["outlier_remove"]:
+  if "outlier_remove" in configuration:
 
             print("{0} Remove outliers...".format(INFO))
             region.remove_outliers(configuration=configuration)

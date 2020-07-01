@@ -519,7 +519,9 @@ def get_states_counter(states_counter, observations, sequence_viterbi_state):
     return states_counter
 
 
-def plot_hmm_states_to_labels(hmm_states_to_labels, observations, sequence_viterbi_state, no_wga_obs, wga_obs):
+def plot_hmm_states_to_labels(hmm_states_to_labels, observations,
+                              sequence_viterbi_state, no_wga_obs,
+                              wga_obs, xlim=(0.0, 80.0), ylim=(0.0, 80.0)):
     hmm_labels = []
 
     # collect the labels as these are predicted by the HMM
@@ -537,8 +539,8 @@ def plot_hmm_states_to_labels(hmm_states_to_labels, observations, sequence_viter
 
     plt.xlabel("NO-WGA ")
     plt.ylabel("WGA")
-    plt.xlim(0.0, 80.0)
-    plt.ylim(0.0, 80.0)
+    plt.xlim(xlim)
+    plt.ylim(ylim)
     plt.show()
 
     color_comp_assoc_hmm = {}
