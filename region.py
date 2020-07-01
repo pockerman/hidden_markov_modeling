@@ -442,7 +442,6 @@ class Region(object):
                     "but Non WGA Window {1} does".format(wga_w.idx,
                                                          n_wga_w.idx))
 
-
       if wga_w.has_gaps() or n_wga_w.has_gaps():
         wga_w.set_window_rd_mark(mark=n_mark)
         wga_w.state = WindowType.N_WIN
