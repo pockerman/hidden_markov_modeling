@@ -45,8 +45,8 @@ def load_regions(configuration):
   print("{0} Load regions...".format(INFO))
   regions=[]
 
-  for file in configuration["regions_files"]:
-    region = Region.load(filename=file)
+  for file_ in configuration["regions_files"]:
+    region = Region.load(filename=file_)
 
     if "check_windowing_sanity" in configuration and configuration["check_windowing_sanity"]:
         print("{0} Check window sanity for region {1}".format(INFO, region.ridx))
