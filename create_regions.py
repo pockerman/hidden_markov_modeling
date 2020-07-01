@@ -139,7 +139,7 @@ def remove_outliers(region, configuration):
                                                       region.get_n_mixed_windows()))
             sys.stdout.flush()
 
-            print("{0} Number of N windows "
+            print("{0} Number of GAP windows "
                   "after outlier removal {1}".format(INFO,
                                                      region.count_gap_windows()))
             sys.stdout.flush()
@@ -238,7 +238,6 @@ if __name__ == '__main__':
     parser.add_argument('--config', type=str, default='config.json',
                         help="You must specify a json "
                         "formatted configuration file")
-
 
     print("{0} Read configuration file".format(INFO))
     args = parser.parse_args()

@@ -407,7 +407,7 @@ def plot_state(state_dist, sample_size, min_, max_, n_bins):
      plt.show()
 
 
-def create_states(states_map, means, covariances, plot=True):
+def create_states(states_map, means, covariances,  means_to_use=None, plot=True):
 
     states={}
     for state in states_map:

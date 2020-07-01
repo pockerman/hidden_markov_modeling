@@ -123,6 +123,8 @@ def zscore_outlier_removal(windows, config):
 def means_cutoff_outlier_removal(windows, config):
     new_windows = []
     limits = config['mu_limits']
+    print("{0} Cutoff means limit: {1}".format(INFO, limits))
+    gap_counter = 0
     for window in windows:
 
         # we don't want to remove the n_windows
@@ -137,6 +139,10 @@ def means_cutoff_outlier_removal(windows, config):
                 continue
             else:
                 new_windows.append(window)
+        else:
+            gap_counter += 1
+
+    print("{0} There are {1} GAP windows ".format(INFO, gap_counter))
     return new_windows
 
 
