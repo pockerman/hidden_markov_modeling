@@ -299,6 +299,10 @@ def get_continuous(tuf_delete_tuf, start_tuf_counter, name):
 
 def get_start_end_segment(tuf_delete_tuf, sequence):
 
+    if len(tuf_delete_tuf) == 0:
+        print("TUF_DELETE_TUF is empty")
+        return []
+
     start_tuf_counter = 0
     segments = []
     while True:

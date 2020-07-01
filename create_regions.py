@@ -181,7 +181,12 @@ def clean_up_regions(regions, configuration):
                                                     region.count_gap_windows()))
     sys.stdout.flush()
 
-    remove_outliers(region=region, configuration=configuration)
+    if "do_remove_outliers" in configuration and configuration["do_remove_outliers"]:
+        remove_outliers(region=region, configuration=configuration)
+    else:
+        print("{0} No outlier removal".format(INFO))
+        sys.stdout.flush()
+
 
 @timefn
 def save_regions(regions, configuration):
