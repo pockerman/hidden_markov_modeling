@@ -40,7 +40,7 @@
       "parameters":[-999.5, -998.5]
     }
   },
-  "plot_tips":["REGION_5_5S"],
+  "plot_tips":["REGION_5_5S","KEEP_OUTLIERS"],
   "windows_filename":"hmm_windows.json",
   "check_windowing_sanity":true,
   "outlier_remove":{
