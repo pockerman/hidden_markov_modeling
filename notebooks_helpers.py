@@ -455,22 +455,22 @@ def create_states(states_map, means, covariances,  means_to_use=None, plot=True)
     return states
 
 
-def create_tuf_state(tuf_means, tuf_cov):
+def create_tuf_state(comp1_means, comp1_cov, comp2_means, comp2_cov):
 
-    print("TUF means: ", tuf_means)
-    print("TUF covariances: ", tuf_cov)
+    #print("TUF means: ", tuf_means)
+    #print("TUF covariances: ", tuf_cov)
 
-    tuf_mu_no_wga = tuf_means[0]
-    tuf_mu_wga = tuf_means[1]
-    tuf_mu = np.array([tuf_mu_wga, tuf_mu_no_wga])
-    tuf_cov = tuf_cov
-    tuf_cov = np.array([[tuf_cov[1], 0.0], [0.0, tuf_cov[0]]])
+    #tuf_mu_no_wga = tuf_means[0]
+    #tuf_mu_wga = tuf_means[1]
+    #tuf_mu = np.array([tuf_mu_wga, tuf_mu_no_wga])
+    #tuf_cov = tuf_cov
+    #tuf_cov = np.array([[tuf_cov[1], 0.0], [0.0, tuf_cov[0]]])
 
-    tuf_dist = MultivariateGaussianDistribution(means=tuf_mu,
-                                                covariance=tuf_cov)
+    tuf_dist = MultivariateGaussianDistribution(means=comp1_means,
+                                                covariance=comp1_cov)
 
     n_bins = 100
-    samples = tuf_dist.sample(n=10000)
+    samples = tuf_dist.sample(n=15000)
     xdata = samples[:, [0]]
     ydata = samples[:, [1]]
 
@@ -482,20 +482,40 @@ def create_tuf_state(tuf_means, tuf_cov):
                cmax=1000,
                cmin=0,
                alpha=0.99,
-               range=((0.0, 70.), (0.0, 70.0)))
+               range=((0.0, 140.), (0.0, 70.0)))
 
-    plt.show()
-    tuf_dist.plot(bins=n_bins)
     plt.show()
 
     # only change the means
-    tuf_mu = np.array([tuf_mu_wga, 40.0])
+    #tuf_mu = np.array([tuf_mu_wga, 40.0])
 
     # also add the dist that is not modeled by the data
-    tuf_dist_double = MultivariateGaussianDistribution(means=tuf_mu,
-                                                       covariance=tuf_cov)
+    tuf_dist_double = MultivariateGaussianDistribution(means=comp2_means,
+                                                       covariance=comp2_cov)
 
-    tuf_mixture = GeneralMixtureModel([tuf_dist, tuf_dist_double], weights=[0.66, 0.34])
+    n_bins = 100
+    samples = tuf_dist_double.sample(n=15000)
+    xdata = samples[:, [0]]
+    ydata = samples[:, [1]]
+
+    x = [item[0] for item in xdata]
+    y = [item[0] for item in ydata]
+    # print(samples)
+    plt.hist2d(y, x,
+               bins=[n_bins, n_bins], cmap='Blues', density=False,
+               cmax=1000,
+               cmin=0,
+               alpha=0.99,
+               range=((0.0, 140.), (0.0, 70.0)))
+
+    plt.show()
+
+    tuf_mixture = GeneralMixtureModel([tuf_dist, tuf_dist_double], weights=[0.5, 0.5])
+
+    tuf_dist.plot(bins=n_bins)
+    tuf_dist_double.plot(bins=n_bins)
+    plt.show()
+
     return State(tuf_mixture, name='TUF')
 
 
@@ -532,7 +552,7 @@ def plot_hmm_states_to_labels(hmm_states_to_labels, observations,
             viterbi_state = sequence_viterbi_state[i][1]
             hmm_labels.append(hmm_states_to_labels[viterbi_state])
 
-    colors = np.array(['green', 'blue', 'red', 'yellow', 'pink', 'black'])
+    colors = np.array(['green', 'blue', 'red', 'yellow', 'pink', 'black', 'purple'])
     colors = colors[hmm_labels]
 
     plt.scatter(no_wga_obs, wga_obs, color=colors)
@@ -553,7 +573,8 @@ def plot_hmm_states_to_labels(hmm_states_to_labels, observations,
     return color_comp_assoc_hmm, hmm_states_to_labels, hmm_labels
 
 
-def plot_hmm_label_state(hmm_states_to_labels, hmm_labels, no_wga_obs, wga_obs, nbins):
+def plot_hmm_label_state(hmm_states_to_labels, hmm_labels,
+                         no_wga_obs, wga_obs, nbins, xlim, ylim):
 
     for label in hmm_states_to_labels:
 
@@ -570,7 +591,7 @@ def plot_hmm_label_state(hmm_states_to_labels, hmm_labels, no_wga_obs, wga_obs, 
                 state_no_wga_obs.append(no_wga_obs[i])
                 state_wga_obs.append(wga_obs[i])
 
-        colors = np.array(['green', 'yellow', 'blue', 'red', 'pink', 'purple'])
+        colors = np.array(['green', 'yellow', 'blue', 'red', 'pink', 'purple', 'magenta'])
 
         if len(state_no_wga_obs) != 0:
 
@@ -582,8 +603,20 @@ def plot_hmm_label_state(hmm_states_to_labels, hmm_labels, no_wga_obs, wga_obs, 
             plt.scatter(state_no_wga_obs, state_wga_obs, color=colors)
 
             kernel = kde.gaussian_kde(np.vstack([state_no_wga_obs, state_wga_obs]))
-            xi, yi = np.mgrid[min([0.0]):max([70.0]):nbins * 1j,
-                     min([0.0]):max([70.0]):nbins * 1j]
+
+            min_x = 0.0
+            max_x = 70.0
+            min_y = 0.0
+            max_y = 70.0
+
+            if xlim is not None and ylim is not None:
+                min_x = xlim[0]
+                max_x = xlim[1]
+                min_y = ylim[0]
+                max_y = ylim[1]
+
+            xi, yi = np.mgrid[min([min_x]):max([max_x]):nbins * 1j,
+                              min([min_y]):max([max_y]):nbins * 1j]
 
             zi = kernel(np.vstack([xi.flatten(), yi.flatten()]))
             plt.contour(xi, yi, zi.reshape(xi.shape), 24)
@@ -591,19 +624,22 @@ def plot_hmm_label_state(hmm_states_to_labels, hmm_labels, no_wga_obs, wga_obs, 
             plt.xlabel("NO-WGA ")
             plt.ylabel("WGA")
 
-            if label == "Duplication":
+            if xlim is not None and ylim is not None:
+                plt.xlim(xlim)
+                plt.ylim(ylim)
+            elif label == "Duplication":
                 plt.xlim(0.0, 70.0)
                 plt.ylim(0.0, 70.0)
-            if label == "Normal-I":
+            elif label == "Normal-I":
                 plt.xlim(0.0, 70.0)
                 plt.ylim(0.0, 70.0)
-            if label == "Normal-II":
+            elif label == "Normal-II":
                 plt.xlim(0.0, 80.0)
                 plt.ylim(0.0, 80.0)
-            if label == "Deletion":
+            elif label == "Deletion":
                 plt.xlim(0.0, 70.0)
                 plt.ylim(0.0, 70.0)
-            if label == "TUF":
+            elif label == "TUF":
                 plt.xlim(0.0, 70.0)
                 plt.ylim(0.0, 70.0)
 
@@ -616,6 +652,7 @@ def plot_hmm_cluster_contours(state_colors, state_vars, obs_state, nbins, nconto
 
     for state in state_colors:
 
+        print("state: ", state)
         min_x = state_min_max[state]['min_x']
         max_x = state_min_max[state]['max_x']
         min_y = state_min_max[state]['min_y']
@@ -634,7 +671,7 @@ def plot_hmm_cluster_contours(state_colors, state_vars, obs_state, nbins, nconto
             plt.scatter(state_no_wga_obs, state_wga_obs, color=state_colors[state])
 
             xi, yi = np.mgrid[min([min_x]):max([max_x]):nbins * 1j,
-                                  min([min_y]):max([max_y]):nbins * 1j]
+                              min([min_y]):max([max_y]):nbins * 1j]
             zi = []
             valsxi = xi[:, [0]]
 
