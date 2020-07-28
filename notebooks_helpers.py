@@ -147,6 +147,7 @@ def check_items(included, check_on):
 
 
 def filter_viterbi_path(path, wstate, limit_state, min_subsequence):
+
     print("Length of path ", len(path))
 
     indices = []
@@ -231,6 +232,10 @@ def filter_viterbi_path(path, wstate, limit_state, min_subsequence):
                                                       wstate=limit_state)
                     counter_after += len(limit_state_after)
 
+                    if counter_after >= len(path):
+                        print("For position {0} cannot compute path. Counter exceeds path length ".format(counter_after))
+                        break
+
                     # only if the exactly next one is wstate
                     # then we have an island
                     if path[counter_after][1].name == wstate:
@@ -274,6 +279,7 @@ def filter_viterbi_path(path, wstate, limit_state, min_subsequence):
 
 
 def get_continuous(tuf_delete_tuf, start_tuf_counter, name):
+
     has_more = True
     item = None
     counter = start_tuf_counter
@@ -345,7 +351,8 @@ def save_segments(segments, chromosome, filename):
             writer.writerow(row)
 
 
-def create_viterbi_path(sequence, hmm_model, filename):
+def create_viterbi_path(sequence, hmm_model, chr, filename):
+
     observations = []
     for i in range(len(sequence)):
         observations.append(sequence[i][0])
@@ -376,7 +383,7 @@ def create_viterbi_path(sequence, hmm_model, filename):
 
                 r = (int(sequence[item][1][0]), int(sequence[item][1][1]))
                 name = viterbi_path[1][item + 1][1].name
-                f.write(str(item) + ":" + str(r) + ":" + str(sequence[item][0]) + ":" + name + "\n")
+                f.write(chr + ":" + str(item) + ":" + str(r) + ":" + str(sequence[item][0]) + ":" + name + "\n")
                 sequence_viterbi_state.append((item, viterbi_path[1][item + 1][1].name))
 
         print("There should be {0} gaps".format(counter))
@@ -521,6 +528,11 @@ def create_tuf_state(comp1_means, comp1_cov, comp2_means, comp2_cov):
 
 def get_states_counter(states_counter, observations, sequence_viterbi_state):
 
+    state_data = {}
+
+    for state in states_counter:
+        state_data[state] = [[], []]
+
     # collect counters for error statistics
     for i, obs in enumerate(observations):
 
@@ -536,13 +548,21 @@ def get_states_counter(states_counter, observations, sequence_viterbi_state):
                 states_counter["GAP_STATE_INCORRECT"] += 1
         else:
             states_counter[viterbi_state] += 1
-    return states_counter
+
+        state_data[viterbi_state][0].append(obs[0])
+        state_data[viterbi_state][1].append(obs[1])
+    return states_counter, state_data
 
 
 def plot_hmm_states_to_labels(hmm_states_to_labels, observations,
                               sequence_viterbi_state, no_wga_obs,
+                              title,
                               wga_obs, xlim=(0.0, 80.0), ylim=(0.0, 80.0)):
     hmm_labels = []
+    state_obs = {}
+
+    for state in hmm_states_to_labels:
+        state_obs[state] = {'wga':[], 'nwga': []}
 
     # collect the labels as these are predicted by the HMM
     for i, obs in enumerate(observations):
@@ -551,17 +571,11 @@ def plot_hmm_states_to_labels(hmm_states_to_labels, observations,
         if obs != (-999.0, -999.0):
             viterbi_state = sequence_viterbi_state[i][1]
             hmm_labels.append(hmm_states_to_labels[viterbi_state])
+            state_obs[viterbi_state]['wga'].append(obs[0])
+            state_obs[viterbi_state]['nwga'].append(obs[1])
 
     colors = np.array(['green', 'blue', 'red', 'yellow', 'pink', 'black', 'purple'])
     colors = colors[hmm_labels]
-
-    plt.scatter(no_wga_obs, wga_obs, color=colors)
-
-    plt.xlabel("NO-WGA ")
-    plt.ylabel("WGA")
-    plt.xlim(xlim)
-    plt.ylim(ylim)
-    plt.show()
 
     color_comp_assoc_hmm = {}
     for label, color in zip(hmm_labels, colors):
@@ -570,6 +584,26 @@ def plot_hmm_states_to_labels(hmm_states_to_labels, observations,
             color_comp_assoc_hmm[color][1] += 1
         else:
             color_comp_assoc_hmm[color] = [label, 1]
+
+    for color in color_comp_assoc_hmm:
+
+        label = color_comp_assoc_hmm[color][0]
+
+        for state in hmm_states_to_labels:
+            if hmm_states_to_labels[state] == label:
+                plt.scatter(state_obs[state]['nwga'], state_obs[state]['wga'], color=[color], label=state)
+
+    plt.scatter(no_wga_obs, wga_obs, color=colors)
+
+    plt.xlabel("NO-WGA ")
+    plt.ylabel("WGA")
+    plt.title(title)
+    plt.legend(loc='upper right', title="States")
+    plt.xlim(xlim)
+    plt.ylim(ylim)
+    plt.show()
+
+
     return color_comp_assoc_hmm, hmm_states_to_labels, hmm_labels
 
 
