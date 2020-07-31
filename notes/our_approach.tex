@@ -1,57 +1,410 @@
-\section{Our Approach}
-In this section we describe the modeling approach we follow.
-We begin by discussing the core elements behind Hidden Markov Models.
-The discussion is taken from \cite{rabiner2009}
 
-\subsection{HMM development}
-\label{hmm_dev}
+\section{TUF}
+\label{tuf}
 
-We are considering two samples for the same individual. One sample is undergoing WGA (sample m605) before sequencing. Sample m585 does not. From the produced sequenced data we then extract the region that corresponds to the chromosome 1. The extracted data is then aligned into non overlapping windows 
-of length $L$. Reads of quality less than Q30 were rejected. 
+Thermodynamically ultra-fastened (TUF) regions are stretches of the DNA which fail to denature
+even after the application of extreme melting conditions \cite{veal2012}. 
+This behavior effectively reduces the amplification efficiency in these regions. It has also been reported that 
+TUF regions contain a core sequence which exhibits an increased GC concentartion relative to the
+surrounding DNA. It is in fact these locally concentrated spikes of GC content which is believed
+to remain duplexed despite the application of denaturation processes \cite{veal2012}. 
+
+Our aim is to develop a mathematical model in order to investigate this assumption i.e. that
+TUF cores exhibit high GC concentration when compared to the surrounding DNA. In this regard, a model
+should be able to capture the existence of TUF regions and subsequently allow for their investigation. 
+Analysis of genome sequences can be a time consuming and error prone process if done manually.
+In whole genome amplified (WGA) read-depth (RD) sequencing samples, TUF regions are often represented as regions of low coverage, resembling deletions. 
+Thus,  borrowing from studies related to copy number variation (CNV),  we develop a hidden Markov model that classifies segregated chromosome regions into states depending on their average read-depth. Using a RD characterization we can distinguish commonly found behavior in sequences such single copy or full copy deletion.
+In this regard, a TUF region can be assumed to represent one extra state. Although the exact characteristics in terms of RD of such a state are not known, the assumption is that a low RD observed in a WGA sample in combination of a normal RD observed in the same region for a non-WGA sample is indicative of TUF. 
 
 
+Need 2D figure to demonstrate this.
 
-A read is considered only if it satisfies a certain
-quality threshold (The \mintinline{c++}{pysam} function \mintinline{c++}{get_query_qualities} which returns query base quality scores at pileup column position). The extracted RD data for each file is then fitted to a normal distribution
-  
-In our approach we assume that the system can be modelled using four states. Hence, the state set is
+TUF regions to a large extent behave as deletions howe....?
+
+Sequence elements high in C+G content may remain annealed even after the application of extreme
+melting confitions \cite{veal2012}. This results in thermodynamically ultra-fastened (TUF) regions which are characterized by incomplete denaturation of the two DNA stands. This behavior effectively reduces the amplification efficiency in these regions \cite{veal2012}. 
+
+TUF hypothesis????
+
+In whole genome amplified (WGA) read-depth
+(RD) sequencing samples, TUF regions are often represented as regions of low coverage,
+similar to deletions.
+
+TUF cores in WGA sequencing samples can be identified as gaps in RD coverage. Thus, they
+mimic deletions. This means that TUF cores can be represented as deletions in RD data
+
+Recent research by (Veal et al, 2012) highlighted the presence of thermodynamically ultra-
+fastened (TUF) regions which propose similar limitations on the use of high-throughput
+sequencing data. Thermodynamically ultra-fastened regions are stretches of genomic DNA
+which fail to denature under normal conditions. As such they act as an additional source of
+PCR amplification bias which cannot be explained solely by GC content (Veal et al, 2012). In
+addition to the ability to complicate such previously mentioned procedures, the presence of
+TUF disrupts any techniques that require hybridization of probes, primers, or involve a
+denaturation step. Therefore, TUF loci could represent an equal if not greater number of
+biologically and medically relevant re-sequencing targets to that of loci with extreme base
+compositions (Aird et al, 2011).
+It was proposed that TUF regions contain a core sequence which shows an increase in GC
+concentration relative to the surrounding DNA (Veal et al, 2012). These local spikes of GC
+content present within TUF regions are thought to remain duplexed during extreme
+denaturation conditions (figure 1). Resistance of this core to denaturation allows it to act as
+a nucleus which propagates the rapid strand renaturation of DNA flanking the TUF core
+(GEIDUSCHEK, 1962). In this way large sequences of neighboring DNA have their
+amplification silenced and are incorporated into the TUF region. Amplification of TUF DNA
+fragments is only problematic when they are found on the same DNA fragment as the TUF
+core. This suggests the TUF core is at least somewhat responsible for the perturbed
+amplification of these TUF regions and that separation of DNA from the TUF core can
+abrogate its effects.
+
+\section{Hidden Markov model}
+\label{hmm_general}
+
+A hidden Markov model (HMM) is a probabilistic framework that uses two interrelated probabilistic mechanisms; a Markov chain of a finite
+number of states, $N$, and a set of random functions each associated with a respective state \cite{koski}.  The set of state is denoted by $S=\{S_0, S_1,\cdots, S_{N-1}\}$. At a given time instant, the 
+system is assumed to be in some state and an observation is generated by the random function corresponding to this state  \cite{koski}.
+State transitioning occurs according to α transition probability matrix  $\mathbf{A}$. Within  the HMM framework, an observer only sees the random output generated by the random functions cooresponding to the states and not the states themselves. Thus, the state at which the system is in can only be probabilistically inferred. 
+
+We use more or less standard notation and denote with $q_n$ the state of the system under consideration at the discrete time instance $n$. Hence,
 
 \begin{equation}
-S = {\text{NORMAL}, \text{TUF}, \text{INSERTION}, \text{DELETION}}
+q_n \in S
 \end{equation}
-
-We can further refine the $S$ set following previous studies e.g.
-\cite{coella2007} and \cite{Wang2007} where they assumed that the
-$\text{NORMAL}$ state is better described by assuming separate states namely Normal heterozygote and Normal homozygote. 
-Furthermore, we assume every state can lead to any other state.
-Therefore currently we assume a fully connected model.
-The observations set $V$ contains only the RD counts. Since the $\text{TUF}$ state mimics the $\text{DELETION}$ state when considering RD counts (i.e. reduced RD counts) we assume the following:
+where $S$ is a set of discrete states. A sequence of states, each of which belongs in $S$, is denoted with $Q$; $Q=\{q_1q_2,\cdots q_T\}$. A sequence of observations is denoted with $O$; $O=\{o_1o_2,\cdots o_T\}$.
+Overall, an HMM is characterized by the following parameters, see \cite{rabiner2009} and \cite{koski}
 
 \begin{itemize}
-	\item Regions of low RD observed in both files do not represent $\text{TUF}$ but rather $\text{DELETION}$?
-	\item Regions of low RD observed in m605 that are $\text{NORMAL}$ in m585 are indicative of $\text{TUF}$.
-\end{itemize}  
+	\item $\mathbf{A}$ a probability transition matrix
+	\item $\mathbf{B}$ a probability emission matrix
+	\item $\boldsymbol{\pi}$ an initialization vector
+\end{itemize}
+Each $a_{ij}$ of $\mathbf{A}$  expresses the probability of transitioning to state $j$ given that the previous state was $i$:
 
-.
+\begin{equation}
+a_{ij} = P(q_n = j | q_{n-1} = i), \forall i,j \in S
+\label{trans_prob_cond}
+\end{equation}
+Equation \ref{trans_prob_cond} expresses the assumption that the system states form a Markov chain. In other words, the current system state depends only on the previous state.
+Since the $a_{ij}$s represent probabilities, the following conditions should be respected \cite{koski}
+
+\begin{equation}
+a_{ij} \geq 0, \sum_{j} a_{i,j} = 1 
+\end{equation}
+Similarly, each element $b_{jk}$ of the emission matrix $\mathbf{B}$ specifies the probability that at time instant $n$ and state $j$, the observation is $o_k$:
+
+\begin{equation}
+b_{jk} = P(O_n = o_k | q_n = j)
+\end{equation}
+Similar to equation \ref{trans_prob_cond} we have the following constraints
+\begin{equation}
+b_{jk} \geq 0, \sum_{k} b_{jk} = 1 
+\label{emiss_prob_cond}
+\end{equation}
+A HMM does not require the number of states is the same as the number of observation symbols.
+Finally, the vector $\boldsymbol{\pi}$ provides the probability distributions at time $n=0$ meaning 
+
+\begin{equation}
+\pi_j(0) = P(q_0 = j)
+\end{equation}
+Collectively, we denote an HMM using the letter $\lambda$:
+
+\begin{equation}
+\lambda = (\mathbf{A}, \mathbf{B}, \boldsymbol{\pi})
+\label{hmm}
+\end{equation}
+Finally, we assume that we are dealing with a time invariant system. In other words, the transition probability matrix remains constant. 
+
+A general review of HMM in relation to bioinformatics is given in \cite{koski}. Hidden Markov models have been used for copy number variation detection research e.g. \cite{coella2007},  \cite{Wang2007} and  \cite{cahan2008}, the analysis of of array CGH data \cite{fridlyand2004}, the analysis of profile series \cite{Sschliep2003}.
 
 
-In our case, we have that the observations consists solely of RD counts. Furthermore, the set of states is the following
+\section{HMM for TUF}
+\label{hmm_tuf}
+
+Our intention is to investigate the applicability of hidden Markov models in terms of identifying TUF regions in the genome. 
+In this regard, we develop an HMM model using the \mintinline{c++}{pomegranate} \footnote{\url{https://github.com/jmschrei/pomegranate}} Python library.
+This section discusses the current state of the approach we use. It further attempts to justify certain modeling choices that have been made. 
+
+As mentioned previously, an HMM model assumes that the system in hand can be in a state from a specified set $S$. This set of states can be assumed a priori implying some knowledge of the data. Examples of this methodology are given in \cite{coella2007} and \cite{Wang2007}  where six states are used. 
+Another approach is to use clustering techiniques in order to determine an optimal number e.g. \cite{fridlyand2004} and \cite{liu2017}. In the latter approach each cluster is assumed to represent a state. Furthermore, clusters that are very similar to each other be merged together.  One advantage of the clustering approach is that it allows for an educated guess about the parameters of the distributions that the HMM framework requires. Frequently used states in CNV studies are full copy deletion, single copy deletion, normal and duplication. TUF as well as gap regions can be represented naturally as an extra state. However, it is important that we model the states correctly. The second point of major concern, is the appropriate probability distribution that best models each state. On the one hand, once could use kernel estimation techiniques on the clustered data and extract the relevant distribution. However, this may not allow for generalization. Furthermore, the empircal distributions that we compute when investigate the data, suggest that he assumption of Gaussian distributions is not unreasonable see figures \ref{fig:image1}, \ref{fig:image2} and \ref{fig:image2}.
+
+\begin{figure}[h]
+	\begin{subfigure}{}
+		\includegraphics[scale=0.45]{imgs/deletion_dist_wga.png}
+		\includegraphics[scale=0.45]{imgs/deletion_dist_no_wga.png}	
+	\end{subfigure}
+	
+	\caption{Full copy deletion histogram for WGA and non-WGA samples.  }
+	\label{fig:image1}
+\end{figure}
 
 
+\begin{figure}[h]
+	\begin{subfigure}{}
+		\includegraphics[scale=0.45]{imgs/single_copy_deletion_dist_wga.png}
+		\includegraphics[scale=0.45]{imgs/single_copy_deletion_dist_no_wga.png}	
+	\end{subfigure}
+	
+	\caption{Single copy deletion histogram for WGA and non-WGA samples.  }
+	\label{fig:image2}
+\end{figure}
 
-We assume the following
+
+\begin{figure}[h]
+	\begin{subfigure}{}
+		\includegraphics[scale=0.45]{imgs/duplication_dist_wga.png}
+		\includegraphics[scale=0.45]{imgs/duplication_dist_no_wga.png}	
+	\end{subfigure}
+	
+	\caption{Duplication histogram for WGA and non-WGA samples.  }
+	\label{fig:image3}
+\end{figure}
 
 
-We want to fit the an HMM model with $K$ states to the vector of the observed RD counts. We can use the 
+The HMM uses two sequences; a sample that it underwent WGA treatment before sequencing (sample  m605), and  one that was not treated (sample m585). 
+This is necessary in order to amplify the existence of TUF regions. 
+Figure \ref{wga_no_wga } shows a snapshot of the applification in the WGA sample compared to the non-treated one as these are viewed in the IGV browser.
 
 
+\begin{figure}[!htb]
+	\begin{center}
+		\includegraphics[scale=0.200]{imgs/wga_no_wga.png}
+	\end{center}
+	\caption{m605 and m585 samples.}
+	\label{wga_no_wga }
+\end{figure}
 
-There are several items we need to clarify. 
+We assume the following set of discrete states 
 
 \begin{itemize}
-\item How do we initialize the transition probabilities?
-\item How do we define the emission probabilities?
-\item How do we differentiate between deletion and TUF as the latter mimics deletion in RD?
+	\item Deletion
+	\item TUF
+	\item Normal copy
+	\item Duplication
+	\item TUFDUP
+	\item Gap
 \end{itemize}
 
+The Gap state  corresponds to the case where there is not base present in either of the sequences used. The TUF state assumes that low WGA sample mean when compared to normal sample mean for the non-WGA sample. However, this does not fully capture the spectrum of the data, see section \ref{model_calibration} and figure \ref{tuf_tufdup}.  Thus, we introduce the  TUFDUP state in order to represent data where the WGA sample mean is rather small whilst the non-WGA sample mean is large enough to assume that this is 
 
+\subsection{Model initialization}
+\label{model_initialization}
+
+According to equation \ref{hmm}, we need to supply the matrices $\mathbf{A}, \mathbf{B}$ and the initialization vector $\boldsymbol{\pi}$.
+For the latter we assume a uniform probability for every state i.e. every state is equally likely to start the sequence of hidden states. Thus, 
+
+\begin{equation}
+\pi_i = \frac{1}{|S|}, ~~ \forall i \in S
+\end{equation}
+where $|S|$ denotes the number of discrete states.   Furthermore, we assume that every state can transition to any other state including itself. 
+However, we assign a signfinicantly higher probability to the latter
+scenario than the former. In other words, we assume that the model is more likely to stay in a given state than transitioning to another. This is summarized by the matrix $\mathbf{A}$ in equation \ref{initial_A}
+
+\begin{equation}
+\mathbf{A} = \begin{bmatrix}0.85 & 0.025 & 0.025 & 0.025 & 0.025 & 0.025 & 0.025 \\ 
+
+0.025 & 0.85 & 0.025 & 0.025 & 0.025 & 0.025 & 0.025 \\
+0.025 & 0.85 & 0.85 & 0.025 & 0.025 & 0.025 & 0.025 \\
+0.025 & 0.85 & 0.025 & 0.85 & 0.025 & 0.025 & 0.025 \\
+0.025 & 0.85 & 0.025 & 0.025 & 0.85 & 0.025 & 0.025 \\
+0.025 & 0.85 & 0.025 & 0.025 & 0.025 & 0.85 & 0.025 \\
+0.025 & 0.85 & 0.025 & 0.025 & 0.025 & 0.025 & 0.85 
+\end{bmatrix}
+\label{initial_A}
+\end{equation}
+
+
+We now trun our attention into modeling the  emission probability matrix $\mathbf{B}$. This, in general, seems to be more important than how one is modeling the transition probability matrix $\mathbf{A}$ \cite{rabiner2009}. A Hidden Markov model allows us to use different parametric models for each state.  For the Gap state we assume that both components follow a uniform distribution $U(-999.5, -998.5)$. Our intention is to make this state to stand out from the rest so that the model is forced to  select this when a gap window is found (see subsection \ref{viterbi_path}). The rest of the states, execpt TUF,  are modeled by using  a two dimensional Gaussian distribution with mean vector $\boldsymbol{\mu} = (\mu_{WGA}, \mu_{NWGA})$ and covariance matrix 
+
+\begin{equation}
+\boldsymbol{\Sigma} = diag(\sigma_{WGA}, \sigma_{NWGA})
+\end{equation}
+where $\mu_{WGA}, \sigma_{WGA}$ are the window, see subsection \ref{viterbi_path}, mean and standard  deviation for the WGA sample and respectively $\mu_{NWGA}, \sigma_{NWGA}$ denote the relevant quantities for the non-WGA sample. In order to have a first estimate of the parameters mentioned above, we extract small regions from chromosome 1 that containe the states that the model assumes. These regions are then discretized into non-overlapping windows each of which has size 100 bases.  We calculate the means for the two samples, i.e. WGA and non-WGA, and then apply a cutoff filter to exclude outliers. The cutoff filter is simply a threshold on the means. Hence, a window is assumed as an outlier if either $\mu_{WGA} > 140$ or $\mu_{NWGA} > 120$.  Note also that the windows which have been identified to contain gaps are also excluded from the clustering calculations however these are kept in the model overall. 
+
+A Gaussian mixture model, GMM,  is used on the combined data in order to do the clustering. We also investigate more traditional approaches like K-Means and PAM. However, these techniques tend to create eqully sized clusters. This is something  that we do not anticipate to be the case ( for example the Normal state is expected, in general, to dominte the data). A GMM approach allows for more flexibility on the shapes of the clusters whilst we can use the parameters of the ensued Gaussian distributions into the HMM model.  Figure \ref{gmm_clustering} shows the clustered data when using five clusters. Note that only four clusters are actually visible. The cluster that represented deletion was dropped in favor of the  red cluster in the figure.  
+
+\begin{figure}[!htb]
+	\begin{center}
+		\includegraphics[scale=0.320]{imgs/gmm_clustering.png}
+	\end{center}
+	\caption{GMM clustering with five clusters.}
+	\label{gmm_clustering}
+\end{figure}  
+
+The yellow cluster is used to extract the parameters for the Duplication state whilst the pink and blue are used to model two different Normal states.
+
+The TUF state is represented as a mixture model with two components each of which is represented as a two dimensional Gaussian distribution. Each component is weighted using a coefficient of $1/2$.  Figure \ref{tuf_clustering} shows the clustering for identifying the properties of the TUF state. The green componet shown in figure \ref{tuf_clustering} is used in order to initialize the TUF state.
+
+
+\begin{figure}[!htb]
+	\begin{center}
+		\includegraphics[scale=0.320]{imgs/tuf_clustering.png}
+	\end{center}
+	\caption{GMM clustering for TUF state with three clusters.}
+	\label{tuf_clustering}
+\end{figure} 
+
+In summary, the Hidden Markov model is as follows
+
+\begin{itemize}
+	\item $\pi_i = \frac{1}{|S|}, ~~ \forall i \in S$
+	\item Gap state $G\sim U(-999.5, -998.5)$
+	\item Every state $S \sim N(\boldsymbol{\mu}, \boldsymbol{\Sigma})$  
+	\item TUF state $TUF \sim \sum_{i=1}^{2} c_i N(\boldsymbol{\mu}, \boldsymbol{\Sigma}), c_i = 1/2$
+\end{itemize}
+We remark however, that the framework we use is flexible enough to assume different paramteric models and add or remove states.
+
+Figure \ref{hmm_figure}
+shows the HMM model with the transition probabilities used in a graphical form.
+
+
+\begin{figure}[!htb]
+	\begin{center}
+		\includegraphics[scale=0.260]{imgs/hmm.png}
+	\end{center}
+	\caption{States and transition probabilities for HMM model.}
+	\label{hmm_figure}
+\end{figure} 
+
+   
+
+\subsection{Model calibration}
+\label{model_calibration}
+
+Once the basic model is  established, we further calibrate it on chromosome 1. 
+This is necessary as it is difficult to identify representative data for every state. Calibration is done by applying 
+the model on various regions and extracting the Viterbi path. The resulting path is then visually evaluated by loading both the region samples and the path on th IGV browser.  Figure \ref{calib_chr1} shows the predicted states for chromosome 1 and region $[1-20]\times 10^6$ using the non-calibrated HMM model. The red spikes correspond to TUF windows.  
+
+\begin{figure}[!htb]
+	\begin{center}
+		\includegraphics[scale=0.240]{imgs/calib_chr1.png}
+	\end{center}
+	\caption{Viterbi path classification of windows.}
+	\label{calib_chr1}
+\end{figure}
+
+Figure \ref{tuf_tufdup} shows the classification of the windows \footnote{The windows are represented by the WGA and NWGA means} achieved by the calibrated model on region $[1-20]\times 10^6$. The non-calibrated model did not include the TUFDUP state. These caused the purple dots to be classified as duplication (shown in green). The black dots are classified as TUF state and the purple dots as TUFDUP. This is the case after introducing the TUFDUP state
+on region 
+	
+	
+\begin{figure}[!htb]
+	\begin{center}
+		\includegraphics[scale=0.320]{imgs/tuf_tufdup.png}
+	\end{center}
+	\caption{Viterbi path classification of windows.}
+	\label{tuf_tufdup}
+\end{figure} 
+
+\section{Viterbi path}
+\label{viterbi_path}
+
+This section presents the Viterbi paths for chromosomes 1, 2, 3, 4, 5, 6, 7. 
+The Viterbi path simply answers the following 
+question; given an HMM $\lambda$ and a sequence of observations $O$ we seek to find the state sequence  $Q$ that maximizes the probability
+
+\begin{equation}
+P(Q|O, \lambda)
+\end{equation}
+We extract regions typically of size $20\times 10^6$ bases. The regions are 
+discretized into non overlapping  windows of size 100 bases. Each of the windows has a view of both samples, i.e. m605 and m585. 
+The same cutoff described previously is also applied. Gap windows are included in the formed sequence. In the present context, the observations are pairs of RD means corresponding to the sample view that each window contains. The HMM model discussed in section \ref{hmm_tuf} is used to
+compute the Viterbi path for the sequence. Figures \ref{fig:image1}, \ref{fig:image2} and \ref{fig:image3} present the classification of the windows for the following regions
+
+\begin{itemize}
+	\item $[1-20]\times 10^6$
+	\item $[20-40]\times 10^6$
+	\item $[40-60]\times 10^6$
+	\item $[60-80]\times 10^6$
+\end{itemize} 
+and chromosomes 1,2 and 6 respectively after applying the Viterbi algorithm.
+
+\begin{figure}[h]
+	\begin{subfigure}{}
+		\includegraphics[scale=0.25]{imgs/chr1_region_1.png}
+		\includegraphics[scale=0.25]{imgs/chr1_region_2.png}
+		\includegraphics[scale=0.25]{imgs/chr1_region_3.png}
+		\includegraphics[scale=0.25]{imgs/chr1_region_4.png}	
+	\end{subfigure}
+
+	\caption{Regions 1,2,3,4  for chromosome 1 left to right.  }
+	\label{fig:image1}
+\end{figure}
+
+\begin{figure}[h]
+	\begin{subfigure}{}
+		\includegraphics[scale=0.25]{imgs/chr1_region_5.png}
+		\includegraphics[scale=0.25]{imgs/chr1_region_6.png}
+		\includegraphics[scale=0.25]{imgs/chr1_region_7.png}
+		\includegraphics[scale=0.25]{imgs/chr1_region_8.png}	
+	\end{subfigure}
+	
+	\caption{Regions 5,6,7,8  for chromosome 1 left to right.  }
+	\label{fig:image2}
+\end{figure}
+
+\begin{figure}[h]
+	\begin{subfigure}{}
+		\includegraphics[scale=0.25]{imgs/chr1_region_9.png}
+		\includegraphics[scale=0.25]{imgs/chr1_region_10.png}
+		\includegraphics[scale=0.25]{imgs/chr1_region_11.png}	
+	\end{subfigure}
+	
+	\caption{Regions 9, 10, 11  for chromosome 1 left to right.  }
+	\label{fig:image3}
+\end{figure}
+
+
+\begin{figure}[h]
+	\begin{subfigure}{}
+		\includegraphics[scale=0.25]{imgs/chr2_region_1.png}
+		\includegraphics[scale=0.25]{imgs/chr2_region_2.png}
+		\includegraphics[scale=0.25]{imgs/chr2_region_3.png}
+		\includegraphics[scale=0.25]{imgs/chr2_region_4.png}
+	\end{subfigure}
+	\caption{Regions 1,2,3,4  for chromosome 2.}
+	\label{fig:image4}
+\end{figure}
+
+\begin{figure}[h]
+	\begin{subfigure}{}
+		\includegraphics[scale=0.25]{imgs/chr2_region_5.png}
+		\includegraphics[scale=0.25]{imgs/chr2_region_6.png}
+		\includegraphics[scale=0.25]{imgs/chr2_region_7.png}
+		\includegraphics[scale=0.25]{imgs/chr2_region_8.png}
+	\end{subfigure}
+	\caption{Regions 5, 6, 7, 8  for chromosome 2.}
+	\label{fig:image5}
+\end{figure}
+
+\begin{figure}[h]
+	\begin{subfigure}{}
+		\includegraphics[scale=0.25]{imgs/chr2_region_9.png}
+		\includegraphics[scale=0.25]{imgs/chr2_region_10.png}
+		\includegraphics[scale=0.25]{imgs/chr2_region_11.png}
+	\end{subfigure}
+	\caption{Regions 9, 10, 11  for chromosome 2.}
+	\label{fig:image6}
+\end{figure}
+
+\begin{figure}[h]
+	
+	\begin{subfigure}{}
+		\includegraphics[scale=0.25]{imgs/chr6_region_1.png}
+		\includegraphics[scale=0.25]{imgs/chr6_region_2.png}
+		\includegraphics[scale=0.25]{imgs/chr6_region_3.png}
+		\includegraphics[scale=0.25]{imgs/chr6_region_4.png}
+	\end{subfigure}
+	
+	\caption{Regions 1,2,3,4  for chromosome 6.  }
+	\label{fig:image7}
+\end{figure}
+
+
+\subsection{Summary}
+
+Currently, we need to
+
+\begin{itemize}
+	\item Establish quantitative mterics for assessing the performance of the HMM
+	\item Compare the performance of the HMM after some training has been performed
+	\item Establish a better clustering approach
+	\item Develop and end-to-end framework for the analysis.
+\end{itemize}
