@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{cahan2008}
 Patric Cahan, Laura~E. Godfrey, Peggy~S. Eis, Todd~A. Richmond, Rebecca~R.
@@ -14,7 +14,13 @@ Stefano Colella, Christopher Yau, Jennifer~M. Taylor, Ghazala Mirza, Helen
   Holmes, and Jiannis Ragoussis.
 \newblock Quantisnp: an objective bayes hidden-markov model to detect and
   accurately map copy number variation using snp genotyping data.
-\newblock 2007.
+\newblock {\em Nuclic Acids Research}, 2007.
+
+\bibitem{flach2012}
+P.~Flach.
+\newblock {\em Machine Learning The art and science of algorithms that make
+  sense of datat}.
+\newblock Cambridge University Press, 2012.
 
 \bibitem{fridlyand2004}
 Jane Fridlyand, Antoine~M. Snijders, Dan Pinkel, Donna~G. Albertson, and

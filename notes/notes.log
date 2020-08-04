@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.7.23)  30 JUL 2020 16:08
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2020.7.23)  3 AUG 2020 13:56
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -683,6 +683,12 @@ runsystem(rm notes.aex)...executed.
 
  (./notes.aux
 
+LaTeX Warning: Label `gmm_clustering' multiply defined.
+
+
+LaTeX Warning: Label `tuf_clustering' multiply defined.
+
+
 LaTeX Warning: Label `fig:image1' multiply defined.
 
 
@@ -821,251 +827,270 @@ Missing character: There is no ± in font cmr10!
  (./_minted-notes/default-pyg-prefix.pygstyle)
 (./_minted-notes/default.pygstyle)
 (./_minted-notes/877F52FBDFF65C02B1D9F2B76067C82A9DC36304AE892E4F80BB66C678E682
-53.pygtex) [3]
-<imgs/deletion_dist_wga.png, id=111, 378.41376pt x 265.99374pt>
+53.pygtex)
+<imgs/wga_no_wga.png, id=83, 1840.8775pt x 286.06876pt>
+File: imgs/wga_no_wga.png Graphic file (type png)
+<use imgs/wga_no_wga.png>
+Package pdftex.def Info: imgs/wga_no_wga.png  used on input line 133.
+(pdftex.def)             Requested size: 368.16898pt x 57.21272pt.
+ [3]
+<imgs/deletion_dist_wga.png, id=117, 378.41376pt x 265.99374pt>
 File: imgs/deletion_dist_wga.png Graphic file (type png)
 <use imgs/deletion_dist_wga.png>
-Package pdftex.def Info: imgs/deletion_dist_wga.png  used on input line 129.
+Package pdftex.def Info: imgs/deletion_dist_wga.png  used on input line 162.
 (pdftex.def)             Requested size: 170.2846pt x 119.69608pt.
-<imgs/deletion_dist_no_wga.png, id=113, 379.4175pt x 265.99374pt>
+<imgs/deletion_dist_no_wga.png, id=118, 379.4175pt x 265.99374pt>
 File: imgs/deletion_dist_no_wga.png Graphic file (type png)
 <use imgs/deletion_dist_no_wga.png>
-Package pdftex.def Info: imgs/deletion_dist_no_wga.png  used on input line 130.
+Package pdftex.def Info: imgs/deletion_dist_no_wga.png  used on input line 163.
 
 (pdftex.def)             Requested size: 170.73628pt x 119.69608pt.
-<imgs/single_copy_deletion_dist_wga.png, id=114, 372.39125pt x 265.99374pt>
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<imgs/single_copy_deletion_dist_wga.png, id=119, 372.39125pt x 265.99374pt>
 File: imgs/single_copy_deletion_dist_wga.png Graphic file (type png)
 <use imgs/single_copy_deletion_dist_wga.png>
 Package pdftex.def Info: imgs/single_copy_deletion_dist_wga.png  used on input 
-line 140.
+line 173.
 (pdftex.def)             Requested size: 167.57451pt x 119.69608pt.
-<imgs/single_copy_deletion_dist_no_wga.png, id=115, 378.41376pt x 268.00125pt>
+<imgs/single_copy_deletion_dist_no_wga.png, id=120, 378.41376pt x 268.00125pt>
 File: imgs/single_copy_deletion_dist_no_wga.png Graphic file (type png)
 <use imgs/single_copy_deletion_dist_no_wga.png>
 Package pdftex.def Info: imgs/single_copy_deletion_dist_no_wga.png  used on inp
-ut line 141.
+ut line 174.
 (pdftex.def)             Requested size: 170.2846pt x 120.59944pt.
-<imgs/duplication_dist_wga.png, id=116, 378.41376pt x 265.99374pt>
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+<imgs/duplication_dist_wga.png, id=121, 378.41376pt x 265.99374pt>
 File: imgs/duplication_dist_wga.png Graphic file (type png)
 <use imgs/duplication_dist_wga.png>
-Package pdftex.def Info: imgs/duplication_dist_wga.png  used on input line 151.
+Package pdftex.def Info: imgs/duplication_dist_wga.png  used on input line 184.
 
 (pdftex.def)             Requested size: 170.2846pt x 119.69608pt.
-<imgs/duplication_dist_no_wga.png, id=117, 378.41376pt x 265.99374pt>
+<imgs/duplication_dist_no_wga.png, id=122, 378.41376pt x 265.99374pt>
 File: imgs/duplication_dist_no_wga.png Graphic file (type png)
 <use imgs/duplication_dist_no_wga.png>
 Package pdftex.def Info: imgs/duplication_dist_no_wga.png  used on input line 1
-52.
+85.
 (pdftex.def)             Requested size: 170.2846pt x 119.69608pt.
-
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<imgs/wga_no_wga.png, id=119, 1840.8775pt x 286.06876pt>
-File: imgs/wga_no_wga.png Graphic file (type png)
-<use imgs/wga_no_wga.png>
-Package pdftex.def Info: imgs/wga_no_wga.png  used on input line 167.
-(pdftex.def)             Requested size: 368.16898pt x 57.21272pt.
-[4 <./imgs/deletion_dist_wga.png> <./imgs/deletion_dist_no_wga.png> <./imgs/sin
-gle_copy_deletion_dist_wga.png> <./imgs/single_copy_deletion_dist_no_wga.png>]
-[5 <./imgs/duplication_dist_wga.png> <./imgs/duplication_dist_no_wga.png> <./im
-gs/wga_no_wga.png>]
-<imgs/gmm_clustering.png, id=154, 390.45876pt x 269.005pt>
+\openout5 = `notes.pyg'.
+
+
+(./_minted-notes/3215198931C5DBEFB6C98F07A301F14A9DC36304AE892E4F80BB66C678E682
+53.pygtex) [4 <./imgs/wga_no_wga.png>]
+<imgs/gmm_clustering.png, id=136, 390.45876pt x 269.005pt>
 File: imgs/gmm_clustering.png Graphic file (type png)
 <use imgs/gmm_clustering.png>
-Package pdftex.def Info: imgs/gmm_clustering.png  used on input line 224.
+Package pdftex.def Info: imgs/gmm_clustering.png  used on input line 205.
 (pdftex.def)             Requested size: 124.94934pt x 86.08334pt.
-<imgs/tuf_clustering.png, id=157, 397.485pt x 273.02pt>
+ [5 <./imgs/deletion_dist_wga.png> <./imgs/deletion_dist_no_wga.png> <./imgs/si
+ngle_copy_deletion_dist_wga.png> <./imgs/single_copy_deletion_dist_no_wga.png>]
+<imgs/tuf_clustering.png, id=154, 397.485pt x 273.02pt>
 File: imgs/tuf_clustering.png Graphic file (type png)
 <use imgs/tuf_clustering.png>
-Package pdftex.def Info: imgs/tuf_clustering.png  used on input line 237.
+Package pdftex.def Info: imgs/tuf_clustering.png  used on input line 218.
 (pdftex.def)             Requested size: 127.19778pt x 87.36818pt.
- [6]
-<imgs/hmm.png, id=168, 1134.2375pt x 630.355pt>
+ [6 <./imgs/duplication_dist_wga.png> <./imgs/duplication_dist_no_wga.png> <./i
+mgs/gmm_clustering.png> <./imgs/tuf_clustering.png>]
+File: imgs/gmm_clustering.png Graphic file (type png)
+<use imgs/gmm_clustering.png>
+Package pdftex.def Info: imgs/gmm_clustering.png  used on input line 276.
+(pdftex.def)             Requested size: 124.94934pt x 86.08334pt.
+File: imgs/tuf_clustering.png Graphic file (type png)
+<use imgs/tuf_clustering.png>
+Package pdftex.def Info: imgs/tuf_clustering.png  used on input line 289.
+(pdftex.def)             Requested size: 127.19778pt x 87.36818pt.
+ [7]
+<imgs/hmm.png, id=186, 1134.2375pt x 630.355pt>
 File: imgs/hmm.png Graphic file (type png)
 <use imgs/hmm.png>
-Package pdftex.def Info: imgs/hmm.png  used on input line 259.
+Package pdftex.def Info: imgs/hmm.png  used on input line 309.
 (pdftex.def)             Requested size: 294.89479pt x 163.88843pt.
-<imgs/calib_chr1.png, id=170, 1836.8625pt x 575.14874pt>
+<imgs/calib_chr1.png, id=188, 1836.8625pt x 575.14874pt>
 File: imgs/calib_chr1.png Graphic file (type png)
 <use imgs/calib_chr1.png>
-Package pdftex.def Info: imgs/calib_chr1.png  used on input line 276.
+Package pdftex.def Info: imgs/calib_chr1.png  used on input line 326.
 (pdftex.def)             Requested size: 440.856pt x 138.03851pt.
 
-Overfull \hbox (10.85138pt too wide) in paragraph at lines 276--277
+Overfull \hbox (10.85138pt too wide) in paragraph at lines 326--327
  [] 
  []
 
-<imgs/tuf_tufdup.png, id=173, 397.485pt x 269.005pt>
+<imgs/tuf_tufdup.png, id=191, 397.485pt x 269.005pt>
 File: imgs/tuf_tufdup.png Graphic file (type png)
 <use imgs/tuf_tufdup.png>
-Package pdftex.def Info: imgs/tuf_tufdup.png  used on input line 288.
+Package pdftex.def Info: imgs/tuf_tufdup.png  used on input line 338.
 (pdftex.def)             Requested size: 127.19778pt x 86.08334pt.
-[7 <./imgs/gmm_clustering.png> <./imgs/tuf_clustering.png>] [8 <./imgs/hmm.png>
- <./imgs/calib_chr1.png> <./imgs/tuf_tufdup.png>]
-<imgs/chr1_region_1.png, id=196, 397.485pt x 285.065pt>
+[8] [9 <./imgs/hmm.png> <./imgs/calib_chr1.png> <./imgs/tuf_tufdup.png>]
+<imgs/chr1_region_1.png, id=210, 397.485pt x 285.065pt>
 File: imgs/chr1_region_1.png Graphic file (type png)
 <use imgs/chr1_region_1.png>
-Package pdftex.def Info: imgs/chr1_region_1.png  used on input line 319.
+Package pdftex.def Info: imgs/chr1_region_1.png  used on input line 369.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr1_region_2.png, id=197, 397.485pt x 285.065pt>
+<imgs/chr1_region_2.png, id=211, 397.485pt x 285.065pt>
 File: imgs/chr1_region_2.png Graphic file (type png)
 <use imgs/chr1_region_2.png>
-Package pdftex.def Info: imgs/chr1_region_2.png  used on input line 320.
+Package pdftex.def Info: imgs/chr1_region_2.png  used on input line 370.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr1_region_3.png, id=198, 397.485pt x 285.065pt>
+<imgs/chr1_region_3.png, id=212, 397.485pt x 285.065pt>
 File: imgs/chr1_region_3.png Graphic file (type png)
 <use imgs/chr1_region_3.png>
-Package pdftex.def Info: imgs/chr1_region_3.png  used on input line 321.
+Package pdftex.def Info: imgs/chr1_region_3.png  used on input line 371.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr1_region_4.png, id=199, 397.485pt x 285.065pt>
+<imgs/chr1_region_4.png, id=213, 397.485pt x 285.065pt>
 File: imgs/chr1_region_4.png Graphic file (type png)
 <use imgs/chr1_region_4.png>
-Package pdftex.def Info: imgs/chr1_region_4.png  used on input line 322.
+Package pdftex.def Info: imgs/chr1_region_4.png  used on input line 372.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr1_region_5.png, id=200, 397.485pt x 285.065pt>
+<imgs/chr1_region_5.png, id=214, 397.485pt x 285.065pt>
 File: imgs/chr1_region_5.png Graphic file (type png)
 <use imgs/chr1_region_5.png>
-Package pdftex.def Info: imgs/chr1_region_5.png  used on input line 331.
+Package pdftex.def Info: imgs/chr1_region_5.png  used on input line 381.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr1_region_6.png, id=201, 397.485pt x 285.065pt>
+<imgs/chr1_region_6.png, id=215, 397.485pt x 285.065pt>
 File: imgs/chr1_region_6.png Graphic file (type png)
 <use imgs/chr1_region_6.png>
-Package pdftex.def Info: imgs/chr1_region_6.png  used on input line 332.
+Package pdftex.def Info: imgs/chr1_region_6.png  used on input line 382.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr1_region_7.png, id=202, 397.485pt x 285.065pt>
+<imgs/chr1_region_7.png, id=216, 397.485pt x 285.065pt>
 File: imgs/chr1_region_7.png Graphic file (type png)
 <use imgs/chr1_region_7.png>
-Package pdftex.def Info: imgs/chr1_region_7.png  used on input line 333.
+Package pdftex.def Info: imgs/chr1_region_7.png  used on input line 383.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr1_region_8.png, id=203, 397.485pt x 285.065pt>
+<imgs/chr1_region_8.png, id=217, 397.485pt x 285.065pt>
 File: imgs/chr1_region_8.png Graphic file (type png)
 <use imgs/chr1_region_8.png>
-Package pdftex.def Info: imgs/chr1_region_8.png  used on input line 334.
+Package pdftex.def Info: imgs/chr1_region_8.png  used on input line 384.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr1_region_9.png, id=204, 397.485pt x 285.065pt>
+<imgs/chr1_region_9.png, id=218, 397.485pt x 285.065pt>
 File: imgs/chr1_region_9.png Graphic file (type png)
 <use imgs/chr1_region_9.png>
-Package pdftex.def Info: imgs/chr1_region_9.png  used on input line 343.
+Package pdftex.def Info: imgs/chr1_region_9.png  used on input line 393.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr1_region_10.png, id=205, 397.485pt x 285.065pt>
+<imgs/chr1_region_10.png, id=219, 397.485pt x 285.065pt>
 File: imgs/chr1_region_10.png Graphic file (type png)
 <use imgs/chr1_region_10.png>
-Package pdftex.def Info: imgs/chr1_region_10.png  used on input line 344.
+Package pdftex.def Info: imgs/chr1_region_10.png  used on input line 394.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr1_region_11.png, id=206, 397.485pt x 285.065pt>
+<imgs/chr1_region_11.png, id=220, 397.485pt x 285.065pt>
 File: imgs/chr1_region_11.png Graphic file (type png)
 <use imgs/chr1_region_11.png>
-Package pdftex.def Info: imgs/chr1_region_11.png  used on input line 345.
+Package pdftex.def Info: imgs/chr1_region_11.png  used on input line 395.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<imgs/chr2_region_1.png, id=207, 397.485pt x 285.065pt>
+<imgs/chr2_region_1.png, id=221, 397.485pt x 285.065pt>
 File: imgs/chr2_region_1.png Graphic file (type png)
 <use imgs/chr2_region_1.png>
-Package pdftex.def Info: imgs/chr2_region_1.png  used on input line 355.
+Package pdftex.def Info: imgs/chr2_region_1.png  used on input line 405.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr2_region_2.png, id=208, 397.485pt x 285.065pt>
+<imgs/chr2_region_2.png, id=222, 397.485pt x 285.065pt>
 File: imgs/chr2_region_2.png Graphic file (type png)
 <use imgs/chr2_region_2.png>
-Package pdftex.def Info: imgs/chr2_region_2.png  used on input line 356.
+Package pdftex.def Info: imgs/chr2_region_2.png  used on input line 406.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr2_region_3.png, id=209, 397.485pt x 285.065pt>
+<imgs/chr2_region_3.png, id=223, 397.485pt x 285.065pt>
 File: imgs/chr2_region_3.png Graphic file (type png)
 <use imgs/chr2_region_3.png>
-Package pdftex.def Info: imgs/chr2_region_3.png  used on input line 357.
+Package pdftex.def Info: imgs/chr2_region_3.png  used on input line 407.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr2_region_4.png, id=210, 397.485pt x 285.065pt>
+<imgs/chr2_region_4.png, id=224, 397.485pt x 285.065pt>
 File: imgs/chr2_region_4.png Graphic file (type png)
 <use imgs/chr2_region_4.png>
-Package pdftex.def Info: imgs/chr2_region_4.png  used on input line 358.
+Package pdftex.def Info: imgs/chr2_region_4.png  used on input line 408.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<imgs/chr2_region_5.png, id=211, 397.485pt x 285.065pt>
+<imgs/chr2_region_5.png, id=225, 397.485pt x 285.065pt>
 File: imgs/chr2_region_5.png Graphic file (type png)
 <use imgs/chr2_region_5.png>
-Package pdftex.def Info: imgs/chr2_region_5.png  used on input line 366.
+Package pdftex.def Info: imgs/chr2_region_5.png  used on input line 416.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr2_region_6.png, id=212, 397.485pt x 285.065pt>
+<imgs/chr2_region_6.png, id=226, 397.485pt x 285.065pt>
 File: imgs/chr2_region_6.png Graphic file (type png)
 <use imgs/chr2_region_6.png>
-Package pdftex.def Info: imgs/chr2_region_6.png  used on input line 367.
+Package pdftex.def Info: imgs/chr2_region_6.png  used on input line 417.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr2_region_7.png, id=213, 397.485pt x 285.065pt>
+<imgs/chr2_region_7.png, id=227, 397.485pt x 285.065pt>
 File: imgs/chr2_region_7.png Graphic file (type png)
 <use imgs/chr2_region_7.png>
-Package pdftex.def Info: imgs/chr2_region_7.png  used on input line 368.
+Package pdftex.def Info: imgs/chr2_region_7.png  used on input line 418.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr2_region_8.png, id=214, 397.485pt x 285.065pt>
+<imgs/chr2_region_8.png, id=228, 397.485pt x 285.065pt>
 File: imgs/chr2_region_8.png Graphic file (type png)
 <use imgs/chr2_region_8.png>
-Package pdftex.def Info: imgs/chr2_region_8.png  used on input line 369.
+Package pdftex.def Info: imgs/chr2_region_8.png  used on input line 419.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<imgs/chr2_region_9.png, id=215, 397.485pt x 285.065pt>
+<imgs/chr2_region_9.png, id=229, 397.485pt x 285.065pt>
 File: imgs/chr2_region_9.png Graphic file (type png)
 <use imgs/chr2_region_9.png>
-Package pdftex.def Info: imgs/chr2_region_9.png  used on input line 377.
+Package pdftex.def Info: imgs/chr2_region_9.png  used on input line 427.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr2_region_10.png, id=216, 397.485pt x 285.065pt>
+<imgs/chr2_region_10.png, id=230, 397.485pt x 285.065pt>
 File: imgs/chr2_region_10.png Graphic file (type png)
 <use imgs/chr2_region_10.png>
-Package pdftex.def Info: imgs/chr2_region_10.png  used on input line 378.
+Package pdftex.def Info: imgs/chr2_region_10.png  used on input line 428.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
-<imgs/chr2_region_11.png, id=217, 397.485pt x 285.065pt>
+<imgs/chr2_region_11.png, id=231, 397.485pt x 285.065pt>
 File: imgs/chr2_region_11.png Graphic file (type png)
 <use imgs/chr2_region_11.png>
-Package pdftex.def Info: imgs/chr2_region_11.png  used on input line 379.
+Package pdftex.def Info: imgs/chr2_region_11.png  used on input line 429.
 (pdftex.def)             Requested size: 99.371pt x 71.26607pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<imgs/chr6_region_1.png, id=218, 397.485pt x 269.005pt>
+<imgs/chr6_region_1.png, id=232, 397.485pt x 269.005pt>
 File: imgs/chr6_region_1.png Graphic file (type png)
 <use imgs/chr6_region_1.png>
-Package pdftex.def Info: imgs/chr6_region_1.png  used on input line 388.
+Package pdftex.def Info: imgs/chr6_region_1.png  used on input line 438.
 (pdftex.def)             Requested size: 99.371pt x 67.25108pt.
-<imgs/chr6_region_2.png, id=219, 397.485pt x 269.005pt>
+<imgs/chr6_region_2.png, id=233, 397.485pt x 269.005pt>
 File: imgs/chr6_region_2.png Graphic file (type png)
 <use imgs/chr6_region_2.png>
-Package pdftex.def Info: imgs/chr6_region_2.png  used on input line 389.
+Package pdftex.def Info: imgs/chr6_region_2.png  used on input line 439.
 (pdftex.def)             Requested size: 99.371pt x 67.25108pt.
-<imgs/chr6_region_3.png, id=220, 397.485pt x 269.005pt>
+<imgs/chr6_region_3.png, id=234, 397.485pt x 269.005pt>
 File: imgs/chr6_region_3.png Graphic file (type png)
 <use imgs/chr6_region_3.png>
-Package pdftex.def Info: imgs/chr6_region_3.png  used on input line 390.
+Package pdftex.def Info: imgs/chr6_region_3.png  used on input line 440.
 (pdftex.def)             Requested size: 99.371pt x 67.25108pt.
-<imgs/chr6_region_4.png, id=221, 397.485pt x 269.005pt>
+<imgs/chr6_region_4.png, id=235, 397.485pt x 269.005pt>
 File: imgs/chr6_region_4.png Graphic file (type png)
 <use imgs/chr6_region_4.png>
-Package pdftex.def Info: imgs/chr6_region_4.png  used on input line 391.
+Package pdftex.def Info: imgs/chr6_region_4.png  used on input line 441.
 (pdftex.def)             Requested size: 99.371pt x 67.25108pt.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[9 <./imgs/chr1_region_1.png> <./imgs/chr1_region_2.png> <./imgs/chr1_region_3.
-png> <./imgs/chr1_region_4.png> <./imgs/chr1_region_5.png> <./imgs/chr1_region_
-6.png> <./imgs/chr1_region_7.png> <./imgs/chr1_region_8.png>]) [10 <./imgs/chr1
-_region_9.png> <./imgs/chr1_region_10.png> <./imgs/chr1_region_11.png> <./imgs/
-chr2_region_1.png> <./imgs/chr2_region_2.png> <./imgs/chr2_region_3.png> <./img
-s/chr2_region_4.png>] [11 <./imgs/chr2_region_5.png> <./imgs/chr2_region_6.png>
- <./imgs/chr2_region_7.png> <./imgs/chr2_region_8.png> <./imgs/chr2_region_9.pn
-g> <./imgs/chr2_region_10.png> <./imgs/chr2_region_11.png> <./imgs/chr6_region_
-1.png> <./imgs/chr6_region_2.png> <./imgs/chr6_region_3.png> <./imgs/chr6_regio
-n_4.png>] (./notes.bbl
+[10 <./imgs/chr1_region_1.png> <./imgs/chr1_region_2.png> <./imgs/chr1_region_3
+.png> <./imgs/chr1_region_4.png> <./imgs/chr1_region_5.png> <./imgs/chr1_region
+_6.png> <./imgs/chr1_region_7.png> <./imgs/chr1_region_8.png>]) [11 <./imgs/chr
+1_region_9.png> <./imgs/chr1_region_10.png> <./imgs/chr1_region_11.png> <./imgs
+/chr2_region_1.png> <./imgs/chr2_region_2.png> <./imgs/chr2_region_3.png> <./im
+gs/chr2_region_4.png>] [12 <./imgs/chr2_region_5.png> <./imgs/chr2_region_6.png
+> <./imgs/chr2_region_7.png> <./imgs/chr2_region_8.png> <./imgs/chr2_region_9.p
+ng> <./imgs/chr2_region_10.png> <./imgs/chr2_region_11.png> <./imgs/chr6_region
+_1.png> <./imgs/chr6_region_2.png> <./imgs/chr6_region_3.png> <./imgs/chr6_regi
+on_4.png>] (./notes.bbl
 Missing character: There is no Ã in font cmr10!
 Missing character: There is no ¶ in font cmr10!
 Missing character: There is no Ã in font cmr10!
 Missing character: There is no © in font cmr10!
 )
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 45.
- [12
+ [13
 
 ]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 45.
@@ -1083,10 +1108,10 @@ runsystem(rm notes.pyg)...executed.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 45.
  ) 
 Here is how much of TeX's memory you used:
- 20742 strings out of 494880
- 371657 string characters out of 6179601
- 489899 words of memory out of 5000000
- 23719 multiletter control sequences out of 15000+600000
+ 20754 strings out of 494880
+ 372095 string characters out of 6179601
+ 489986 words of memory out of 5000000
+ 23723 multiletter control sequences out of 15000+600000
  545947 words of font info for 80 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  36i,9n,39p,10375b,401s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1105,10 +1130,10 @@ cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmss9
 /share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/
 texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt8.pfb>
-Output written on notes.pdf (12 pages, 1058084 bytes).
+Output written on notes.pdf (13 pages, 1062976 bytes).
 PDF statistics:
- 347 PDF objects out of 1000 (max. 8388607)
- 238 compressed objects within 3 object streams
- 70 named destinations out of 1000 (max. 500000)
+ 364 PDF objects out of 1000 (max. 8388607)
+ 254 compressed objects within 3 object streams
+ 75 named destinations out of 1000 (max. 500000)
  247 words of extra memory for PDF output out of 10000 (max. 10000000)
 

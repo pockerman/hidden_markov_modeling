@@ -3,46 +3,44 @@ Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: notes.aux
 The style file: plain.bst
 Database file #1: references.bib
-Warning--empty journal in coella2007
-You've used 9 entries,
+You've used 10 entries,
             2118 wiz_defined-function locations,
-            542 strings with 6010 characters,
-and the built_in function-call counts, 3176 in all, are:
-= -- 267
-> -- 275
+            546 strings with 6128 characters,
+and the built_in function-call counts, 3394 in all, are:
+= -- 287
+> -- 282
 < -- 0
-+ -- 111
-- -- 100
-* -- 244
-:= -- 604
-add.period$ -- 27
-call.type$ -- 9
-change.case$ -- 76
++ -- 114
+- -- 102
+* -- 252
+:= -- 645
+add.period$ -- 30
+call.type$ -- 10
+change.case$ -- 79
 chr.to.int$ -- 0
 cite$ -- 10
-duplicate$ -- 92
-empty$ -- 159
-format.name$ -- 100
-if$ -- 593
+duplicate$ -- 104
+empty$ -- 181
+format.name$ -- 102
+if$ -- 640
 int.to.chr$ -- 0
-int.to.str$ -- 9
-missing$ -- 10
-newline$ -- 48
-num.names$ -- 18
-pop$ -- 83
+int.to.str$ -- 10
+missing$ -- 12
+newline$ -- 53
+num.names$ -- 20
+pop$ -- 89
 preamble$ -- 1
-purify$ -- 68
+purify$ -- 71
 quote$ -- 0
-skip$ -- 63
+skip$ -- 68
 stack$ -- 0
-substring$ -- 47
-swap$ -- 8
+substring$ -- 52
+swap$ -- 10
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 34
-warning$ -- 1
-while$ -- 18
-width$ -- 10
-write$ -- 91
-(There was 1 warning)
+type$ -- 36
+warning$ -- 0
+while$ -- 20
+width$ -- 12
+write$ -- 102

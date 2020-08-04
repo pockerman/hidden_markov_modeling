@@ -9,6 +9,10 @@ TUF regions contain a core sequence which exhibits an increased GC concentartion
 surrounding DNA. It is in fact these locally concentrated spikes of GC content which is believed
 to remain duplexed despite the application of denaturation processes \cite{veal2012}. 
 
+G-quadruplexes (G4) are four-stranded secondary structures fromed by particular G-rich nucleic acid sequences.
+Notably, G4s can adopt intramolecular folds whenarising from a single G-rich DNA or RNA strand, or in-termolecular folds, through dimerization or tetramerizationof two or more strands \cite{lombardi2020}.
+Extensive evidence implicates G4 sequences in various essential biological functions, including telomere maintenance,DNA replication, genome rearrangements,DNA damage response, chromatin structure, RNA processing and transcriptional ortranslational regulation, see \cite{lombardi2020} and references therein. 
+
 Our aim is to develop a mathematical model in order to investigate this assumption i.e. that
 TUF cores exhibit high GC concentration when compared to the surrounding DNA. In this regard, a model
 should be able to capture the existence of TUF regions and subsequently allow for their investigation. 
@@ -94,7 +98,7 @@ Similarly, each element $b_{jk}$ of the emission matrix $\mathbf{B}$ specifies t
 \begin{equation}
 b_{jk} = P(O_n = o_k | q_n = j)
 \end{equation}
-Similar to equation \ref{trans_prob_cond} we have the following constraints
+We have the following constraints for the $\mathbf{B}$ matrix
 \begin{equation}
 b_{jk} \geq 0, \sum_{k} b_{jk} = 1 
 \label{emiss_prob_cond}
@@ -113,7 +117,7 @@ Collectively, we denote an HMM using the letter $\lambda$:
 \end{equation}
 Finally, we assume that we are dealing with a time invariant system. In other words, the transition probability matrix remains constant. 
 
-A general review of HMM in relation to bioinformatics is given in \cite{koski}. Hidden Markov models have been used for copy number variation detection research e.g. \cite{coella2007},  \cite{Wang2007} and  \cite{cahan2008}, the analysis of of array CGH data \cite{fridlyand2004}, the analysis of profile series \cite{Sschliep2003}.
+A general review of HMM in relation to bioinformatics is given in \cite{koski}. Hidden Markov models have been used for copy number variation detection research e.g. \cite{coella2007},  \cite{Wang2007} and  \cite{cahan2008}, the analysis of of array CGH data \cite{fridlyand2004}, and the analysis of profile series \cite{Sschliep2003}.
 
 
 \section{HMM for TUF}
@@ -123,9 +127,40 @@ Our intention is to investigate the applicability of hidden Markov models in ter
 In this regard, we develop an HMM model using the \mintinline{c++}{pomegranate} \footnote{\url{https://github.com/jmschrei/pomegranate}} Python library.
 This section discusses the current state of the approach we use. It further attempts to justify certain modeling choices that have been made. 
 
-As mentioned previously, an HMM model assumes that the system in hand can be in a state from a specified set $S$. This set of states can be assumed a priori implying some knowledge of the data. Examples of this methodology are given in \cite{coella2007} and \cite{Wang2007}  where six states are used. 
-Another approach is to use clustering techiniques in order to determine an optimal number e.g. \cite{fridlyand2004} and \cite{liu2017}. In the latter approach each cluster is assumed to represent a state. Furthermore, clusters that are very similar to each other be merged together.  One advantage of the clustering approach is that it allows for an educated guess about the parameters of the distributions that the HMM framework requires. Frequently used states in CNV studies are full copy deletion, single copy deletion, normal and duplication. TUF as well as gap regions can be represented naturally as an extra state. However, it is important that we model the states correctly. The second point of major concern, is the appropriate probability distribution that best models each state. On the one hand, once could use kernel estimation techiniques on the clustered data and extract the relevant distribution. However, this may not allow for generalization. Furthermore, the empircal distributions that we compute when investigate the data, suggest that he assumption of Gaussian distributions is not unreasonable see figures \ref{fig:image1}, \ref{fig:image2} and \ref{fig:image2}.
+The HMM uses two sequences; a sample that it underwent WGA treatment before sequencing (sample  m605), and  one that was not treated (sample m585). 
+This is necessary in order to amplify the existence of TUF regions. 
+Figure \ref{wga_no_wga } shows a snapshot of the applification in the WGA sample compared to the non-treated one as these are viewed in the IGV browser.
 
+
+\begin{figure}[!htb]
+	\begin{center}
+		\includegraphics[scale=0.200]{imgs/wga_no_wga.png}
+	\end{center}
+	\caption{m605 and m585 samples.}
+	\label{wga_no_wga }
+\end{figure}
+
+Furthermore, we assum the following set of discrete states:
+
+\begin{itemize}
+	\item Deletion
+	\item TUF
+	\item Normal copy
+	\item Duplication
+	\item TUFDUP
+	\item Gap
+\end{itemize}
+
+The Gap state  corresponds to the case where there is not base present in either of the sequences used. The TUF state assumes that low WGA sample mean when compared to normal sample mean for the non-WGA sample. However, this does not fully capture the spectrum of the data, see section \ref{model_calibration} and figure \ref{tuf_tufdup}.  Thus, we introduce the  TUFDUP state in order to represent data where the WGA sample mean is rather small whilst the non-WGA sample mean is large enough to assume that this is
+
+As mentioned previously, an HMM model assumes that the system in hand can be in a state from a specified set $S$. This set of states can be assumed a priori implying some knowledge of the data. Examples of this methodology are given in \cite{coella2007} and \cite{Wang2007}  where six states are used. 
+Another approach is to use clustering techiniques in order to determine an optimal number e.g. \cite{fridlyand2004} and \cite{liu2017}. In the latter approach each cluster is assumed to represent a state. Furthermore, clusters being very similar to each other, can be merged together.  
+
+One advantage of the clustering approach is that it allows for an educated guess about the parameters of the distributions that the HMM framework requires. Frequently used states in CNV studies are full copy deletion, single copy deletion, normal and duplication. TUF as well as gap regions can be represented naturally as an extra state. 
+
+The second point of major concern, is the appropriate probability distribution that best models each state in terms of emission probabilities. This, in general, seems to be more important than how one is modeling the transition probability matrix $\mathbf{A}$, \cite{rabiner2009}.  There is variety of methods to achieve this. The simplest being to assume a priori a given probability mass function with given parameters. Another approach is to  use an estimation technique such as histograms, kernel estimation or clustering. 
+
+In this work, we assume that the states follow a two dimensional Gaussian distribution. The exception to this is the Gap state (see below). The empircal distributions that we compute when investigate the data, suggest that he assumption of Gaussian distributions is not unreasonable see figures \ref{fig:image1}, \ref{fig:image2} and \ref{fig:image2}. We estimate the parameters for these distributions by using a Gaussian mixture model, \cite{flach2012}, to cluster a dataset which contains manually identified portions of the DNA that match the assumed states. 
 \begin{figure}[h]
 	\begin{subfigure}{}
 		\includegraphics[scale=0.45]{imgs/deletion_dist_wga.png}
@@ -158,43 +193,49 @@ Another approach is to use clustering techiniques in order to determine an optim
 	\label{fig:image3}
 \end{figure}
 
+The dataset corresponds to small regions from chromosome 1 that contain the states that the model assumes. These regions are then discretized into non-overlapping windows each of which has size 100 bases.  We calculate the means for the two samples, i.e. WGA and non-WGA, and then apply a cutoff filter to exclude outliers. The filter is simply a threshold on the means. Hence, a window is assumed as an outlier if either $\mu_{WGA} > 140$ or $\mu_{NWGA} > 120$.  The remaining windows, are then cluseterd using a Gaussian mixture model \footnote{We use the \mintinline{c++}{sklern} implementation} (GMM), \cite{flach2012}.  We also investigated more traditional approaches like K-Means and PAM. However, these techniques tend to create eqully sized clusters. This is something  that we do not anticipate to be the case ( for example the Normal state is expected, in general, to dominte the data). A GMM approach allows for more flexibility on the shapes of the clusters whilst we can use the parameters of the ensued Gaussian distributions, i.e. $\mu_{WGA}, \mu_{NWGA}$ and   $\boldsymbol{\Sigma} = diag(\sigma_{WGA}^2, \sigma_{NWGA}^2)$ where $\mu_{i}, \sigma_{i}$ are the window mean and standard  deviation for the WGA and non-WGA sample,  into the HMM model. Note that the windows which have been identified to contain gaps are also excluded from the clustering calculations however these are kept in the model overall.  
 
-The HMM uses two sequences; a sample that it underwent WGA treatment before sequencing (sample  m605), and  one that was not treated (sample m585). 
-This is necessary in order to amplify the existence of TUF regions. 
-Figure \ref{wga_no_wga } shows a snapshot of the applification in the WGA sample compared to the non-treated one as these are viewed in the IGV browser.
+%A hidden Markov model allows us to use different parametric models for each state.  Therefore, for the Gap state we assume that both components follow a uniform distribution $U(-999.5, -998.5)$. Our intention is to make this state to stand out from the rest so that the model is forced to  select this when a gap window is found (see subsection \ref{viterbi_path}). The rest of the states, execpt TUF,  are modeled by using  a two dimensional Gaussian distribution with mean vector $\boldsymbol{\mu} = (\mu_{WGA}, \mu_{NWGA})$ and covariance matrix 
+
+%\begin{equation}
+%\boldsymbol{\Sigma} = diag(\sigma_{WGA}, \sigma_{NWGA})
+%\end{equation}
+%where $\mu_{WGA}, \sigma_{WGA}$ are the window, see subsection \ref{viterbi_path}, mean and standard  deviation for the WGA sample and respectively $\mu_{NWGA}, \sigma_{NWGA}$ denote the relevant quantities for the non-WGA sample. In order to have a first estimate of the parameters mentioned above, we extract small regions from chromosome 1 that containe the states that the model assumes. These regions are then discretized into non-overlapping windows each of which has size 100 bases.  We calculate the means for the two samples, i.e. WGA and non-WGA, and then apply a cutoff filter to exclude outliers. The cutoff filter is simply a threshold on the means. Hence, a window is assumed as an outlier if either $\mu_{WGA} > 140$ or $\mu_{NWGA} > 120$.  
+ 
+Figure \ref{gmm_clustering} shows the clustered data when using five clusters. Only four clusters are actually visible. The cluster that represented deletion was dropped in favor of the  red cluster in the figure.  
+
+\begin{figure}[!htb]
+	\begin{center}
+		\includegraphics[scale=0.320]{imgs/gmm_clustering.png}
+	\end{center}
+	\caption{GMM clustering with five clusters.}
+	\label{gmm_clustering}
+\end{figure}  
+
+The yellow cluster is used to extract the parameters for the Duplication state whilst the pink and blue are used to model two different Normal states.
+
+The TUF state is represented as a mixture model with two components each of which is represented as a two dimensional Gaussian distribution. Each component is weighted using a coefficient of $1/2$.  Figure \ref{tuf_clustering} shows the clustering for identifying the properties of the TUF state. The green componet shown in figure \ref{tuf_clustering} is used in order to initialize the TUF state.
 
 
 \begin{figure}[!htb]
 	\begin{center}
-		\includegraphics[scale=0.200]{imgs/wga_no_wga.png}
+		\includegraphics[scale=0.320]{imgs/tuf_clustering.png}
 	\end{center}
-	\caption{m605 and m585 samples.}
-	\label{wga_no_wga }
-\end{figure}
+	\caption{GMM clustering for TUF state with three clusters.}
+	\label{tuf_clustering}
+\end{figure} 
 
-We assume the following set of discrete states 
+In order to model the Gap state we assume that both components follow a uniform distribution $U(-999.5, -998.5)$. Our intention is to make this state to stand out from the rest so that the model is forced to  select this when a gap window is found (see subsection \ref{viterbi_path}).
+ 
+Finally, the TUGAP state is... 
 
-\begin{itemize}
-	\item Deletion
-	\item TUF
-	\item Normal copy
-	\item Duplication
-	\item TUFDUP
-	\item Gap
-\end{itemize}
 
-The Gap state  corresponds to the case where there is not base present in either of the sequences used. The TUF state assumes that low WGA sample mean when compared to normal sample mean for the non-WGA sample. However, this does not fully capture the spectrum of the data, see section \ref{model_calibration} and figure \ref{tuf_tufdup}.  Thus, we introduce the  TUFDUP state in order to represent data where the WGA sample mean is rather small whilst the non-WGA sample mean is large enough to assume that this is 
-
-\subsection{Model initialization}
-\label{model_initialization}
-
-According to equation \ref{hmm}, we need to supply the matrices $\mathbf{A}, \mathbf{B}$ and the initialization vector $\boldsymbol{\pi}$.
-For the latter we assume a uniform probability for every state i.e. every state is equally likely to start the sequence of hidden states. Thus, 
+The HMM also requires as input the initialization vector $\boldsymbol{\pi}$ and the transition matrix $\mathbf{A}$, see equation \ref{hmm}. For the former we assume a uniform probability for every state i.e. every state is equally likely to initiate the sequence of hidden states. Hence, 
 
 \begin{equation}
 \pi_i = \frac{1}{|S|}, ~~ \forall i \in S
 \end{equation}
-where $|S|$ denotes the number of discrete states.   Furthermore, we assume that every state can transition to any other state including itself. 
+where $|S|$ denotes the number of discrete states. For the latter,  we assume that every state can transition to any other state including itself. 
 However, we assign a signfinicantly higher probability to the latter
 scenario than the former. In other words, we assume that the model is more likely to stay in a given state than transitioning to another. This is summarized by the matrix $\mathbf{A}$ in equation \ref{initial_A}
 
@@ -212,14 +253,27 @@ scenario than the former. In other words, we assume that the model is more likel
 \end{equation}
 
 
-We now trun our attention into modeling the  emission probability matrix $\mathbf{B}$. This, in general, seems to be more important than how one is modeling the transition probability matrix $\mathbf{A}$ \cite{rabiner2009}. A Hidden Markov model allows us to use different parametric models for each state.  For the Gap state we assume that both components follow a uniform distribution $U(-999.5, -998.5)$. Our intention is to make this state to stand out from the rest so that the model is forced to  select this when a gap window is found (see subsection \ref{viterbi_path}). The rest of the states, execpt TUF,  are modeled by using  a two dimensional Gaussian distribution with mean vector $\boldsymbol{\mu} = (\mu_{WGA}, \mu_{NWGA})$ and covariance matrix 
+
+ 
+
+\subsection{Model initialization}
+\label{model_initialization}
+
+
+
+
+%We now turn our attention into modeling the  emission probability matrix $\mathbf{B}$. This, in general, seems to be more important than how one is modeling the transition probability matrix $\mathbf{A}$ \cite{rabiner2009}. A hidden Markov model allows us to use different parametric models for each state.  For the Gap state we assume that both components follow a uniform distribution $U(-999.5, -998.5)$. Our intention is to make this state to stand out from the rest so that the model is forced to  select this when a gap window is found (see subsection \ref{viterbi_path}). The rest of the states, execpt TUF,  are modeled by using  a two dimensional Gaussian distribution with mean vector $\boldsymbol{\mu} = (\mu_{WGA}, \mu_{NWGA})$ and covariance matrix 
 
 \begin{equation}
 \boldsymbol{\Sigma} = diag(\sigma_{WGA}, \sigma_{NWGA})
 \end{equation}
-where $\mu_{WGA}, \sigma_{WGA}$ are the window, see subsection \ref{viterbi_path}, mean and standard  deviation for the WGA sample and respectively $\mu_{NWGA}, \sigma_{NWGA}$ denote the relevant quantities for the non-WGA sample. In order to have a first estimate of the parameters mentioned above, we extract small regions from chromosome 1 that containe the states that the model assumes. These regions are then discretized into non-overlapping windows each of which has size 100 bases.  We calculate the means for the two samples, i.e. WGA and non-WGA, and then apply a cutoff filter to exclude outliers. The cutoff filter is simply a threshold on the means. Hence, a window is assumed as an outlier if either $\mu_{WGA} > 140$ or $\mu_{NWGA} > 120$.  Note also that the windows which have been identified to contain gaps are also excluded from the clustering calculations however these are kept in the model overall. 
+where $\mu_{WGA}, \sigma_{WGA}$ are the window, see subsection \ref{viterbi_path}, mean and standard  deviation for the WGA sample and respectively $\mu_{NWGA}, \sigma_{NWGA}$ denote the relevant quantities for the non-WGA sample. In order to have a first estimate of the parameters mentioned above, we extract small regions from chromosome 1 that containe the states that the model assumes. These regions are then discretized into non-overlapping windows each of which has size 100 bases.  We calculate the means for the two samples, i.e. WGA and non-WGA, and then apply a cutoff filter to exclude outliers. The cutoff filter is simply a threshold on the means. Hence, a window is assumed as an outlier if either $\mu_{WGA} > 140$ or $\mu_{NWGA} > 120$.  
 
-A Gaussian mixture model, GMM,  is used on the combined data in order to do the clustering. We also investigate more traditional approaches like K-Means and PAM. However, these techniques tend to create eqully sized clusters. This is something  that we do not anticipate to be the case ( for example the Normal state is expected, in general, to dominte the data). A GMM approach allows for more flexibility on the shapes of the clusters whilst we can use the parameters of the ensued Gaussian distributions into the HMM model.  Figure \ref{gmm_clustering} shows the clustered data when using five clusters. Note that only four clusters are actually visible. The cluster that represented deletion was dropped in favor of the  red cluster in the figure.  
+The remaining windows, are then cluseterd using a Gaussian mixture model (GMM), \cite{flach2012}.  
+We also investigated more traditional approaches like K-Means and PAM. However, these techniques tend to create eqully sized clusters. This is something  that we do not anticipate to be the case ( for example the Normal state is expected, in general, to dominte the data). A GMM approach allows for more flexibility on the shapes of the clusters whilst we can use the parameters of the ensued Gaussian distributions into the HMM model.
+Note that the windows which have been identified to contain gaps are also excluded from the clustering calculations however these are kept in the model overall.   
+
+Figure \ref{gmm_clustering} shows the clustered data when using five clusters. Only four clusters are actually visible. The cluster that represented deletion was dropped in favor of the  red cluster in the figure.  
 
 \begin{figure}[!htb]
 	\begin{center}
@@ -250,11 +304,9 @@ In summary, the Hidden Markov model is as follows
 	\item Every state $S \sim N(\boldsymbol{\mu}, \boldsymbol{\Sigma})$  
 	\item TUF state $TUF \sim \sum_{i=1}^{2} c_i N(\boldsymbol{\mu}, \boldsymbol{\Sigma}), c_i = 1/2$
 \end{itemize}
-We remark however, that the framework we use is flexible enough to assume different paramteric models and add or remove states.
-
 Figure \ref{hmm_figure}
 shows the HMM model with the transition probabilities used in a graphical form.
-
+We remark however, that the framework we use is flexible enough to assume different paramteric models and add or remove states.
 
 \begin{figure}[!htb]
 	\begin{center}
