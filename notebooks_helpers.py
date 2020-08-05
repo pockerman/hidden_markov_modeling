@@ -6,7 +6,6 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import mixture
-from sklearn import metrics
 from pomegranate import *
 from scipy.stats import kde
 import csv
@@ -463,15 +462,6 @@ def create_states(states_map, means, covariances,  means_to_use=None, plot=True)
 
 
 def create_tuf_state(comp1_means, comp1_cov, comp2_means, comp2_cov):
-
-    #print("TUF means: ", tuf_means)
-    #print("TUF covariances: ", tuf_cov)
-
-    #tuf_mu_no_wga = tuf_means[0]
-    #tuf_mu_wga = tuf_means[1]
-    #tuf_mu = np.array([tuf_mu_wga, tuf_mu_no_wga])
-    #tuf_cov = tuf_cov
-    #tuf_cov = np.array([[tuf_cov[1], 0.0], [0.0, tuf_cov[0]]])
 
     tuf_dist = MultivariateGaussianDistribution(means=comp1_means,
                                                 covariance=comp1_cov)

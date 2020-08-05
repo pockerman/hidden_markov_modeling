@@ -50,79 +50,6 @@
       "mu_limits":{"wga_mu": 140.0, "no_wga_mu": 120.0}
     }
   },
-  "clusterer":{
-    "name":"kmedoids",
-    "config":{
-    "init_cluster_idx":"random_from_data",
-    "metric":"MANHATAN",
-    "features":["no_wga_mean","mean_ratio"],
-    "n_clusters":3
-    }
-  },
-  "clusters":{
-      "cluster_0":{
-        "filename":"/home/a/ag568/cluster_0.txt",
-        "state": "state_0",
-         "distributions":{
-          "wga":{
-            "type":"distribution",
-            "name":"normal"
-            },
-            "no_wga":{
-              "type":"distribution",
-              "name":"normal"
-            }
-        }
-      },
-      "cluster_1":{
-        "filename":"/home/a/ag568/cluster_1.txt",
-        "state": "state_1",
-        "distributions":{
-          "wga":{
-            "type":"distribution",
-            "name":"normal",
-            "weights":null
-          },
-          "no_wga":{
-            "type":"distribution",
-            "name":"normal",
-            "weights":null
-          }
-        }
-      },
-      "cluster_2":{
-		"filename":"/home/a/ag568/cluster_2.txt",
-		"state": "state_2",
-		"distributions":{
-			"wga":{
-				"type":"gmm",
-				"uniform":{
-             			 "params":[2.0, 8.0]
-           			 },
-            			"names":["normal", "uniform"],
-            			"weights":null
-			},
-			"no_wga":{
-				"type":"distribution",
-				"name":"normal"
-			}
-		}
-	},
-	"cluster_3":{
-		"filename":"/home/a/ag568/cluster_3.txt",
-		"state":"state_3",
-		"distributions":{
-			"wga":{
-				"type":"distribution",
-				"name":"normal"
-			},
-			"no_wga":{
-				"type":"distribution",
-				"name":"normal"
-			}
-		}
-	}
-  },
 
   "HMM": {
     "use_multivariate":true,
@@ -134,49 +61,6 @@
     "verbose":true,
     "save_model":true,
     "save_hmm_filename":"/home/a/ag568/HMM_Model",
-    "states":{
-      "state_0":{
-         "start_prob":0.20
-      },
-      "state_1":{
-         "start_prob":0.20
-      },
-      "state_2":{
-          "start_prob":0.20
-      },
-      "state_3":{
-          "start_prob":0.20
-      },
-      "gap_state":{
-	"start_prob":0.20
-      }
-    },
-    "transitions":{
-        "state_0-state_0":0.95,
-        "state_0-state_1":0.0125,
-	"state_0-state_2":0.0125,
-	"state_0-state_3":0.0125,
-	"state_0-gap_state":0.0125,
-        "state_1-state_1":0.95,
-        "state_1-state_0":0.0125,
-	"state_1-state_2":0.0125,
-	"state_1-state_3":0.0125,
-	"state_1-gap_state":0.0125,
-        "state_2-state_0":0.0125,
-        "state_2-state_1":0.0125,
-	"state_2-state_2":0.95,
-	"state_2-state_3":0.0125,
-	"state_2-gap_state":0.0125,
-	"state_3-state_0":0.0125,
-        "state_3-state_1":0.0125,
-	"state_3-state_2":0.0125,
-	"state_3-state_3":0.95,
-	"gap_state-gap_state":0.95,
-	"gap_state-state_0":0.0125,
-        "gap_state-state_1":0.0125,
-	"gap_state-state_2":0.0125,
-	"gap_state-state_3":0.0125
-     },
     "train_sequence_size":100,
     "train_sequence_source":"region",
     "train_n_sequences_per_source":190000,
