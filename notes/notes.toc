@@ -2,6 +2,5 @@
 \contentsline {section}{\numberline {1}TUF}{1}{section.1}
 \contentsline {section}{\numberline {2}Hidden Markov model}{2}{section.2}
 \contentsline {section}{\numberline {3}HMM for TUF}{3}{section.3}
-\contentsline {subsection}{\numberline {3.1}Model calibration}{7}{subsection.3.1}
-\contentsline {section}{\numberline {4}Viterbi path}{7}{section.4}
-\contentsline {subsection}{\numberline {4.1}Summary}{9}{subsection.4.1}
+\contentsline {section}{\numberline {4}Viterbi path}{8}{section.4}
+\contentsline {subsection}{\numberline {4.1}Summary}{10}{subsection.4.1}
